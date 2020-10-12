@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "package": "me.fluffy.dactyl.injection.inj",
+  "refmap": "mixins.dactyl.refmap.json",
+  "mixins": [
+    "me.fluffy.dactyl.injection.inj.InjEntityPlayerSP",
+    "me.fluffy.dactyl.injection.inj.InjMinecraft"
+  ]
+}
