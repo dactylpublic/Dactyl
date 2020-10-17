@@ -1,0 +1,177 @@
+package me.fluffy.dactyl.module;
+
+import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.Bind;
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.common.MinecraftForge;
+import org.lwjgl.input.Keyboard;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Module {
+    private String name, desc, moduleInfo, displayName;
+    private boolean enabled, seen, alwaysListening;
+    private Category category;
+
+    private final List<Setting> settingList = new ArrayList<>();
+
+    public static Minecraft mc = Minecraft.getMinecraft();
+
+    public Module(String name, Category category, String desc) {
+        this.name = name;
+        this.desc = desc;
+        this.category = category;
+        this.moduleInfo = "";
+        this.displayName = name;
+        this.enabled = false;
+        this.seen = true;
+        this.alwaysListening = false;
+        this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
+        this.register(new Setting<Boolean>("Hidden", false));
+    }
+
+    public Module(String name, Category category) {
+        this.name = name;
+        this.desc = "";
+        this.category = category;
+        this.moduleInfo = "";
+        this.displayName = name;
+        this.enabled = false;
+        this.seen = true;
+        this.alwaysListening = false;
+        this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
+        this.register(new Setting<Boolean>("Hidden", false));
+    }
+
+    public Module(String name, Category category, String desc, boolean alwaysListening) {
+        this.name = name;
+        this.desc = desc;
+        this.category = category;
+        this.moduleInfo = "";
+        this.displayName = name;
+        this.enabled = false;
+        this.seen = true;
+        this.alwaysListening = alwaysListening;
+        this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
+        this.register(new Setting<Boolean>("Hidden", false));
+    }
+
+    public Module(String name, Category category, boolean alwaysListening) {
+        this.name = name;
+        this.desc = "";
+        this.category = category;
+        this.moduleInfo = "";
+        this.displayName = name;
+        this.enabled = false;
+        this.seen = true;
+        this.alwaysListening = alwaysListening;
+        this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
+        this.register(new Setting<Boolean>("Hidden", false));
+    }
+
+    public void toggle() {
+        this.enabled = !enabled;
+        if(enabled) {
+            MinecraftForge.EVENT_BUS.register(this);
+        } else {
+            MinecraftForge.EVENT_BUS.unregister(this);
+        }
+        onToggle();
+    }
+
+    public void onToggle() {
+        if(this.enabled) {
+            onEnable();
+        } else {
+            onDisable();
+        }
+    }
+
+    public void onEnable() {}
+    public void onDisable() {}
+    public void onClientUpdate() {}
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getDesc() {
+        return this.desc;
+    }
+
+    public String getModuleInfo() {
+        return this.moduleInfo;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public boolean isSeen() {
+        return this.seen;
+    }
+
+    public void setModuleInfo(String moduleInfo) {
+        this.moduleInfo = moduleInfo;
+    }
+
+    public boolean isAlwaysListening() {
+        return this.alwaysListening;
+    }
+
+    public int getKey() {
+        return ((Setting<Bind>)this.getSettingsList().get(0)).getValue().getKey();
+    }
+
+    public Category getCategory() {
+        return this.category;
+    }
+
+    public void setKey(int key) {
+        ((Setting<Bind>)this.getSettingsList().get(0)).getValue().setKey(key);
+    }
+
+    public void register(Setting setting) {
+        this.settingList.add(setting);
+    }
+
+    public List<Setting> getSettingsList() {
+        return this.settingList;
+    }
+
+    public List<String> getSettingNames() {
+        List<String> settingNames = new ArrayList<>();
+        for(Setting setting : getSettingsList()) {
+            settingNames.add(setting.getName());
+        }
+        return settingNames;
+    }
+
+    public Setting getSetting(String name) {
+        for(Setting setting : getSettingsList()) {
+            if(setting.getName().equalsIgnoreCase(name)) {
+                return setting;
+            }
+        }
+        return null;
+    }
+
+    public enum Category {
+        COMBAT,
+        PLAYER,
+        MISC,
+        MOVEMENT,
+        RENDER,
+        CLIENT;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase().substring(0, 1).toUpperCase() + name().toLowerCase().substring(1);
+        }
+    }
+}

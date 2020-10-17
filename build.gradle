@@ -28,7 +28,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 version = '0.0.1a'
 group = 'me.fluffy.dactyl' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'dactyl'
+archivesBaseName = 'Dactyl'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 

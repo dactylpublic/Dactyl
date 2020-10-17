@@ -1,6 +1,9 @@
 package me.fluffy.dactyl.injection.core;
 
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.Mixins;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -10,9 +13,9 @@ import java.util.Map;
 @IFMLLoadingPlugin.MCVersion(value = "1.12.2")
 public class DactylInjectionCore implements IFMLLoadingPlugin{
     public DactylInjectionCore() {
-        /*MixinBootstrap.init();
-        Mixins.addConfiguration("mixins.yuno.json");
-        MixinEnvironment.getDefaultEnvironment().setSide(MixinEnvironment.Side.CLIENT);*/
+        MixinBootstrap.init();
+        Mixins.addConfiguration("mixins.dactyl.json");
+        MixinEnvironment.getDefaultEnvironment().setSide(MixinEnvironment.Side.CLIENT);
     }
 
     @Override
