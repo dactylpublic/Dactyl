@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.module;
 
+import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.Bind;
 import net.minecraft.client.Minecraft;
@@ -24,7 +25,6 @@ public class Module {
         this.category = category;
         this.moduleInfo = "";
         this.displayName = name;
-        this.enabled = false;
         this.seen = true;
         this.alwaysListening = false;
         this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
@@ -37,7 +37,6 @@ public class Module {
         this.category = category;
         this.moduleInfo = "";
         this.displayName = name;
-        this.enabled = false;
         this.seen = true;
         this.alwaysListening = false;
         this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
@@ -50,7 +49,6 @@ public class Module {
         this.category = category;
         this.moduleInfo = "";
         this.displayName = name;
-        this.enabled = false;
         this.seen = true;
         this.alwaysListening = alwaysListening;
         this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
@@ -63,7 +61,6 @@ public class Module {
         this.category = category;
         this.moduleInfo = "";
         this.displayName = name;
-        this.enabled = false;
         this.seen = true;
         this.alwaysListening = alwaysListening;
         this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
@@ -91,6 +88,7 @@ public class Module {
     public void onEnable() {}
     public void onDisable() {}
     public void onClientUpdate() {}
+    public void onRender3D(Render3DEvent event) {}
 
     public String getName() {
         return this.name;

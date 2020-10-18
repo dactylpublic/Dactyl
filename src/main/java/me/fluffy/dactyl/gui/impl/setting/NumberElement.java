@@ -7,7 +7,6 @@ import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Mouse;
-import sun.misc.FloatingDecimal;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,7 +22,7 @@ public class NumberElement extends SettingElement {
         RenderUtil.drawRect(this.getX()+getOffset(this.getSetting()), this.getY(), this.getX()+100, this.getY()+15, c);
         RenderUtil.drawOutlinedRectange(this.getX(), this.getY(), this.getX()+100, this.getY()+15, 0xff2e2e2e);
         dragSetting(mouseX, mouseY);
-        RenderUtil.drawRect(this.getX(), this.getY(), this.getX() + 100, this.getY() + 15, ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, true, false));
+        //RenderUtil.drawRect(this.getX(), this.getY(), this.getX() + 100, this.getY() + 15, ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, true, false));
         Number currentVal = (Number) this.getSetting().getValue();
         if(!(currentVal.doubleValue() >= 0.0 && currentVal.doubleValue() <= 0.1)) {
             RenderUtil.drawRect(this.getX(), this.getY(), (int) (this.getX() + getOffset(this.getSetting())), this.getY() + 15, ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, false, false));

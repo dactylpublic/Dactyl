@@ -36,15 +36,15 @@ public class Configuration {
                         if (setting.getValue() instanceof Bind) {
                             Bind ymlBind = new Bind((int) pathEntry.getValue().get("value"));
                             mod.getSetting(pathEntry.getKey()).setValue(ymlBind);
-                        } else if(setting.getValue() instanceof Enum) {
-                            Enum enumClass = (Enum)setting.getValue();
-                            for(Field field : enumClass.getClass().getDeclaredFields()) {
-                                if(Enum.class.isAssignableFrom(field.getType())) {
+                        } else if (setting.getValue() instanceof Enum) {
+                            Enum enumClass = (Enum) setting.getValue();
+                            for (Field field : enumClass.getClass().getDeclaredFields()) {
+                                if (Enum.class.isAssignableFrom(field.getType())) {
                                     if (!field.isAccessible()) {
                                         field.setAccessible(true);
                                     }
-                                    Enum enumValue = (Enum)field.get(enumClass);
-                                    if(enumValue.name().equalsIgnoreCase(String.valueOf(pathEntry.getValue()))) {
+                                    Enum enumValue = (Enum) field.get(enumClass);
+                                    if (enumValue.name().equalsIgnoreCase(String.valueOf(pathEntry.getValue()))) {
                                         mod.getSetting(pathEntry.getKey()).setValue(enumValue);
                                     }
                                 }
@@ -52,11 +52,10 @@ public class Configuration {
                         } else {
                             mod.getSetting(pathEntry.getKey()).setValue(pathEntry.getValue());
                         }
-                    } else {
-                        if(pathEntry.getKey().equalsIgnoreCase("Enabled")) {
-                            if(((Object)mod.isEnabled()) != pathEntry.getValue() || (mod.isAlwaysListening() && !mod.isEnabled())) {
-                                mod.toggle();
-                            }
+                    }
+                    if(pathEntry.getKey().equalsIgnoreCase("Enabled")) {
+                        if (mod.isEnabled() != Boolean.parseBoolean(String.valueOf(pathEntry.getValue()))) {
+                            mod.toggle();
                         }
                     }
                 }

@@ -10,6 +10,7 @@
     "InjWorld",
     "access.ICPacketPlayer",
     "access.IMinecraft",
-    "access.ITimer"
+    "access.ITimer",
+    "access.IVec3i"
   ]
 }
