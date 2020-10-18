@@ -182,6 +182,7 @@ public class AutoCrystal extends Module {
                 .filter(entity -> entity instanceof EntityEnderCrystal)
                 .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
                 .filter(entity -> CombatUtil.isBreakableCrystal((EntityEnderCrystal) entity, traceBreak.getValue(), wallsBreak.getValue(), antiSuicide.getValue(), maxSelfDMG.getValue(), breakLogic.getValue(), doesDamageMin.getValue(), enemyRange.getValue()))
+                .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuicide.getValue(), maxSelfDMG.getValue()))
                 .filter(this::passesAntiStuck)
                 .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
                 .orElse(null);

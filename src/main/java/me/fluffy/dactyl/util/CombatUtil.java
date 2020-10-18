@@ -235,6 +235,19 @@ public class CombatUtil {
         return (List<BlockPos>)positions;
     }
 
+    public static boolean wontSelfPop(EntityEnderCrystal crystal, boolean antiSui, double maxSelfDMG) {
+        if(antiSui) {
+            double dmg = calculateDamage(crystal, mc.player);
+            if (dmg >= (mc.player.getHealth()+mc.player.getAbsorptionAmount())) {
+                return false;
+            }
+            if(dmg >= maxSelfDMG) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static boolean isValidPlacePos(boolean isOnePointThirteen, BlockPos blockPos) {
         if(!isOnePointThirteen) {
             final BlockPos boost = blockPos.add(0, 1, 0);
