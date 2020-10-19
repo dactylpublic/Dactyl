@@ -106,6 +106,10 @@ public class Module {
         return this.displayName;
     }
 
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public boolean isEnabled() {
         return this.enabled;
     }

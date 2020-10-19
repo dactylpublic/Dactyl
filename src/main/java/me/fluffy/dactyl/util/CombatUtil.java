@@ -3,6 +3,7 @@ package me.fluffy.dactyl.util;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.injection.inj.access.IVec3i;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -12,6 +13,9 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
@@ -28,6 +32,131 @@ import java.util.stream.Collectors;
 
 public class CombatUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
+
+    private static final List<Integer> invalidSlots = Arrays.asList(0, 5, 6, 7, 8);
+
+    public static int findCrapple() {
+        if (mc.player == null) {
+            return -1;
+        }
+        for (int x = 0; x < mc.player.inventoryContainer.getInventory().size(); x++) {
+            if(invalidSlots.contains(x)) {
+                continue;
+            }
+            ItemStack stack = mc.player.inventoryContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(stack.getItem().equals(Items.GOLDEN_APPLE) && !(stack.getItemDamage() == 1)) {
+                return x;
+            }
+        }
+        return -1;
+    }
+
+    public static int findItemSlotDamage1(Item i) {
+        if (mc.player == null) {
+            return -1;
+        }
+        for (int x = 0; x < mc.player.inventoryContainer.getInventory().size(); x++) {
+            if(invalidSlots.contains(x)) {
+                continue;
+            }
+            ItemStack stack = mc.player.inventoryContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(stack.getItem().equals(i) && (stack.getItemDamage() == 1)) {
+                return x;
+            }
+        }
+        return -1;
+    }
+
+    public static int findItemSlot(Item i) {
+        if (mc.player == null) {
+            return -1;
+        }
+        for (int x = 0; x < mc.player.inventoryContainer.getInventory().size(); x++) {
+            if(invalidSlots.contains(x)) {
+                continue;
+            }
+            ItemStack stack = mc.player.inventoryContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(stack.getItem().equals(i)) {
+                return x;
+            }
+        }
+        return -1;
+    }
+
+    public static boolean requiredDangerSwitch(double dangerRange) {
+        int dangerousCrystals = (int) mc.world.loadedEntityList.stream()
+                .filter(entity -> entity instanceof EntityEnderCrystal)
+                .filter(entity -> mc.player.getDistance(entity) <= dangerRange)
+                .filter(entity -> calculateDamage(entity.posX, entity.posY, entity.posZ, mc.player) >= (mc.player.getHealth() + mc.player.getAbsorptionAmount()))
+                .count();
+        return dangerousCrystals > 0;
+    }
+
+    public static boolean passesOffhandCheck(double requiredHealth, Item item, boolean isCrapple) {
+        double totalPlayerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+        if(!isCrapple) {
+            if (findItemSlot(item) == -1) {
+                return false;
+            }
+        } else {
+            if(findCrapple() == -1) {
+                return false;
+            }
+        }
+        if(totalPlayerHealth < requiredHealth) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isHard(Block block) {
+        return block == Blocks.OBSIDIAN || block == Blocks.BEDROCK;
+    }
+
+    public static Vec3d interpolateEntity(Entity entity) {
+        return new Vec3d(entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * mc.getRenderPartialTicks(), entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * mc.getRenderPartialTicks(), entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * mc.getRenderPartialTicks());
+    }
+
+    public static void switchOffhandStrict(int targetSlot, int step) {
+        switch(step) {
+            case 0:
+                mc.playerController.windowClick(mc.player.inventoryContainer.windowId, targetSlot, 0, ClickType.PICKUP, mc.player);
+                break;
+            case 1:
+                mc.playerController.windowClick(mc.player.inventoryContainer.windowId, 45, 0, ClickType.PICKUP, mc.player);
+                break;
+            case 2:
+                mc.playerController.windowClick(mc.player.inventoryContainer.windowId, targetSlot, 0,ClickType.PICKUP, mc.player);
+                mc.playerController.updateController();
+                break;
+        }
+    }
+
+    public static void switchOffhandTotemNotStrict() {
+        int targetSlot = findItemSlot(Items.TOTEM_OF_UNDYING);
+        if(targetSlot != -1) {
+            mc.playerController.windowClick(mc.player.inventoryContainer.windowId, targetSlot, 0, ClickType.PICKUP, mc.player);
+            mc.playerController.windowClick(mc.player.inventoryContainer.windowId, 45, 0, ClickType.PICKUP, mc.player);
+            mc.playerController.windowClick(mc.player.inventoryContainer.windowId, targetSlot, 0, ClickType.PICKUP, mc.player);
+            mc.playerController.updateController();
+        }
+    }
+
+    public static void switchOffhandNonStrict(int targetSlot) {
+        mc.playerController.windowClick(mc.player.inventoryContainer.windowId, targetSlot, 0, ClickType.PICKUP, mc.player);
+        mc.playerController.windowClick(mc.player.inventoryContainer.windowId, 45, 0, ClickType.PICKUP, mc.player);
+        mc.playerController.windowClick(mc.player.inventoryContainer.windowId, targetSlot, 0,ClickType.PICKUP, mc.player);
+        mc.playerController.updateController();
+    }
 
 
     public static boolean isBreakableCrystal(EntityEnderCrystal crystal, boolean doBreakTrace, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, AutoCrystal.BreakLogic breakLogic, double doesDMGMin, double enemyRange) {
@@ -59,7 +188,8 @@ public class CombatUtil {
         }
 
         if(breakLogic == AutoCrystal.BreakLogic.PLACED || breakLogic == AutoCrystal.BreakLogic.BOTH) {
-            if(!AutoCrystal.INSTANCE.getPlacedCrystals().contains(crystal.getPositionVector())) {
+            BlockPos crystalPos = new BlockPos(crystal.getPosition().getX(), crystal.getPosition().getY(), crystal.getPosition().getZ());
+            if(!AutoCrystal.INSTANCE.getPlacedCrystals().contains(crystalPos.down())) {
                 return false;
             }
         }
@@ -113,7 +243,8 @@ public class CombatUtil {
         }
 
         if(breakLogic == AutoCrystal.BreakLogic.PLACED || breakLogic == AutoCrystal.BreakLogic.BOTH) {
-            if(!AutoCrystal.INSTANCE.getPlacedCrystals().contains(crystal.getPositionVector())) {
+            BlockPos crystalPos = new BlockPos(crystal.getPosition().getX(), crystal.getPosition().getY(), crystal.getPosition().getZ());
+            if(!AutoCrystal.INSTANCE.getPlacedCrystals().contains(crystalPos.down())) {
                 return false;
             }
         }
@@ -177,7 +308,7 @@ public class CombatUtil {
                 }
                 double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
                 float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
-                if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                if(targetDamage < minDamage && !(targetHealth > startFacePlaceHealth)) {
                     continue;
                 }
                 if(targetDamage <= 2.0) {
@@ -297,6 +428,10 @@ public class CombatUtil {
 
     public static float calculateDamage(final EntityEnderCrystal crystal, final Entity entity) {
         return calculateDamage(crystal.posX, crystal.posY, crystal.posZ, entity);
+    }
+
+    public static float calculateDamage(BlockPos pos, final Entity entity) {
+        return calculateDamage(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, entity);
     }
 
     public static boolean canSeeBlock(BlockPos pos) {

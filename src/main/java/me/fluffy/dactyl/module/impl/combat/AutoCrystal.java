@@ -7,6 +7,7 @@ import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.injection.inj.access.ICPacketPlayer;
+import me.fluffy.dactyl.injection.inj.access.ICPacketUseEntity;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
@@ -16,11 +17,15 @@ import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
+import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketSoundEffect;
+import net.minecraft.network.play.server.SPacketSpawnObject;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
@@ -45,11 +50,13 @@ public class AutoCrystal extends Module {
     Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0D, 1.0D, 13.5D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiSuiPlace.getValue());
     Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> pSilent = new Setting<Boolean>("pSilent", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue()&&placeRotate.getValue());
+    Setting<Boolean> syncRotate = new Setting<Boolean>("SyncRotate", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue()&&placeRotate.getValue());
     Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
     Setting<Double> placeRange = new Setting<Double>("PlaceRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
     Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
 
     // break
@@ -65,14 +72,16 @@ public class AutoCrystal extends Module {
     Setting<Boolean> antiSuicide = new Setting<Boolean>("AntiSuicide", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Double> maxSelfDMG = new Setting<Double>("MaxSelfDMG", 8.0D, 1.0D, 13.5D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiSuicide.getValue());
     Setting<Boolean> breakRotate = new Setting<Boolean>("BreakRotate", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 4.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && traceBreak.getValue());
     Setting<Double> breakRange = new Setting<Double>("BreakRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 4.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && traceBreak.getValue());
+    Setting<Boolean> predict = new Setting<Boolean>("Predict", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
 
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", true, vis->settingPage.getValue() == SettingPage.MISC);
 
     // render
     Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, vis->settingPage.getValue() == SettingPage.RENDER);
@@ -93,8 +102,10 @@ public class AutoCrystal extends Module {
     private float oldYaw, oldPitch;
     private static boolean togglePitch = false;
     private static BlockPos crystalRender = null;
+    private EntityEnderCrystal currentAttacking = null;
+    private boolean resetTick = false;
 
-    private final List<Vec3d> placedCrystals = new ArrayList<>();
+    private final Set<BlockPos> placedCrystals = new HashSet<>();
 
     public AutoCrystal() {
         super("AutoCrystal",
@@ -136,6 +147,40 @@ public class AutoCrystal extends Module {
                     }
                 }
             }
+            if(event.getPacket() instanceof SPacketDestroyEntities) {
+                SPacketDestroyEntities packet = (SPacketDestroyEntities)event.getPacket();
+                for (int id : packet.getEntityIDs()) {
+                    Entity entity = mc.world.getEntityByID(id);
+                    if (entity instanceof EntityEnderCrystal) {
+                        if(placedCrystals.contains(new BlockPos(entity.getPositionVector()).down())){
+                            placedCrystals.remove((new BlockPos(entity.getPositionVector())).down());
+                        }
+                    }
+                }
+            }
+            if(event.getPacket() instanceof SPacketSpawnObject) {
+                SPacketSpawnObject packetSpawnObject = (SPacketSpawnObject)event.getPacket();
+                if(doCaBreak.getValue() && predict.getValue()) {
+                    if(packetSpawnObject.getType() == 51) {
+                        BlockPos pos = new BlockPos(packetSpawnObject.getX(), packetSpawnObject.getY(), packetSpawnObject.getZ());
+                        if (placedCrystals.contains(pos.down())) {
+                            for (EntityPlayer p : mc.world.playerEntities) {
+                                if (p == null || mc.player.equals(p) || p.getDistanceSq(pos) > (((enemyRange.getValue() + placeRange.getValue()))*((enemyRange.getValue() + placeRange.getValue()))) || !Dactyl.friendManager.isFriend(p.getName())) {
+                                    continue;
+                                }
+                                float playerHealth = p.getHealth() + p.getAbsorptionAmount();
+                                if (CombatUtil.calculateDamage(pos, (Entity)p) > playerHealth + 0.5D) {
+                                    return;
+                                }
+                            }
+                            CPacketUseEntity attackPacket = new CPacketUseEntity();
+                            ((ICPacketUseEntity)attackPacket).setEntityId(packetSpawnObject.getEntityID());
+                            ((ICPacketUseEntity)attackPacket).setAction(CPacketUseEntity.Action.ATTACK);
+                            mc.player.connection.sendPacket(attackPacket);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -153,6 +198,10 @@ public class AutoCrystal extends Module {
     public void doAutoCrystal(EventUpdateWalkingPlayer eventUpdateWalkingPlayer, UpdateStage updateStage) {
         if(antiStuckTimer.hasPassed(1000)) {
             attackedCrystals.clear();
+        }
+        if(syncRotate.getValue() && resetTick && !pSilent.getValue()) {
+            resetTick = false;
+            resetRots();
         }
         if(auraOrder.getValue() == AuraLogic.BREAKPLACE) {
             doBreak(updateStage);
@@ -186,11 +235,13 @@ public class AutoCrystal extends Module {
                 .filter(this::passesAntiStuck)
                 .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
                 .orElse(null);
-        if (crystal == null) {
+        if (crystal == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
             resetRots();
+            currentAttacking = null;
             return;
         }
         if(!breakTimer.hasPassed(breakDelay.getValue())) {
+            currentAttacking = null;
             return;
         }
         if(updateLogic.getValue() == UpdateLogic.WALKING) {
@@ -200,6 +251,7 @@ public class AutoCrystal extends Module {
                 //mc.player.rotationYaw = (float) rots[0];
                 //mc.player.rotationPitch = (float) rots[1];
             }
+            currentAttacking = crystal;
             attackCrystal(crystal);
         } else {
             if(breakRotate.getValue()) {
@@ -207,7 +259,14 @@ public class AutoCrystal extends Module {
                 double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
                 setRotations(rots[0], rots[1]);
             }
+            currentAttacking = crystal;
             attackCrystal(crystal);
+        }
+        if(pSilent.getValue()) {
+            resetTick = false;
+            resetRots();
+        } else {
+            resetTick = true;
         }
 
     }
@@ -269,13 +328,21 @@ public class AutoCrystal extends Module {
                 facing = rayTraceResult.sideHit;
             }
             if(placeTimer.hasPassed(placeDelay.getValue())) {
-                if(placeHand == null) {
+                if(placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
                     this.setModuleInfo("");
                     resetRots();
                     return;
                 }
+                placedCrystals.add(placePosition);
                 mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float)rayTraceResult.hitVec.x, (float)rayTraceResult.hitVec.y, (float)rayTraceResult.hitVec.z));
                 placeTimer.reset();
+                if(pSilent.getValue()) {
+                    resetTick = false;
+                    resetRots();
+                } else {
+                    resetTick = true;
+                }
+
             }
             if (isRotating) {
                 if (togglePitch) {
@@ -335,8 +402,13 @@ public class AutoCrystal extends Module {
         for (Map.Entry<Entity, Float> entry : this.damageMap().entrySet()) {
             Entity crystal = entry.getKey();
             float damage = ((Float)entry.getValue()).floatValue();
-            if (damage >= (minPlaceDMG.getValue()) && mc.player.getDistance(crystal) <= (placeRange.getValue()+0.1d)) {
+            if(damage >= minPlaceDMG.getValue() && ((mc.player.getDistance(crystal) <= (placeRange.getValue()+0.5d)))) {
                 crystalCount++;
+            }
+        }
+        if(crystalCount == 0 && (maxInRange.getValue() == 1)) {
+            if(currentAttacking != null) {
+                crystalCount+=1;
             }
         }
         return crystalCount;
@@ -412,11 +484,12 @@ public class AutoCrystal extends Module {
         checkTimer.reset();
         placedCrystals.clear();
         attackedCrystals.clear();
-        resetRots();
         crystalRender = null;
+        currentAttacking = null;
+        resetRots();
     }
 
-    public List<Vec3d> getPlacedCrystals() {
+    public Set<BlockPos> getPlacedCrystals() {
         return this.placedCrystals;
     }
 

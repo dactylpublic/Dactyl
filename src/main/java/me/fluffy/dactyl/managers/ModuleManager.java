@@ -7,6 +7,7 @@ import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
 import me.fluffy.dactyl.module.impl.TestModule;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
+import me.fluffy.dactyl.module.impl.combat.Offhand;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
 import me.fluffy.dactyl.module.impl.movement.Strafe;
 import me.fluffy.dactyl.setting.Setting;
@@ -29,6 +30,7 @@ public class ModuleManager {
 
         // combat
         modules.add(new AutoCrystal());
+        modules.add(new Offhand());
 
         // player
 

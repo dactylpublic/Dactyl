@@ -17,7 +17,7 @@ public class BindElement extends SettingElement {
     public void drawScreen(int drawX, int drawY, float partialTicks) {
         this.drawDefaultBackground(drawX, drawY, listening);
         String currentText = listening ? "Listening..." : Keyboard.getKeyName(((Bind)getSetting().getValue()).getKey());
-        Dactyl.fontUtil.drawString("Bind" + " " + TextFormatting.GRAY + currentText, this.getX()+4, this.getY() + (15 - 8) / 2, 0xffffffff);
+        Dactyl.fontUtil.drawString(getSetting().getName() + " " + TextFormatting.GRAY + currentText, this.getX()+4, this.getY() + (15 - 8) / 2, 0xffffffff);
     }
 
     @Override

@@ -9,6 +9,7 @@
     "InjNetworkManager",
     "InjWorld",
     "access.ICPacketPlayer",
+    "access.ICPacketUseEntity",
     "access.IMinecraft",
     "access.ITimer",
     "access.IVec3i"
