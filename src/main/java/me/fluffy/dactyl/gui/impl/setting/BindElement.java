@@ -23,7 +23,9 @@ public class BindElement extends SettingElement {
     @Override
     public void mouseClicked(int mouseButton, int x, int y) {
         if (isHovering(x, y) && !listening) {
-            listening = true;
+            if(mouseButton == 0) {
+                listening = true;
+            }
         } else if(isHovering(x, y) && listening){
             if(mouseButton != 0 && mouseButton != 1) {
                 getSetting().setValue(new Bind(mouseButton));

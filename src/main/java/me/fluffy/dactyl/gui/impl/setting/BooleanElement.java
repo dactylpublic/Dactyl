@@ -19,6 +19,9 @@ public class BooleanElement extends SettingElement {
 
     @Override
     public void mouseClicked(int mouseButton, int x, int y) {
+        if(mouseButton != 0) {
+            return;
+        }
         if (isHovering(x, y)) {
             boolean currentVal = (boolean) this.getSetting().getValue();
             this.getSetting().setValue(!currentVal);

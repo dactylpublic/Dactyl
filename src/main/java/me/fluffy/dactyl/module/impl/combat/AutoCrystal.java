@@ -50,8 +50,6 @@ public class AutoCrystal extends Module {
     Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0D, 1.0D, 13.5D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiSuiPlace.getValue());
     Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> pSilent = new Setting<Boolean>("pSilent", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue()&&placeRotate.getValue());
-    Setting<Boolean> syncRotate = new Setting<Boolean>("SyncRotate", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue()&&placeRotate.getValue());
     Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
@@ -81,7 +79,7 @@ public class AutoCrystal extends Module {
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", true, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
 
     // render
     Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, vis->settingPage.getValue() == SettingPage.RENDER);
@@ -103,7 +101,6 @@ public class AutoCrystal extends Module {
     private static boolean togglePitch = false;
     private static BlockPos crystalRender = null;
     private EntityEnderCrystal currentAttacking = null;
-    private boolean resetTick = false;
 
     private final Set<BlockPos> placedCrystals = new HashSet<>();
 
@@ -199,10 +196,6 @@ public class AutoCrystal extends Module {
         if(antiStuckTimer.hasPassed(1000)) {
             attackedCrystals.clear();
         }
-        if(syncRotate.getValue() && resetTick && !pSilent.getValue()) {
-            resetTick = false;
-            resetRots();
-        }
         if(auraOrder.getValue() == AuraLogic.BREAKPLACE) {
             doBreak(updateStage);
             doPlace(updateStage);
@@ -261,12 +254,6 @@ public class AutoCrystal extends Module {
             }
             currentAttacking = crystal;
             attackCrystal(crystal);
-        }
-        if(pSilent.getValue()) {
-            resetTick = false;
-            resetRots();
-        } else {
-            resetTick = true;
         }
 
     }
@@ -336,13 +323,6 @@ public class AutoCrystal extends Module {
                 placedCrystals.add(placePosition);
                 mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float)rayTraceResult.hitVec.x, (float)rayTraceResult.hitVec.y, (float)rayTraceResult.hitVec.z));
                 placeTimer.reset();
-                if(pSilent.getValue()) {
-                    resetTick = false;
-                    resetRots();
-                } else {
-                    resetTick = true;
-                }
-
             }
             if (isRotating) {
                 if (togglePitch) {

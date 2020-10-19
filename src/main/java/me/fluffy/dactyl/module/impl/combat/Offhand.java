@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 public class Offhand extends Module {
     Setting<Boolean> strictSwap = new Setting<Boolean>("StrictSwap", false);
-    Setting<Boolean> moveBypass = new Setting<Boolean>("MoveBypass", false);
+    Setting<Boolean> moveBypass = new Setting<Boolean>("MoveBypass", false, vis->strictSwap.getValue());
 
     // gapple
     Setting<Bind> gappleBind = new Setting<Bind>("Gapple", new Bind(Keyboard.KEY_NONE));
@@ -44,8 +44,10 @@ public class Offhand extends Module {
 
     // other
     Setting<Integer> modeUpdates = new Setting<Integer>("Updates", 2, 1, 2);
-    Setting<Boolean> deathCheck = new Setting<Boolean>("DangerSwap", true);
-    Setting<Double> dangerDistance = new Setting<Double>("DangerDist", 10.0, 1.0D, 13.5D);
+    Setting<Boolean> deathCheck = new Setting<Boolean>("DangerCheck", true);
+    Setting<Double> dangerDistance = new Setting<Double>("DangerDist", 10.0, 1.0D, 13.5D, vis->deathCheck.getValue());
+    Setting<Boolean> soft = new Setting<Boolean>("Soft", false);
+    Setting<Double> softHealth = new Setting<Double>("SoftHealth", 15.0, 1.0D, 36.0D, vis->soft.getValue());
 
 
     public static Offhand INSTANCE;
@@ -60,10 +62,116 @@ public class Offhand extends Module {
 
     public final TimeUtil lastSwitch = new TimeUtil();
 
+    private OffhandMode offhandMode = OffhandMode.TOTEM;
+
     @Override
     public void onToggle() {
         strictSwitchMap.clear();
         lastSwitch.reset();
+        offhandMode = OffhandMode.TOTEM;
+    }
+
+    private void doOffhand() {
+        if(screenNotAllowed()) {
+            return;
+        }
+        // set module info and display name
+        String itemCount = String.valueOf(mc.player.getHeldItemOffhand().getCount()+(mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == mc.player.getHeldItemOffhand().getItem()).mapToInt(ItemStack::getCount).sum()));
+        this.setDisplayName(getModuleNameFromItem(mc.player.getHeldItemOffhand().getItem()));
+        this.setModuleInfo(itemCount);
+
+        if(strictSwap.getValue()) {
+            if (strictSwitchMap.size() > 0) {
+                Iterator<Integer> iterator = strictSwitchMap.keySet().iterator();
+                while (iterator.hasNext()) {
+                    Integer key = iterator.next();
+                    double oldMotionX = mc.player.motionX;
+                    double oldMotionY = mc.player.motionY;
+                    double oldMotionZ = mc.player.motionZ;
+                    if(moveBypass.getValue()) {
+                        mc.player.motionX = mc.player.motionY = mc.player.motionZ = 0.0d;
+                    }
+                    CombatUtil.switchOffhandStrict(key, strictSwitchMap.get(key));
+                    if(moveBypass.getValue()) {
+                        mc.player.motionX = oldMotionX;
+                        mc.player.motionY = oldMotionY;
+                        mc.player.motionZ = oldMotionZ;
+                    }
+                    int newVal = strictSwitchMap.get(key) + 1;
+                    strictSwitchMap.put(key, newVal);
+                    if (strictSwitchMap.get(key) > 2) {
+                        iterator.remove();
+                    }
+                }
+                return;
+            }
+        }
+
+        boolean needsSwitching = false;
+        boolean switchToTotem = false;
+
+        float playerHealth = mc.player.getHealth()+mc.player.getAbsorptionAmount();
+
+        if((getRelativeSwitchHealth() >= playerHealth) || (deathCheck.getValue() && CombatUtil.requiredDangerSwitch(dangerDistance.getValue()))) {
+            if(!holdingTotem()) {
+                switchToTotem = true;
+            }
+        }
+
+        if(mc.player.getHeldItemOffhand().getItem() != getRelativeItem(offhandMode) && !switchToTotem) {
+            needsSwitching = true;
+        }
+
+        if((!hasTotemsAvailable() || holdingTotem()) && switchToTotem) {
+            switchToTotem = false;
+        }
+
+        if(!holdingOffhandItem() && !holdingTotem()) {
+            int offhandModeItemCount = mc.player.getHeldItemOffhand().getCount()+(mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == getRelativeItem(offhandMode)).mapToInt(ItemStack::getCount).sum());
+            if(soft.getValue()) {
+                if((softHealth.getValue() >= playerHealth) || (deathCheck.getValue() && CombatUtil.requiredDangerSwitch(dangerDistance.getValue()))) {
+                    if(hasTotemsAvailable() && offhandModeItemCount == 0) {
+                        needsSwitching = true;
+                        offhandMode = OffhandMode.TOTEM;
+                    }
+                }
+            } else {
+                if(hasTotemsAvailable() && offhandModeItemCount == 0) {
+                    needsSwitching = true;
+                    offhandMode = OffhandMode.TOTEM;
+                }
+            }
+        }
+
+        if(needsSwitching) {
+            switchToItem(getRelativeItem(offhandMode));
+        } else if(switchToTotem) {
+            offhandMode = OffhandMode.TOTEM;
+            switchToTotem();
+        }
+    }
+
+    private void switchToTotem() {
+        if(!strictSwap.getValue()) {
+            CombatUtil.switchOffhandTotemNotStrict();
+        } else {
+            if(hasTotemsAvailable()) {
+                strictSwitchMap.put(CombatUtil.findItemSlot(Items.TOTEM_OF_UNDYING), 0);
+            }
+        }
+    }
+
+    private void switchToItem(Item item) {
+        if(getRelativeSwitching(offhandMode) == -1) {
+            return;
+        }
+        if(!strictSwap.getValue()) {
+            CombatUtil.switchOffhandNonStrict(getRelativeSwitching(offhandMode));
+        } else {
+            if(hasTotemsAvailable()) {
+                strictSwitchMap.put(getRelativeSwitching(offhandMode), 0);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -76,18 +184,9 @@ public class Offhand extends Module {
             return;
         }
         Item targetToSwitch = null;
-        double targetSwitchHealth = 0.0D;
-        String switchTargetName = "";
-        boolean needsAnGrammar = false;
+        double requiredSwitchHealth = 0.0D;
         if (!(targetKey == gappleBind.getValue().getKey() || targetKey == crystalBind.getValue().getKey() || targetKey == obiBind.getValue().getKey())) {
             return;
-        }
-
-        boolean wasMoving = false;
-        if(moveBypass.getValue()) {
-            if(mc.player.moveForward != 0.0f || mc.player.moveStrafing != 0.0f) {
-                wasMoving = true;
-            }
         }
 
         if(deathCheck.getValue()) {
@@ -95,107 +194,30 @@ public class Offhand extends Module {
                 return;
             }
         }
-
+        OffhandMode nextOffhand = null;
         if(targetKey == gappleBind.getValue().getKey()) {
             targetToSwitch = Items.GOLDEN_APPLE;
-            targetSwitchHealth = HoleUtil.isInHole() ? gappleHoleHealth.getValue() : gappleHealth.getValue();
-            switchTargetName = "Gapple";
+            requiredSwitchHealth = HoleUtil.isInHole() ? gappleHoleHealth.getValue() : gappleHealth.getValue();
+            nextOffhand = (notchApple.getValue() ? OffhandMode.GAPPLE : OffhandMode.CRAPPLE);
         } else if(targetKey == crystalBind.getValue().getKey()) {
             targetToSwitch = Items.END_CRYSTAL;
-            targetSwitchHealth = HoleUtil.isInHole() ? crystalHoleHealth.getValue() : crystalHealth.getValue();
-            switchTargetName = "Crystal";
+            requiredSwitchHealth = HoleUtil.isInHole() ? crystalHoleHealth.getValue() : crystalHealth.getValue();
+            nextOffhand = OffhandMode.CRYSTAL;
         } else if(targetKey == obiBind.getValue().getKey()) {
             targetToSwitch = Item.getItemFromBlock(Blocks.OBSIDIAN);
-            targetSwitchHealth = HoleUtil.isInHole() ? obiHoleHealth.getValue() : obiHealth.getValue();
-            switchTargetName = "Obsidan Block";
-            needsAnGrammar = true;
+            requiredSwitchHealth = HoleUtil.isInHole() ? obiHoleHealth.getValue() : obiHealth.getValue();
+            nextOffhand = OffhandMode.OBI;
         }
-        boolean passesCheck = true;
         if(mc.player.getHeldItemOffhand().getItem() == targetToSwitch) {
-            targetToSwitch = Items.TOTEM_OF_UNDYING;
-            targetSwitchHealth = 1.0D;
-            switchTargetName = "Totem";
+            nextOffhand = OffhandMode.TOTEM;
         }
-
-        if(targetSwitchHealth >= (mc.player.getHealth()+mc.player.getAbsorptionAmount())) {
+        float playerHealth = mc.player.getHealth()+mc.player.getAbsorptionAmount();
+        if(playerHealth < requiredSwitchHealth) {
             return;
         }
 
-        if(targetToSwitch != null) {
-            boolean isCrapple = (targetToSwitch == Items.GOLDEN_APPLE && !notchApple.getValue());
-            int targetSwitchSlot = -1;
-            if(isCrapple) {
-                if(CombatUtil.findCrapple() == -1) {
-                    passesCheck = false;
-                    return;
-                } else {
-                    targetSwitchSlot = CombatUtil.findCrapple();
-                }
-            } else {
-                if(targetToSwitch == Items.GOLDEN_APPLE) {
-                    if (CombatUtil.findItemSlotDamage1(targetToSwitch) == -1) {
-                        passesCheck = false;
-                        return;
-                    } else {
-                        targetSwitchSlot = CombatUtil.findItemSlotDamage1(targetToSwitch);
-                    }
-                } else {
-                    if (CombatUtil.findItemSlot(targetToSwitch) == -1) {
-                        passesCheck = false;
-                        return;
-                    } else {
-                        targetSwitchSlot = CombatUtil.findItemSlot(targetToSwitch);
-                    }
-                }
-            }
-            if(targetSwitchSlot == -1) {
-                passesCheck = false;
-                return;
-            }
-
-
-            if (CombatUtil.passesOffhandCheck(targetSwitchHealth, targetToSwitch, isCrapple)) {
-                if(!strictSwap.getValue()) {
-                    if(mc.player.getHeldItemOffhand().getItem() != targetToSwitch) {
-                        boolean doBypass = false;
-                        double motionX = mc.player.motionX;
-                        double motionY = mc.player.motionY;
-                        double motionZ = mc.player.motionZ;
-                        if(moveBypass.getValue()) {
-                            if(wasMoving) {
-                                doBypass = true;
-                                mc.player.motionX = mc.player.motionY = mc.player.motionZ = 0.0d;
-                            }
-                        }
-                        lastSwitch.reset();
-                        CombatUtil.switchOffhandNonStrict(targetSwitchSlot);
-                        if(doBypass)  {
-                            mc.player.motionX = motionX;
-                            mc.player.motionY = motionY;
-                            mc.player.motionZ = motionZ;
-                        }
-                    }
-                } else {
-                    boolean doBypass = false;
-                    double motionX = mc.player.motionX;
-                    double motionY = mc.player.motionY;
-                    double motionZ = mc.player.motionZ;
-                    if(moveBypass.getValue()) {
-                        if(wasMoving) {
-                            doBypass = true;
-                            mc.player.motionX = mc.player.motionY = mc.player.motionZ = 0.0d;
-                        }
-                    }
-                    lastSwitch.reset();
-                    strictSwitchMap.put(targetSwitchSlot, 0);
-                    if(doBypass)  {
-                        mc.player.motionX = motionX;
-                        mc.player.motionY = motionY;
-                        mc.player.motionZ = motionZ;
-                    }
-                }
-                return;
-            }
+        if(nextOffhand != null) {
+            offhandMode = nextOffhand;
         }
     }
 
@@ -207,60 +229,35 @@ public class Offhand extends Module {
         return (mc.player.getHeldItemOffhand().getItem().equals(Items.TOTEM_OF_UNDYING));
     }
 
-    private void doOffhand() {
-        if(screenNotAllowed()) {
-            return;
+    private Item getRelativeItem(OffhandMode mode) {
+        switch(mode) {
+            case TOTEM:
+                return Items.TOTEM_OF_UNDYING;
+            case GAPPLE:
+            case CRAPPLE:
+                return Items.GOLDEN_APPLE;
+            case OBI:
+                return Item.getItemFromBlock(Blocks.OBSIDIAN);
+            case CRYSTAL:
+                return Items.END_CRYSTAL;
         }
+        return null;
+    }
 
-        if(strictSwitchMap.size() > 0) {
-            Iterator<Integer> iterator = strictSwitchMap.keySet().iterator();
-            while (iterator.hasNext()) {
-                Integer key = iterator.next();
-                CombatUtil.switchOffhandStrict(key, strictSwitchMap.get(key));
-                int newVal = strictSwitchMap.get(key)+1;
-                strictSwitchMap.put(key, newVal);
-                if(strictSwitchMap.get(key) > 2) {
-                    iterator.remove();
-                }
-            }
-            return;
+    private int getRelativeSwitching(OffhandMode mode) {
+        switch(mode) {
+            case TOTEM:
+                return CombatUtil.findItemSlot(Items.TOTEM_OF_UNDYING);
+            case GAPPLE:
+                return CombatUtil.findItemSlotDamage1(Items.GOLDEN_APPLE);
+            case CRAPPLE:
+                return CombatUtil.findCrapple();
+            case OBI:
+                return CombatUtil.findItemSlot(Item.getItemFromBlock(Blocks.OBSIDIAN));
+            case CRYSTAL:
+                return CombatUtil.findItemSlot(Items.END_CRYSTAL);
         }
-        String itemCount = String.valueOf(mc.player.getHeldItemOffhand().getCount()+(mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == mc.player.getHeldItemOffhand().getItem()).mapToInt(ItemStack::getCount).sum()));
-        this.setDisplayName(getModuleNameFromItem(mc.player.getHeldItemOffhand().getItem()));
-        this.setModuleInfo(itemCount);
-        boolean needsSwitch = false;
-
-        if(deathCheck.getValue()) {
-            if (CombatUtil.requiredDangerSwitch(dangerDistance.getValue())) {
-                if(!holdingTotem()) {
-                    needsSwitch = true;
-                }
-            }
-        }
-
-        if(getRelativeSwitchHealth() >= (mc.player.getHealth()+mc.player.getAbsorptionAmount())) {
-            if(!holdingTotem()) {
-                needsSwitch = true;
-            }
-        }
-
-        if(!holdingOffhandItem()) {
-            needsSwitch = true;
-        }
-
-        if((!hasTotemsAvailable() || holdingTotem()) && needsSwitch) {
-            needsSwitch = false;
-        }
-
-        if(needsSwitch) {
-            if(!strictSwap.getValue()) {
-                CombatUtil.switchOffhandTotemNotStrict();
-            } else {
-                if(hasTotemsAvailable()) {
-                    strictSwitchMap.put(CombatUtil.findItemSlot(Items.TOTEM_OF_UNDYING), 0);
-                }
-            }
-        }
+        return -1;
     }
 
     private String switchTargetNameOffhand() {
@@ -275,18 +272,9 @@ public class Offhand extends Module {
         return "Totem";
     }
 
-    // i hate british
-    private boolean needsAnGrammarOffhand() {
-        Item heldItemOffhand = mc.player.getHeldItemOffhand().getItem();
-        if(heldItemOffhand == Item.getItemFromBlock(Blocks.OBSIDIAN)) {
-            return true;
-        }
-        return false;
-    }
-
     private double getRelativeSwitchHealth() {
         Item heldItemOffhand = mc.player.getHeldItemOffhand().getItem();
-        double relativeHealth = 36.0D;
+        double relativeHealth = 0.0D;
         if(heldItemOffhand == Items.GOLDEN_APPLE) {
             relativeHealth = HoleUtil.isInHole() ? gappleHoleHealth.getValue() : gappleHealth.getValue();
         } else if(heldItemOffhand == Items.END_CRYSTAL) {
@@ -341,6 +329,14 @@ public class Offhand extends Module {
         if(modeUpdates.getValue() == 2) {
             doOffhand();
         }
+    }
+
+    private enum OffhandMode {
+        GAPPLE,
+        CRAPPLE,
+        CRYSTAL,
+        OBI,
+        TOTEM
     }
 
 }
