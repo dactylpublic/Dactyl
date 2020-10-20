@@ -50,6 +50,8 @@ public class AutoCrystal extends Module {
     Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0D, 1.0D, 13.5D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiSuiPlace.getValue());
     Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> antiMultiLethal = new Setting<Boolean>("LethalNoMulti", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> lethalMin = new Setting<Double>("LethalMin", 10.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiMultiLethal.getValue());
     Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
@@ -93,6 +95,7 @@ public class AutoCrystal extends Module {
     private final TimeUtil breakTimer = new TimeUtil();
     private final TimeUtil checkTimer = new TimeUtil();
     private final TimeUtil antiStuckTimer = new TimeUtil();
+    private final TimeUtil placeResetTimer = new TimeUtil();
 
     private static float yaw;
     private static float pitch;
@@ -144,7 +147,7 @@ public class AutoCrystal extends Module {
                     }
                 }
             }
-            if(event.getPacket() instanceof SPacketDestroyEntities) {
+            /*if(event.getPacket() instanceof SPacketDestroyEntities) {
                 SPacketDestroyEntities packet = (SPacketDestroyEntities)event.getPacket();
                 for (int id : packet.getEntityIDs()) {
                     Entity entity = mc.world.getEntityByID(id);
@@ -154,7 +157,7 @@ public class AutoCrystal extends Module {
                         }
                     }
                 }
-            }
+            }*/
             if(event.getPacket() instanceof SPacketSpawnObject) {
                 SPacketSpawnObject packetSpawnObject = (SPacketSpawnObject)event.getPacket();
                 if(doCaBreak.getValue() && predict.getValue()) {
@@ -195,6 +198,9 @@ public class AutoCrystal extends Module {
     public void doAutoCrystal(EventUpdateWalkingPlayer eventUpdateWalkingPlayer, UpdateStage updateStage) {
         if(antiStuckTimer.hasPassed(1000)) {
             attackedCrystals.clear();
+        }
+        if(placeResetTimer.hasPassed(5000)) {
+            placedCrystals.clear();
         }
         if(auraOrder.getValue() == AuraLogic.BREAKPLACE) {
             doBreak(updateStage);
@@ -383,6 +389,10 @@ public class AutoCrystal extends Module {
             Entity crystal = entry.getKey();
             float damage = ((Float)entry.getValue()).floatValue();
             if(damage >= minPlaceDMG.getValue() && ((mc.player.getDistance(crystal) <= (placeRange.getValue()+0.5d)))) {
+                if(antiMultiLethal.getValue() && damage >= lethalMin.getValue()) {
+                    crystalCount = maxInRange.getValue();
+                    return crystalCount;
+                }
                 crystalCount++;
             }
         }
@@ -462,6 +472,8 @@ public class AutoCrystal extends Module {
         placeTimer.reset();
         breakTimer.reset();
         checkTimer.reset();
+        placeResetTimer.reset();
+        antiStuckTimer.reset();
         placedCrystals.clear();
         attackedCrystals.clear();
         crystalRender = null;

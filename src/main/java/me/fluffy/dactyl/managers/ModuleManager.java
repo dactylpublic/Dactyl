@@ -2,20 +2,15 @@ package me.fluffy.dactyl.managers;
 
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.module.Module;
-import me.fluffy.dactyl.module.impl.AnotherModule;
 import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
-import me.fluffy.dactyl.module.impl.TestModule;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
 import me.fluffy.dactyl.module.impl.combat.Offhand;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
 import me.fluffy.dactyl.module.impl.movement.Strafe;
+import me.fluffy.dactyl.module.impl.render.HoleESP;
 import me.fluffy.dactyl.setting.Setting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -35,18 +30,18 @@ public class ModuleManager {
         // player
 
         // misc
-        modules.add(new TestModule());
-        modules.add(new AnotherModule());
         modules.add(new FakePlayer());
 
         // movement
         modules.add(new Strafe());
 
         // render
+        modules.add(new HoleESP());
 
         // client
         modules.add(new ClickGuiModule());
         modules.add(new HUD());
+        modules.add(new Colors());
 
         setup();
     }

@@ -308,7 +308,7 @@ public class CombatUtil {
                 }
                 double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
                 float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
-                if(targetDamage < minDamage && !(targetHealth > startFacePlaceHealth)) {
+                if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
                     continue;
                 }
                 if(targetDamage <= 2.0) {
