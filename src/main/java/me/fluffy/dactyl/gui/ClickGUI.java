@@ -4,6 +4,7 @@ import me.fluffy.dactyl.gui.impl.ModuleButton;
 import me.fluffy.dactyl.gui.impl.ModulePanel;
 import me.fluffy.dactyl.gui.impl.setting.SettingElement;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.SoundEvents;
@@ -25,18 +26,52 @@ public class ClickGUI extends GuiScreen {
         INSTANCE = this;
     }
 
+    public int getColorHovering(int outY, int targetX, int targetY, int mouseX, int mouseY, boolean idle, boolean fullalpha) {
+        boolean hovered = false;
+        if(mouseX >= targetX && mouseX <= targetX+100 && mouseY >= targetY && mouseY <= targetY+15) hovered = true;
+        if(hovered) {
+            if(fullalpha) {
+                if(idle) {
+                    return 0xff3b3b3b;
+                } else {
+                    return Colors.INSTANCE.getColor(outY, false);
+                }
+            } else {
+                if(idle) {
+                    return 0x573b3b3b;
+                } else {
+                    return Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColorDarker(outY, false), 150);
+                }
+            }
+        } else {
+            if(fullalpha) {
+                if(idle) {
+                    return 0xff4f4f4f;
+                } else {
+                    return Colors.INSTANCE.getColor(outY, false);
+                }
+            } else {
+                if(idle) {
+                    return 0x574f4f4f;
+                } else {
+                    return Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(outY, false), 150);
+                }
+            }
+        }
+    }
+
     public int getHoverColor(Object guiElement, int mouseX, int mouseY, boolean idle, boolean fullalpha) {
         if(guiElement instanceof ModuleButton) {
             ModuleButton moduleButton = (ModuleButton)guiElement;
-            return getColor(fullalpha, idle, moduleButton.isHovering(mouseX, mouseY));
+            return getColorOld(fullalpha, idle, moduleButton.isHovering(mouseX, mouseY));
         } else if(guiElement instanceof SettingElement) {
             SettingElement settingElement = (SettingElement)guiElement;
-            return getColor(fullalpha, idle, settingElement.isHovering(mouseX, mouseY));
+            return getColorOld(fullalpha, idle, settingElement.isHovering(mouseX, mouseY));
         }
         return -1;
     }
 
-    public int getColor(boolean fullalpha, boolean idle, boolean hovering) {
+    public int getColorOld(boolean fullalpha, boolean idle, boolean hovering) {
         if(hovering) {
             if(fullalpha) {
                 if(idle) {

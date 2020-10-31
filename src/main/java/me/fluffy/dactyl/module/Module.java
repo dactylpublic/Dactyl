@@ -4,6 +4,7 @@ import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.Bind;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 
@@ -126,6 +127,10 @@ public class Module {
         return this.alwaysListening;
     }
 
+    public void setAlwaysListening(boolean alwaysListening) {
+        this.alwaysListening = alwaysListening;
+    }
+
     public int getKey() {
         return ((Setting<Bind>)this.getSettingsList().get(0)).getValue().getKey();
     }
@@ -144,6 +149,10 @@ public class Module {
 
     public List<Setting> getSettingsList() {
         return this.settingList;
+    }
+
+    public ScaledResolution getRes() {
+        return new ScaledResolution(mc);
     }
 
     public List<String> getSettingNames() {

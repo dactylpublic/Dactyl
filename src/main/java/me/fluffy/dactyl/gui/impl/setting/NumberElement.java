@@ -17,15 +17,16 @@ public class NumberElement extends SettingElement {
     }
 
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        //this.drawDefaultBackground(mouseX, mouseY, false);
         int c = ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, true, false);
-        RenderUtil.drawRect(this.getX()+getOffset(this.getSetting()), this.getY(), this.getX()+100, this.getY()+15, c);
-        RenderUtil.drawOutlinedRectange(this.getX(), this.getY(), this.getX()+100, this.getY()+15, 0xff2e2e2e);
+        int offset = getOffset(this.getSetting());
+        RenderUtil.drawRect(this.getX()+offset, this.getY(), this.getX()+100, this.getY()+15, c);
+        RenderUtil.drawOutlinedRectangle(this.getX(), this.getY(), this.getX()+100, this.getY()+15, 0xff2e2e2e);
         dragSetting(mouseX, mouseY);
-        //RenderUtil.drawRect(this.getX(), this.getY(), this.getX() + 100, this.getY() + 15, ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, true, false));
         Number currentVal = (Number) this.getSetting().getValue();
         if(!(currentVal.doubleValue() >= 0.0 && currentVal.doubleValue() <= 0.1)) {
-            RenderUtil.drawRect(this.getX(), this.getY(), (int) (this.getX() + getOffset(this.getSetting())), this.getY() + 15, ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, false, false));
+            int startColor = ClickGUI.INSTANCE.getColorHovering(this.getY(), this.getX(), this.getY(), mouseX, mouseY, false, false);
+            int endColor = ClickGUI.INSTANCE.getColorHovering(this.getY()+15, this.getX(), this.getY(), mouseX, mouseY, false, false);
+            RenderUtil.drawGradientRect(this.getX(), this.getY()+1, (int) (this.getX() + offset), this.getY()+15, startColor, endColor);
         }
         Dactyl.fontUtil.drawString(getSetting().getName() + " " + TextFormatting.GRAY + ((this.getSetting().getValue() instanceof Float) ? String.format("%.01f", (Float) this.getSetting().getValue()) : String.valueOf(Double.valueOf(((Number)this.getSetting().getValue()).doubleValue()))), this.getX() + 4, this.getY() + (15 - 8) / 2, 0xffffffff);
     }

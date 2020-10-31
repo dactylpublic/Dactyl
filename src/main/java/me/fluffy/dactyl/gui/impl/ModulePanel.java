@@ -2,6 +2,7 @@ package me.fluffy.dactyl.gui.impl;
 
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.Minecraft;
 
@@ -37,9 +38,10 @@ public class ModulePanel {
     }
 
     private void drawCategoryButton() {
-        RenderUtil.drawRect(x, y, x+100, y+15, 0xff004fcf);
+        RenderUtil.drawRect(x, y, x+100, y+15, Colors.INSTANCE.getColor(y+15, false));
+        //RenderUtil.drawRect(x, y, x+100, y+15, 0xff004fcf);
         Dactyl.fontUtil.drawString(category.toString(), x+4, y + (15 - 8) / 2, 0xffffffff);
-        RenderUtil.drawOutlinedRectange(x, y, x+100, y+15, 0xff2e2e2e);
+        RenderUtil.drawOutlinedRectangle(x, y, x+100, y+15, 0xff2e2e2e);
     }
 
     public void onKeyPressed(char eventChar, int key) {

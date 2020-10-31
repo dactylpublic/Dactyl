@@ -13,4 +13,13 @@ public class HUD extends Module {
         super("HUD", Category.CLIENT, true);
         INSTANCE = this;
     }
+
+
+
+    private enum SettingPage {
+        GENERAL,
+        PLAYER,
+        PVP,
+
+    }
 }

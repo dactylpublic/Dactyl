@@ -4,6 +4,8 @@ import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.gui.ClickGUI;
 import me.fluffy.dactyl.gui.impl.setting.*;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.Bind;
 import me.fluffy.dactyl.util.render.RenderUtil;
@@ -49,7 +51,8 @@ public class ModuleButton {
                     bottomY+=15;
                 }
             }
-            RenderUtil.drawOutlinedRectange(x, this.y+15, x+100, this.y+15+getSettingsSpace(), 0xff004fcf, 300.0D);
+            RenderUtil.drawOutlinedGradientRectangleZ(x, this.y+15, x+100,this.y+15+getSettingsSpace(), 500.0D);
+            //RenderUtil.drawOutlinedRectangle(x, this.y+15, x+100, this.y+15+getSettingsSpace(), 0xff004fcf, 300.0D);
         }
     }
 
@@ -66,9 +69,14 @@ public class ModuleButton {
     }
 
     public void drawButton(int mouseX, int mouseY) {
-        int color = ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, !(module.isEnabled() || module.isAlwaysListening()), false);
-        RenderUtil.drawRect(x, y, x+100, y+15, color);
-        RenderUtil.drawOutlinedRectange(x, y, x+100, y+15, 0xff2e2e2e);
+        int startColor = ClickGUI.INSTANCE.getColorHovering(this.y, this.x, this.y, mouseX, mouseY, !(module.isEnabled() || module.isAlwaysListening()), false);
+        int endColor = ClickGUI.INSTANCE.getColorHovering(this.y+15, this.x, this.y, mouseX, mouseY, !(module.isEnabled() || module.isAlwaysListening()), false);
+        //int color = ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, !(module.isEnabled() || module.isAlwaysListening()), false);
+        //int startColor = Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(y, false), 170);
+        //int endColor = Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(y+15, false), 170);
+        RenderUtil.drawGradientRect(x, y, x+100, y+15, startColor, endColor);
+        //RenderUtil.drawRect(x, y, x+100, y+15, color);
+        RenderUtil.drawOutlinedRectangle(x, y, x+100, y+15, 0xff2e2e2e);
         Dactyl.fontUtil.drawString(module.getName(), x+4, y + (15 - 8) / 2, (module.isEnabled() || module.isAlwaysListening()) ? 0xffffffff : 0xff858585);
     }
 

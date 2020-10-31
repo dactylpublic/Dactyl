@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.util.render;
 
+import me.fluffy.dactyl.module.impl.client.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -40,6 +41,34 @@ public class RenderUtil {
         bufferbuilder.pos(left, top, 0.0D).color(f1, f2, f3, f).endVertex();
         bufferbuilder.pos(left, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
         bufferbuilder.pos(right, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+        tessellator.draw();
+        GlStateManager.shadeModel(7424);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+    }
+
+    public static void drawGradientRect(int left, int top, int right, int bottom, int startColor, int endColor, double zLevel) {
+        float f = (float)(startColor >> 24 & 255) / 255.0F;
+        float f1 = (float)(startColor >> 16 & 255) / 255.0F;
+        float f2 = (float)(startColor >> 8 & 255) / 255.0F;
+        float f3 = (float)(startColor & 255) / 255.0F;
+        float f4 = (float)(endColor >> 24 & 255) / 255.0F;
+        float f5 = (float)(endColor >> 16 & 255) / 255.0F;
+        float f6 = (float)(endColor >> 8 & 255) / 255.0F;
+        float f7 = (float)(endColor & 255) / 255.0F;
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.shadeModel(7425);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(right, top, zLevel).color(f1, f2, f3, f).endVertex();
+        bufferbuilder.pos(left, top, zLevel).color(f1, f2, f3, f).endVertex();
+        bufferbuilder.pos(left, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        bufferbuilder.pos(right, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
         tessellator.draw();
         GlStateManager.shadeModel(7424);
         GlStateManager.disableBlend();
@@ -108,14 +137,36 @@ public class RenderUtil {
         }
     }
 
-    public static void drawOutlinedRectange(int left, int top, int right, int bottom, int color) {
+    public static void drawOutlinedRectangle(int left, int top, int right, int bottom, int color) {
         drawHorizontalLine(left, right, top, color);
         drawHorizontalLine(left, right, bottom, color);
         drawVerticalLine(left, bottom, top, color);
         drawVerticalLine(right, bottom, top, color);
     }
 
-    public static void drawOutlinedRectange(int left, int top, int right, int bottom, int color, double zlevel) {
+    public static void drawOutlinedGradientRectangle(int left, int top, int right, int bottom) {
+        // bottom line
+        drawGradientRect(left, bottom, right, bottom, Colors.INSTANCE.getColor(bottom, false), Colors.INSTANCE.getColor(bottom, false));
+        // top line
+        drawGradientRect(left, top, right, top, Colors.INSTANCE.getColor(top, false), Colors.INSTANCE.getColor(top, false));
+        // left line
+        drawGradientRect(left, top, left+1, bottom, Colors.INSTANCE.getColor(top, false), Colors.INSTANCE.getColor(bottom, false));
+        // right line
+        drawGradientRect(right, top, right-1, bottom, Colors.INSTANCE.getColor(top, false), Colors.INSTANCE.getColor(bottom, false));
+    }
+
+    public static void drawOutlinedGradientRectangleZ(int left, int top, int right, int bottom, double zLevel) {
+        // bottom line
+        drawGradientRect(left, bottom-1, right, bottom, Colors.INSTANCE.getColor(bottom, false), Colors.INSTANCE.getColor(bottom, false), zLevel);
+        // top line
+        drawGradientRect(left, top, right, top+1, Colors.INSTANCE.getColor(top, false), Colors.INSTANCE.getColor(top, false), zLevel);
+        // left line
+        drawGradientRect(left, top, left+1, bottom, Colors.INSTANCE.getColor(top, false), Colors.INSTANCE.getColor(bottom, false), zLevel);
+        // right line
+        drawGradientRect(right-1, top, right, bottom, Colors.INSTANCE.getColor(top, false), Colors.INSTANCE.getColor(bottom, false), zLevel);
+    }
+
+    public static void drawOutlinedRectangle(int left, int top, int right, int bottom, int color, double zlevel) {
         drawHorizontalLine(left, right, top, color, zlevel);
         drawHorizontalLine(left, right, bottom, color, zlevel);
         drawVerticalLine(left, bottom, top, color, zlevel);

@@ -82,6 +82,7 @@ public class AutoCrystal extends Module {
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> africanMode = new Setting<Boolean>("AfricanMode", false, vis->settingPage.getValue() == SettingPage.MISC);
 
     // render
     Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, vis->settingPage.getValue() == SettingPage.RENDER);
@@ -326,6 +327,9 @@ public class AutoCrystal extends Module {
                     resetRots();
                     return;
                 }
+                if(africanMode.getValue()) {
+                    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
+                }
                 placedCrystals.add(placePosition);
                 mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float)rayTraceResult.hitVec.x, (float)rayTraceResult.hitVec.y, (float)rayTraceResult.hitVec.z));
                 placeTimer.reset();
@@ -379,6 +383,8 @@ public class AutoCrystal extends Module {
             isRotating = false;
         }
     }
+
+
 
     private int getCrystalsInRange() {
         int crystalCount = 0;
