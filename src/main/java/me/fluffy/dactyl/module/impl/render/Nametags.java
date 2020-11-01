@@ -39,6 +39,7 @@ public class Nametags extends Module {
     Setting<Boolean> health = new Setting<Boolean>("Health", true);
     Setting<Boolean> ping = new Setting<Boolean>("Ping", true);
     Setting<Boolean> gamemode = new Setting<Boolean>("Gamemode", true);
+    Setting<Boolean> invisibles = new Setting<Boolean>("Invisibles", true);
     Setting<Boolean> durability = new Setting<Boolean>("Durability", true);
     Setting<Boolean> itemName = new Setting<Boolean>("Armor", true);
     Setting<Boolean> totemPops = new Setting<Boolean>("TotemPops", true);
@@ -60,6 +61,9 @@ public class Nametags extends Module {
             double y = interpolate(entity.lastTickPosY, entity.posY, event.getPartialTicks()) - ((IRenderManager)(mc.getRenderManager())).getRenderPosY();
             double z = interpolate(entity.lastTickPosZ, entity.posZ, event.getPartialTicks()) -((IRenderManager)(mc.getRenderManager())).getRenderPosZ();
             if(entity != mc.getRenderViewEntity()) {
+                if(!invisibles.getValue() && entity.isInvisible()) {
+                    return;
+                }
                 renderNameTag(entity, x, y, z, event.getPartialTicks());
             }
         }
@@ -104,9 +108,9 @@ public class Nametags extends Module {
         GL11.glDisable(2929);
         GlStateManager.enableBlend();
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 0.3f, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 0.7f, 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 0.3f, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 0.7f, 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
 
@@ -406,9 +410,9 @@ public class Nametags extends Module {
         if (Dactyl.friendManager.isFriend(player.getName()))
             return 0xff55FFFF;
         if (player.isInvisible()) {
-            colour = 0xffc92c00;
+            colour = 0xff910022;
         } else if (player.isSneaking()) {
-            colour = 0xffc92c00;
+            colour = 0xff004a05;
         }
         return colour;
     }

@@ -9,12 +9,27 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class TotemListener extends Listener {
     private final Minecraft mc = Minecraft.getMinecraft();
 
     public TotemListener() {
         super("TotemListener", "Handles totem pops.");
+    }
+
+    @SubscribeEvent
+    public void onUpdateClient(TickEvent.ClientTickEvent event) {
+        if(mc.player == null || mc.world == null) {
+            return;
+        }
+        for(EntityPlayer player : mc.world.playerEntities) {
+            if(player.getHealth() <= 0) {
+                if(Dactyl.totemManager.containsKey(player.getName())) {
+                    Dactyl.totemManager.clearUser(player.getName());
+                }
+            }
+        }
     }
 
     @SubscribeEvent
@@ -35,13 +50,13 @@ public class TotemListener extends Listener {
         }
     }
 
-    @SubscribeEvent
-    public void onDeath(LivingDeathEvent event) {
-        if(event.getEntity() instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer)event.getEntity();
-            Dactyl.totemManager.clearUser(player.getName());
-        }
-    }
+    //@SubscribeEvent
+    //public void onDeath(LivingDeathEvent event) {
+    //    if(event.getEntity() instanceof EntityPlayer) {
+    //        EntityPlayer player = (EntityPlayer)event.getEntity();
+    //        Dactyl.totemManager.clearUser(player.getName());
+    //    }
+    //}
 
     @SubscribeEvent
     public void onPop(UpdatePopEvent event) {

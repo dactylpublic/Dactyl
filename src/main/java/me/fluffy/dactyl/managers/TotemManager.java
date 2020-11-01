@@ -31,6 +31,10 @@ public class TotemManager {
         return this.poppedUsers;
     }
 
+    public boolean containsKey(String user) {
+        return poppedUsers.containsKey(user);
+    }
+
     public int getPops(String user) {
         if(poppedUsers.get(user) != null) {
             return poppedUsers.get(user);
@@ -40,7 +44,8 @@ public class TotemManager {
 
     public void clearUser(String user) {
         if(poppedUsers.get(user) != null) {
-            poppedUsers.remove(user);
+            poppedUsers.put(user, 0);
+            //poppedUsers.remove(user);
         }
     }
 

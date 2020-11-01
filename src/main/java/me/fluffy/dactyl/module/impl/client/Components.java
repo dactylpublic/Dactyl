@@ -4,6 +4,6 @@ import me.fluffy.dactyl.module.Module;
 
 public class Components extends Module {
     public Components() {
-        super("Components", Category.CLIENT, true);
+        super("Addons", Category.CLIENT, true);
     }
 }
