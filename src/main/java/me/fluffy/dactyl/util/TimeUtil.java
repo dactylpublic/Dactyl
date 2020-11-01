@@ -18,4 +18,6 @@ public class TimeUtil {
     public void timeTravel(long time) {
         lastRecorded = (lastRecorded + time);
     }
+
+    public long getLastRecorded() { return this.lastRecorded; }
 }

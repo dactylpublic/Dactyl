@@ -181,18 +181,18 @@ public class ClickGUI extends GuiScreen {
     }
 
     public void playButtonSound() {
-        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 0.5F));
+        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     public void handleMouseInput() throws IOException {
         if(Mouse.getEventDWheel() > 0) {
             for(ModulePanel panel : modulePanels) {
-                panel.setY(panel.getY()+13);
+                panel.setY(panel.getY()-13);
             }
         }
         if(Mouse.getEventDWheel() < 0) {
             for(ModulePanel panel : modulePanels) {
-                panel.setY(panel.getY()-13);
+                panel.setY(panel.getY()+13);
             }
         }
         super.handleMouseInput();

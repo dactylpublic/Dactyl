@@ -377,6 +377,7 @@ public class AutoCrystal extends Module {
     }
 
     private void attackCrystal(Entity entity) {
+        Criticals.INSTANCE.ignoring = true;
         mc.playerController.attackEntity(mc.player, entity);
         mc.player.swingArm(offhandSwing.getValue() ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
         if (attackedCrystals.containsKey(entity)) {
@@ -388,6 +389,7 @@ public class AutoCrystal extends Module {
         if(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos) != null) {
             this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName());
         }
+        Criticals.INSTANCE.ignoring = false;
         breakTimer.reset();
     }
 
