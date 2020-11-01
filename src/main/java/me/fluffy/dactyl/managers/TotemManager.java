@@ -27,6 +27,10 @@ public class TotemManager {
         }
     }
 
+    public HashMap<String, Integer> getPoppedUsers() {
+        return this.poppedUsers;
+    }
+
     public int getPops(String user) {
         if(poppedUsers.get(user) != null) {
             return poppedUsers.get(user);

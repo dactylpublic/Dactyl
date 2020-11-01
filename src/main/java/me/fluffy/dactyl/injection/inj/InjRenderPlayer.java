@@ -2,6 +2,7 @@ package me.fluffy.dactyl.injection.inj;
 
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.render.HandColor;
+import me.fluffy.dactyl.module.impl.render.Nametags;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -19,7 +20,9 @@ import java.awt.*;
 public class InjRenderPlayer {
     @Inject(method = "renderEntityName", at = @At("HEAD"), cancellable = true)
     public void renderEntityNameHook(AbstractClientPlayer entityIn, double x, double y, double z, String name, double distanceSq, CallbackInfo info) {
-        // cancel if nametags enabled
+        if(Nametags.INSTANCE.isEnabled()) {
+            info.cancel();
+        }
     }
 
     @Inject(method = "renderRightArm", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/ModelPlayer;swingProgress:F", opcode = 181), cancellable = true)

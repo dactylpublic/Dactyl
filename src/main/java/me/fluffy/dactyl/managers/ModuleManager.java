@@ -17,6 +17,7 @@ import me.fluffy.dactyl.module.impl.movement.Strafe;
 import me.fluffy.dactyl.module.impl.movement.Velocity;
 import me.fluffy.dactyl.module.impl.render.HandColor;
 import me.fluffy.dactyl.module.impl.render.HoleESP;
+import me.fluffy.dactyl.module.impl.render.Nametags;
 import me.fluffy.dactyl.setting.Setting;
 
 import java.lang.reflect.Field;
@@ -50,6 +51,7 @@ public class ModuleManager {
         // render
         modules.add(new HoleESP());
         modules.add(new HandColor());
+        modules.add(new Nametags());
 
         // client
         modules.add(new ClickGuiModule());

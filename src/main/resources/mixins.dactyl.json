@@ -15,6 +15,7 @@
     "access.ICPacketPlayer",
     "access.ICPacketUseEntity",
     "access.IMinecraft",
+    "access.IRenderManager",
     "access.ITimer",
     "access.IVec3i"
   ]

@@ -41,7 +41,7 @@ public class Strafe extends Module {
         if(canSprint() && autoSprint.getValue()) {
             mc.player.setSprinting(true);
         }
-        this.setModuleInfo(skipModeSetting.getValue() != SkipMode.NONE ? "Skips" : "Bhop");
+        this.setModuleInfo(skipModeSetting.getValue() != SkipMode.NONE ? "Skips" : "Rapid");
     }
 
     @SubscribeEvent
