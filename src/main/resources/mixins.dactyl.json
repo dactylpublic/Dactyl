@@ -11,6 +11,7 @@
     "InjMovementInputFromOptions",
     "InjNetworkManager",
     "InjRenderPlayer",
+    "InjVisGraph",
     "InjWorld",
     "access.ICPacketPlayer",
     "access.ICPacketUseEntity",
