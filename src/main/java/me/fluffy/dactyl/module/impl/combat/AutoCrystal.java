@@ -52,6 +52,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> antiMultiLethal = new Setting<Boolean>("LethalNoMulti", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> lethalMin = new Setting<Double>("LethalMin", 10.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiMultiLethal.getValue());
+    Setting<Boolean> antiping = new Setting<Boolean>("AntiMulti", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
@@ -97,6 +98,7 @@ public class AutoCrystal extends Module {
     private final TimeUtil checkTimer = new TimeUtil();
     private final TimeUtil antiStuckTimer = new TimeUtil();
     private final TimeUtil placeResetTimer = new TimeUtil();
+    private final TimeUtil novolaTimer = new TimeUtil();
 
     private static float yaw;
     private static float pitch;
@@ -407,6 +409,11 @@ public class AutoCrystal extends Module {
                 crystalCount+=1;
             }
         }
+        if(!novolaTimer.hasPassed(50) && antiping.getValue()) {
+            if(crystalCount == 0) {
+                crystalCount = 1;
+            }
+        }
         return crystalCount;
     }
 
@@ -479,6 +486,7 @@ public class AutoCrystal extends Module {
         breakTimer.reset();
         checkTimer.reset();
         placeResetTimer.reset();
+        novolaTimer.reset();
         antiStuckTimer.reset();
         placedCrystals.clear();
         attackedCrystals.clear();

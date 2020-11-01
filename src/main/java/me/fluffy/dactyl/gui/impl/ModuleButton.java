@@ -77,7 +77,7 @@ public class ModuleButton {
         RenderUtil.drawGradientRect(x, y, x+100, y+15, startColor, endColor);
         //RenderUtil.drawRect(x, y, x+100, y+15, color);
         RenderUtil.drawOutlinedRectangle(x, y, x+100, y+15, 0xff2e2e2e);
-        Dactyl.fontUtil.drawString(module.getName(), x+4, y + (15 - 8) / 2, (module.isEnabled() || module.isAlwaysListening()) ? 0xffffffff : 0xff858585);
+        Dactyl.fontUtil.drawString(module.getName(), x+4, y + (15 - 8) / 2, (module.isEnabled() || module.isAlwaysListening()) ? 0xffffffff : 0xff969696);
     }
 
     public void mouseClicked(int mouseButton, int mouseX, int mouseY) {
@@ -118,7 +118,7 @@ public class ModuleButton {
                 if(setting.getValue() instanceof Bind) {
                     settingElements.add(new BindElement(setting, this.x, this.y));
                 } else if(setting.getValue() instanceof String) {
-                    // stringarrayelement
+                    settingElements.add(new StringElement(setting, this.x, this.y));
                 } else if(setting.getValue() instanceof Enum) {
                     settingElements.add(new EnumElement(setting, this.x, this.y));
                 } else if(setting.getValue() instanceof Boolean) {

@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
+import me.fluffy.dactyl.event.impl.world.BlockPushEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityPlayerSP.class)
 public class InjEntityPlayerSP extends AbstractClientPlayer {
@@ -51,5 +53,15 @@ public class InjEntityPlayerSP extends AbstractClientPlayer {
         MoveEvent moveEvent = new MoveEvent(x, y, z, ForgeEvent.Stage.PRE);
         MinecraftForge.EVENT_BUS.post(moveEvent);
         super.move(type, moveEvent.getX(), moveEvent.getY(), moveEvent.getZ());
+    }
+
+    @Inject(method = "pushOutOfBlocks",at = @At("HEAD"),cancellable = true)
+    private void onPushOutOfBlocks(double x, double y, double z, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
+        BlockPushEvent eventPushOutOfBlocks = new BlockPushEvent();
+        MinecraftForge.EVENT_BUS.post(eventPushOutOfBlocks);
+
+        if(eventPushOutOfBlocks.isCanceled()) {
+            callbackInfoReturnable.setReturnValue(false);
+        }
     }
 }

@@ -35,6 +35,11 @@ public class SettingElement {
         RenderUtil.drawOutlinedRectangle(x, y, x+100, y+15, 0xff2e2e2e);
     }
 
+    public void drawBlackBackground() {
+        RenderUtil.drawGradientRect(x, y, x+100, y+15, 0x57000000, 0x57000000);
+        RenderUtil.drawOutlinedRectangle(x, y, x+100, y+15, 0xff2e2e2e);
+    }
+
     public boolean isHovering(int mouseX, int mouseY) {
         return mouseX >= x && mouseX <= x+100 && mouseY >= y && mouseY <= y + 15;
     }

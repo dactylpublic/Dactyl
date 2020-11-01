@@ -4,11 +4,16 @@ import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
 import me.fluffy.dactyl.module.impl.client.Colors;
+import me.fluffy.dactyl.module.impl.client.Components;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
 import me.fluffy.dactyl.module.impl.combat.Offhand;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
+import me.fluffy.dactyl.module.impl.movement.NoSlow;
+import me.fluffy.dactyl.module.impl.movement.ReverseStep;
 import me.fluffy.dactyl.module.impl.movement.Strafe;
+import me.fluffy.dactyl.module.impl.movement.Velocity;
+import me.fluffy.dactyl.module.impl.render.HandColor;
 import me.fluffy.dactyl.module.impl.render.HoleESP;
 import me.fluffy.dactyl.setting.Setting;
 
@@ -34,14 +39,19 @@ public class ModuleManager {
 
         // movement
         modules.add(new Strafe());
+        modules.add(new NoSlow());
+        modules.add(new Velocity());
+        modules.add(new ReverseStep());
 
         // render
         modules.add(new HoleESP());
+        modules.add(new HandColor());
 
         // client
         modules.add(new ClickGuiModule());
         modules.add(new HUD());
         modules.add(new Colors());
+        modules.add(new Components());
 
         setup();
     }

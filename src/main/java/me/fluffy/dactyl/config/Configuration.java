@@ -57,6 +57,9 @@ public class Configuration {
                         if (mod.isEnabled() != Boolean.parseBoolean(String.valueOf(pathEntry.getValue()))) {
                             mod.toggle();
                         }
+                        if(!mod.isEnabled() && mod.isAlwaysListening()) {
+                            mod.toggle();
+                        }
                     }
                 }
             }

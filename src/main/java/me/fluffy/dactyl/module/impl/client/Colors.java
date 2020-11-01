@@ -25,9 +25,12 @@ public class Colors extends Module {
     public Setting<Integer> red = new Setting<Integer>("Red", 255, 1, 255, vis->colorModeSetting.getValue() == ColorMode.RGB);
     public Setting<Integer> green = new Setting<Integer>("Green", 255, 1, 255, vis->colorModeSetting.getValue() == ColorMode.RGB);
     public Setting<Integer> blue = new Setting<Integer>("Blue", 255, 1, 255, vis->colorModeSetting.getValue() == ColorMode.RGB);
+    public Setting<Integer> alpha = new Setting<Integer>("Alpha", 255, 1, 255, vis->colorModeSetting.getValue() == ColorMode.RGB);
 
     //public Setting<Integer> rainbowSaturation = new Setting<Integer>("Saturation", 175, 1, 255, vis->colorModeSetting.getValue() == ColorMode.RAINBOW);
 
+
+    public float hue;
 
     public HashMap<Integer, Integer> colorX = new HashMap<>();
     public HashMap<Integer, Integer> colorY = new HashMap<>();
@@ -58,6 +61,14 @@ public class Colors extends Module {
             return new Color(red.getValue(), green.getValue(), blue.getValue()).getRGB();
         }
         return -1;
+    }
+
+    public Color getCurrentColor() {
+        if (colorModeSetting.getValue() == ColorMode.RAINBOW) {
+            return Color.getHSBColor(this.hue, rainbowSaturation.getValue() / 255.0F, rainbowBrightness.getValue() / 255.0F);
+        } else {
+            return new Color(red.getValue(), green.getValue(), blue.getValue(), alpha.getValue());
+        }
     }
 
     public int getColorDarker(int offset, boolean isX) {
@@ -109,7 +120,7 @@ public class Colors extends Module {
     private void updateRainbow() {
         ScaledResolution res = getRes();
         int zoomSpeed = 101 - rainbowSpeed.getValue();
-        float hue = (System.currentTimeMillis() % (360 * zoomSpeed)) / (360f * zoomSpeed);
+        hue = (System.currentTimeMillis() % (360 * zoomSpeed)) / (360f * zoomSpeed);
         float tempHue = hue;
         if(reverseMap.getValue()) {
             for (int i = res.getScaledHeight() - 1; i >= 0; i--) {

@@ -89,6 +89,7 @@ public class Module {
     public void onEnable() {}
     public void onDisable() {}
     public void onClientUpdate() {}
+    public void onScreen() {}
     public void onRender3D(Render3DEvent event) {}
 
     public String getName() {

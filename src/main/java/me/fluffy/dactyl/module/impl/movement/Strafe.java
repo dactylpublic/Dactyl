@@ -18,8 +18,11 @@ public class Strafe extends Module {
     Setting<SkipMode> skipModeSetting = new Setting<SkipMode>("Skips", SkipMode.TICK);
     Setting<Integer> skipTickHops = new Setting<Integer>("SkipTicks", 1, 1, 10, vis->skipModeSetting.getValue() == SkipMode.TICK);
     Setting<Integer> skipDelayHops = new Setting<Integer>("SkipDelay", 25, 1, 100, vis->skipModeSetting.getValue() == SkipMode.MS);
+
+    public static Strafe INSTANCE;
     public Strafe() {
         super("Strafe", Category.MOVEMENT);
+        INSTANCE = this;
     }
 
     private int stage = 0;

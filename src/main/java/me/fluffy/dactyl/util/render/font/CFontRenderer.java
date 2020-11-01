@@ -94,6 +94,8 @@ public class CFontRenderer extends CFont{
                         underline = false;
                         strikethrough = false;
                         GlStateManager.bindTexture(tex.getGlTextureId());
+                        // GL11.glBindTexture(GL11.GL_TEXTURE_2D,
+                        // tex.getGlTextureId());
                         currentData = this.charData;
                         if ((colorIndex < 0) || (colorIndex > 15)) colorIndex = 15;
                         if (shadow) colorIndex += 16;
@@ -104,9 +106,13 @@ public class CFontRenderer extends CFont{
                         bold = true;
                         if (italic) {
                             GlStateManager.bindTexture(texItalicBold.getGlTextureId());
+                            // GL11.glBindTexture(GL11.GL_TEXTURE_2D,
+                            // texItalicBold.getGlTextureId());
                             currentData = this.boldItalicChars;
                         } else {
                             GlStateManager.bindTexture(texBold.getGlTextureId());
+                            // GL11.glBindTexture(GL11.GL_TEXTURE_2D,
+                            // texBold.getGlTextureId());
                             currentData = this.boldChars;
                         }
                     } else if (colorIndex == 18) strikethrough = true;
@@ -115,9 +121,13 @@ public class CFontRenderer extends CFont{
                         italic = true;
                         if (bold) {
                             GlStateManager.bindTexture(texItalicBold.getGlTextureId());
+                            // GL11.glBindTexture(GL11.GL_TEXTURE_2D,
+                            // texItalicBold.getGlTextureId());
                             currentData = this.boldItalicChars;
                         } else {
                             GlStateManager.bindTexture(texItalic.getGlTextureId());
+                            // GL11.glBindTexture(GL11.GL_TEXTURE_2D,
+                            // texItalic.getGlTextureId());
                             currentData = this.italicChars;
                         }
                     } else if (colorIndex == 21) {
@@ -128,6 +138,8 @@ public class CFontRenderer extends CFont{
                         strikethrough = false;
                         GlStateManager.color((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, alpha);
                         GlStateManager.bindTexture(tex.getGlTextureId());
+                        // GL11.glBindTexture(GL11.GL_TEXTURE_2D,
+                        // tex.getGlTextureId());
                         currentData = this.charData;
                     }
                     i++;

@@ -38,8 +38,20 @@ public class FontUtil {
         if (HUD.INSTANCE.customFont.getValue()) {
             font.drawString(text, x, y, color, false);
         } else {
-            Minecraft.getMinecraft().fontRenderer.drawString(text, x, y, color, false);
+            Minecraft.getMinecraft().fontRenderer.drawString(text, x, y, color);
         }
+    }
+
+    public void drawStringWithShadow(String text, int x, int y, int color) {
+        if (HUD.INSTANCE.customFont.getValue()) {
+            font.drawStringWithShadow(text, x, y, color);
+        } else {
+            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, x, y, color);
+        }
+    }
+
+    public boolean isCustomFont() {
+        return HUD.INSTANCE.customFont.getValue();
     }
 
     public void drawString(String text, float textScale, int x, int y, int color, boolean shadow) {

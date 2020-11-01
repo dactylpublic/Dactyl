@@ -5,6 +5,8 @@ import me.fluffy.dactyl.config.friends.FriendManager;
 import me.fluffy.dactyl.gui.ClickGUI;
 import me.fluffy.dactyl.managers.ListenerManager;
 import me.fluffy.dactyl.managers.ModuleManager;
+import me.fluffy.dactyl.managers.TickRateManager;
+import me.fluffy.dactyl.managers.TotemManager;
 import me.fluffy.dactyl.util.render.font.FontUtil;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -17,7 +19,7 @@ import org.lwjgl.opengl.Display;
 public class Dactyl {
     public static final String MODID = "dactyl";
     public static final String NAME = "Dactyl";
-    public static final String VERSION = "v0.0.9";
+    public static final String VERSION = "v0.3.1";
 
     public static Logger logger;
 
@@ -29,6 +31,8 @@ public class Dactyl {
     public static ClickGUI clickGUI;
     public static Configuration configuration;
     public static FriendManager friendManager;
+    public static TickRateManager tickRateManager;
+    public static TotemManager totemManager;
 
     @Mod.EventHandler
     public void preInitialization(FMLPreInitializationEvent event) {
@@ -43,11 +47,13 @@ public class Dactyl {
         clickGUI = new ClickGUI();
         configuration = new Configuration();
         friendManager = new FriendManager();
+        tickRateManager = new TickRateManager();
+        totemManager = new TotemManager();
     }
 
     @Mod.EventHandler
     public void postInitialization(FMLPostInitializationEvent event) {
-        Display.setTitle("ICEHack " + VERSION);
+        Display.setTitle("Dactyl.ie " + VERSION);
     }
 
     public void save() {
@@ -57,6 +63,13 @@ public class Dactyl {
         } catch(Exception exception) {
             exception.printStackTrace();
         }
+    }
+
+    public TickRateManager getTickRateManager() {
+        if (this.tickRateManager == null) {
+            this.tickRateManager = new TickRateManager();
+        }
+        return this.tickRateManager;
     }
 
 }

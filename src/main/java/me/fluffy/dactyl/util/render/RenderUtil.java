@@ -208,6 +208,21 @@ public class RenderUtil {
         GlStateManager.disableBlend();
     }
 
+
+    public static int getRainbow(int speed, int offset, float s, float b) {
+        float hue = (float)((System.currentTimeMillis() + offset) % speed);
+        hue /= speed;
+        return Color.getHSBColor(hue, s, b).getRGB();
+    }
+
+    public static int getScreenHeight() {
+        return (Minecraft.getMinecraft().displayHeight / 2);
+    }
+
+    public static int getScreenWidth() {
+        return (Minecraft.getMinecraft().displayWidth / 2);
+    }
+
     public static void drawHorizontalLine(int startX, int endX, int y, int color) {
         if (endX < startX)
         {

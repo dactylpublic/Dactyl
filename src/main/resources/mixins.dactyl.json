@@ -4,9 +4,13 @@
   "package": "me.fluffy.dactyl.injection.inj",
   "refmap": "mixins.dactyl.refmap.json",
   "mixins": [
+    "InjEntityPlayer",
     "InjEntityPlayerSP",
+    "InjGuiIngame",
     "InjMinecraft",
+    "InjMovementInputFromOptions",
     "InjNetworkManager",
+    "InjRenderPlayer",
     "InjWorld",
     "access.ICPacketPlayer",
     "access.ICPacketUseEntity",
