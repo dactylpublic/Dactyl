@@ -241,7 +241,10 @@ public class HUD extends Module {
             int hour = rightNow.get(Calendar.HOUR_OF_DAY);
             int mins = rightNow.get(Calendar.MINUTE);
             boolean isAfternoon = false;
-            if(hour > 12) isAfternoon = true;
+            if(hour >= 12) isAfternoon = true;
+            if(isAfternoon && (hour-12 == 0)) {
+                hour = 24;
+            }
             String hourString = isAfternoon ? String.valueOf(hour-12) : String.valueOf(hour);
             String textTime = ChatFormatting.RESET + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "")+String.valueOf(mins) + (isAfternoon ? "pm" : "am");
             normal.add(new TextElement(textTime, 0xffffffff, false));

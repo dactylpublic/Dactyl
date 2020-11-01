@@ -146,24 +146,11 @@ public class Nametags extends Module {
             if(player.getHeldItemMainhand() != null) stacks.add(player.getHeldItemMainhand().copy());
             if(player.getHeldItemOffhand() != null) stacks.add(player.getHeldItemOffhand().copy());
 
-            if (player.getHeldItemMainhand() != null) {
+            if (player.getHeldItemOffhand() != null) {
                 xOffset -= 8;
-                ItemStack renderStack = player.getHeldItemMainhand().copy();
+                ItemStack renderStack = player.getHeldItemOffhand().copy();
                 if(!renderStack.getItem().equals(Items.AIR)) {
                     renderItemStack(stacks, renderStack, xOffset, -(getEnchantSpace(stacks)+26)+26+10);
-                    if (itemName.getValue() && !renderStack.isEmpty() && renderStack.getItem() != Items.AIR) {
-                        String stackName = renderStack.getDisplayName();
-                        int stackNameWidth = (int) (Dactyl.fontUtil.getStringWidth(stackName) / 2);
-                        GL11.glPushMatrix();
-                        GL11.glScalef((float)0.5f, (float)0.5f, (float)0.0f);
-                        int enchantY = 2-getEnchantSpace(stacks)-24;
-                        if(!(enchantY < -50)) {
-                            enchantY = -50;
-                        }
-                        Dactyl.fontUtil.drawStringWithShadow(stackName, -stackNameWidth, (int) (enchantY - 20), -1);
-                        GL11.glScalef((float)1.5f, (float)1.5f, (float)1.0f);
-                        GL11.glPopMatrix();
-                    }
                     if(armorStacks.isEmpty()) {
                         xOffset += 22;
                     } else {
@@ -187,11 +174,24 @@ public class Nametags extends Module {
                     }
                 }
             }
-            if (player.getHeldItemOffhand() != null) {
+            if (player.getHeldItemMainhand() != null) {
                 xOffset -= 8;
-                ItemStack renderStack = player.getHeldItemOffhand().copy();
+                ItemStack renderStack = player.getHeldItemMainhand().copy();
                 if(!renderStack.getItem().equals(Items.AIR)) {
                     renderItemStack(stacks, renderStack, xOffset, -(getEnchantSpace(stacks)+26)+26+10);
+                    if (itemName.getValue() && !renderStack.isEmpty() && renderStack.getItem() != Items.AIR) {
+                        String stackName = renderStack.getDisplayName();
+                        int stackNameWidth = (int) (Dactyl.fontUtil.getStringWidth(stackName) / 2);
+                        GL11.glPushMatrix();
+                        GL11.glScalef((float)0.5f, (float)0.5f, (float)0.0f);
+                        int enchantY = 2-getEnchantSpace(stacks)-24;
+                        if(!(enchantY < -50)) {
+                            enchantY = -50;
+                        }
+                        Dactyl.fontUtil.drawStringWithShadow(stackName, -stackNameWidth, (int) (enchantY - 20), -1);
+                        GL11.glScalef((float)1.5f, (float)1.5f, (float)1.0f);
+                        GL11.glPopMatrix();
+                    }
                     xOffset += 16;
                 }
             }

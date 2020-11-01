@@ -15,6 +15,7 @@ import me.fluffy.dactyl.module.impl.movement.NoSlow;
 import me.fluffy.dactyl.module.impl.movement.ReverseStep;
 import me.fluffy.dactyl.module.impl.movement.Strafe;
 import me.fluffy.dactyl.module.impl.movement.Velocity;
+import me.fluffy.dactyl.module.impl.player.FastItem;
 import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.module.impl.render.HandColor;
 import me.fluffy.dactyl.module.impl.render.HoleESP;
@@ -40,6 +41,7 @@ public class ModuleManager {
 
         // player
         modules.add(new Freecam());
+        modules.add(new FastItem());
 
         // misc
         modules.add(new FakePlayer());
