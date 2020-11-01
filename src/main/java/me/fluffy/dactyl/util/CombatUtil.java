@@ -340,6 +340,124 @@ public class CombatUtil {
         return placePosition;
     }
 
+    public static boolean isFacePlaceCrystal(EntityEnderCrystal crystal, double minFacePlaceHP, boolean placeTrace, double wallsPlaceRange, double placeRange, double enemyRange) {
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        if(placeTrace) {
+            if(!canSeeEntity(crystal) && mc.player.getDistance(crystal) > wallsPlaceRange) {
+                return false;
+            }
+        }
+        if(mc.player.getDistance(crystal) > placeRange) {
+            return false;
+        }
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            float entHP = ((EntityLivingBase)entity).getHealth()+((EntityLivingBase)entity).getAbsorptionAmount();
+            if(entHP > minFacePlaceHP) {
+                continue;
+            }
+            double targetDMG = calculateDamage(crystal, entity);
+            if(targetDMG >= 1.4d) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static BlockPos getBestPlacePosIgnoreAlreadyPlaced(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+        BlockPos placePosition = null;
+        final List<BlockPos> placePositions = findImpossiblePlacePoses(oneBlockCA, placeRange);
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        double damage = 2.0;
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            for(BlockPos blockPos : placePositions) {
+                if(doPlaceTrace) {
+                    if(!canSeeBlock(blockPos)) {
+                        if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                            continue;
+                        }
+                    }
+                }
+                if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+                    continue;
+                }
+                if(entity.getDistanceSq(blockPos) > 56.2) {
+                    continue;
+                }
+                double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+                float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+                if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                    continue;
+                }
+                if(targetDamage <= 2.0) {
+                    continue;
+                }
+                if (targetDamage <= damage) {
+                    continue;
+                }
+                double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+                float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                if(antiSuicide) {
+                    if(selfDamage > maxSelfDmg) {
+                        continue;
+                    }
+                    if((selfDamage >= playerHealth)) {
+                        continue;
+                    }
+                }
+                if(selfDamage > targetDamage) {
+                    continue;
+                }
+                placePosition = blockPos;
+                damage = targetDamage;
+            }
+        }
+        if (damage == 2.0) {
+            return null;
+        }
+        return placePosition;
+    }
+
+    public static EntityPlayer getGreatestDamageOnPlayer(double enemyRange, BlockPos blockPos) {
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        EntityPlayer player = null;
+        double bestDMG = 1.3d;
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+            if(targetDamage > bestDMG) {
+                bestDMG = targetDamage;
+                player = (EntityPlayer) entity;
+            }
+        }
+        return player;
+    }
+
 
     public static List<BlockPos> getSphere(BlockPos pos, float r, int h, boolean hollow, boolean sphere, int plus_y) {
         List<BlockPos> circleblocks = new ArrayList<>();
@@ -366,6 +484,12 @@ public class CombatUtil {
         return (List<BlockPos>)positions;
     }
 
+    private static List<BlockPos> findImpossiblePlacePoses(boolean isOnePointThirteen, double placeRange) {
+        NonNullList positions = NonNullList.create();
+        positions.addAll(getSphere(new BlockPos(Math.floor(mc.player.posX), Math.floor(mc.player.posY), Math.floor(mc.player.posZ)), (float)placeRange, (int)placeRange, false, true, 0).stream().filter(pos->isImpossiblePlacePos(isOnePointThirteen, pos)).collect(Collectors.toList()));
+        return (List<BlockPos>)positions;
+    }
+
     public static boolean wontSelfPop(EntityEnderCrystal crystal, boolean antiSui, double maxSelfDMG) {
         if(antiSui) {
             double dmg = calculateDamage(crystal, mc.player);
@@ -387,6 +511,17 @@ public class CombatUtil {
         } else {
             final BlockPos boost = blockPos.add(0, 1, 0);
             return (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN) && mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(boost)).isEmpty();
+        }
+    }
+
+    private static boolean isImpossiblePlacePos(boolean isOnePointThirteen, BlockPos blockPos) {
+        if(!isOnePointThirteen) {
+            final BlockPos boost = blockPos.add(0, 1, 0);
+            final BlockPos boost2 = blockPos.add(0, 2, 0);
+            return (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN) && mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getBlockState(boost2).getBlock() == Blocks.AIR;
+        } else {
+            final BlockPos boost = blockPos.add(0, 1, 0);
+            return (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN) && mc.world.getBlockState(boost).getBlock() == Blocks.AIR;
         }
     }
 

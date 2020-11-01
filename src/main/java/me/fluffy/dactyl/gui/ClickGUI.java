@@ -8,7 +8,9 @@ import me.fluffy.dactyl.module.impl.client.Colors;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.SoundEvents;
+import org.lwjgl.input.Mouse;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ClickGUI extends GuiScreen {
@@ -179,6 +181,20 @@ public class ClickGUI extends GuiScreen {
     }
 
     public void playButtonSound() {
-        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 0.5F));
+    }
+
+    public void handleMouseInput() throws IOException {
+        if(Mouse.getEventDWheel() > 0) {
+            for(ModulePanel panel : modulePanels) {
+                panel.setY(panel.getY()+13);
+            }
+        }
+        if(Mouse.getEventDWheel() < 0) {
+            for(ModulePanel panel : modulePanels) {
+                panel.setY(panel.getY()-13);
+            }
+        }
+        super.handleMouseInput();
     }
 }

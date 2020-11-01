@@ -58,6 +58,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> placeRange = new Setting<Double>("PlaceRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
+    Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
 
     // break
@@ -290,6 +291,11 @@ public class AutoCrystal extends Module {
         }
         BlockPos placePosition = CombatUtil.getBestPlacePosition(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
         EnumHand placeHand = null;
+
+        if(CombatUtil.getBestPlacePosIgnoreAlreadyPlaced(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
+            this.setModuleInfo("");
+        }
+
         if(mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL) {
             placeHand = EnumHand.MAIN_HAND;
         } else if(mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL) {
@@ -323,6 +329,15 @@ public class AutoCrystal extends Module {
             } else {
                 facing = rayTraceResult.sideHit;
             }
+            if(placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
+                this.setModuleInfo("");
+                resetRots();
+                return;
+            } else {
+                if(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition) != null) {
+                    this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition).getName());
+                }
+            }
             if(placeTimer.hasPassed(placeDelay.getValue())) {
                 if(placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
                     this.setModuleInfo("");
@@ -346,7 +361,7 @@ public class AutoCrystal extends Module {
                 }
             }
         } else {
-            this.setModuleInfo("");
+            //this.setModuleInfo("");
             crystalRender = null;
             resetRots();
         }
@@ -368,6 +383,10 @@ public class AutoCrystal extends Module {
             attackedCrystals.put((EntityEnderCrystal) entity, attackedCrystals.get(entity) + 1);
         } else {
             attackedCrystals.put((EntityEnderCrystal) entity, 1);
+        }
+        BlockPos brokenPos = new BlockPos(entity.posX, entity.posY, entity.posZ);
+        if(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos) != null) {
+            this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName());
         }
         breakTimer.reset();
     }
@@ -396,7 +415,8 @@ public class AutoCrystal extends Module {
         for (Map.Entry<Entity, Float> entry : this.damageMap().entrySet()) {
             Entity crystal = entry.getKey();
             float damage = ((Float)entry.getValue()).floatValue();
-            if(damage >= minPlaceDMG.getValue() && ((mc.player.getDistance(crystal) <= (placeRange.getValue()+0.5d)))) {
+            boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystal((EntityEnderCrystal) crystal, facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
+            if(damage >= minPlaceDMG.getValue() && ((mc.player.getDistance(crystal) <= placeRange.getValue()) || (isFacePlaceCrystal && countFacePlace.getValue()))) {
                 if(antiMultiLethal.getValue() && damage >= lethalMin.getValue()) {
                     crystalCount = maxInRange.getValue();
                     return crystalCount;

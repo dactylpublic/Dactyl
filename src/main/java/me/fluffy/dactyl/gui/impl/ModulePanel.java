@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.gui.impl;
 
 import me.fluffy.dactyl.Dactyl;
+import me.fluffy.dactyl.gui.impl.setting.SettingElement;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.util.render.RenderUtil;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 public class ModulePanel {
     private final Module.Category category;
     private final int x;
-    private final int y;
+    private int y;
     private final ArrayList<ModuleButton> moduleButtons = new ArrayList<>();
     public ModulePanel(Module.Category category, int x, int y) {
         this.category = category;
@@ -60,6 +61,19 @@ public class ModulePanel {
             if(module.getCategory() == this.category) {
                 moduleButtons.add(new ModuleButton(this, module, this.x, this.y+moduleY));
                 moduleY+=15;
+            }
+        }
+    }
+
+    public void setY(int y) {
+        int oldy = this.y;
+        this.y = y;
+        for(ModuleButton e : moduleButtons) {
+            e.setY(e.getY()+(y-oldy));
+            for(SettingElement settingElement : e.getSettingElements()) {
+                if(settingElement.getSetting().isVisible()) {
+                    settingElement.setY(settingElement.getY()+(y-oldy));
+                }
             }
         }
     }

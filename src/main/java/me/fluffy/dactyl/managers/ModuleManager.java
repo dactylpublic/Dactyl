@@ -7,6 +7,8 @@ import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.client.Components;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
+import me.fluffy.dactyl.module.impl.combat.Criticals;
+import me.fluffy.dactyl.module.impl.combat.Killaura;
 import me.fluffy.dactyl.module.impl.combat.Offhand;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
 import me.fluffy.dactyl.module.impl.movement.NoSlow;
@@ -31,6 +33,8 @@ public class ModuleManager {
         // combat
         modules.add(new AutoCrystal());
         modules.add(new Offhand());
+        modules.add(new Killaura());
+        modules.add(new Criticals());
 
         // player
 

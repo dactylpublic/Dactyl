@@ -13,7 +13,7 @@ import net.minecraft.world.IBlockAccess;
 
 public class ReverseStep extends Module {
     Setting<StepMode> stepModeSetting = new Setting<StepMode>("Mode", StepMode.HOLES);
-    Setting<Boolean> inWater = new Setting<Boolean>("inWater", true, v->stepModeSetting.getValue()==StepMode.ALL);
+    Setting<Boolean> inWater = new Setting<Boolean>("inWater", false, v->stepModeSetting.getValue()==StepMode.ALL);
     public ReverseStep() {
         super("ReverseStep", Category.MOVEMENT);
     }

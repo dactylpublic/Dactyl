@@ -11,6 +11,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.EntityUtil;
 import me.fluffy.dactyl.util.MathUtil;
+import me.fluffy.dactyl.util.TimeUtil;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.resources.I18n;
@@ -32,6 +33,8 @@ public class HUD extends Module {
     public Setting<Boolean> potionColorSync = new Setting<Boolean>("PotionCSync", false, v->renderHud.getValue());
     public Setting<Boolean> potionIcons = new Setting<Boolean>("PotionIcons", false);
     public Setting<Boolean> arrayListSetting = new Setting<Boolean>("ArrayList", true, v->renderHud.getValue());
+    public Setting<Integer> arrayListUpdates = new Setting<Integer>("ArrayUpdates", 200, 50, 1000, v->renderHud.getValue()&&arrayListSetting.getValue());
+    public Setting<Integer> arrayListFactor = new Setting<Integer>("AnimFactor", 2, 1, 10, v->renderHud.getValue()&&arrayListSetting.getValue());
     public Setting<Boolean> fps = new Setting<Boolean>("FPS", true, v->renderHud.getValue());
     public Setting<Boolean> tps = new Setting<Boolean>("TPS", true, v->renderHud.getValue());
     public Setting<Boolean> speed = new Setting<Boolean>("Speed", true, v->renderHud.getValue());
@@ -54,7 +57,55 @@ public class HUD extends Module {
         INSTANCE = this;
     }
 
+    public static final ArrayList<ArrayListElement> arrayListElements = new ArrayList<>();
+    public static final TimeUtil arrayTimer = new TimeUtil();
+
     private long serverLastUpdated;
+
+    @Override
+    public void onClientUpdate() {
+        if(mc.player == null) {
+            return;
+        }
+        if(arrayTimer.hasPassed(arrayListUpdates.getValue())) {
+            updateArrayList();
+            sortModules();
+        }
+    }
+
+    private void updateArrayList() {
+        for(Module module : Dactyl.moduleManager.getModules()) {
+            if(module.isEnabled() && !((module.isHidden() || module.isAlwaysListening() || module.getCategory().equals(Category.CLIENT)))) {
+                if(!arrayListContainsModule(module)) {
+                    ArrayListElement element = new ArrayListElement(module);
+                    element.state = AnimationState.OPEN;
+                    arrayListElements.add(element);
+                }
+            } else {
+                if(arrayListContainsModule(module)) {
+                    ArrayListElement element = getArrayListElement(module);
+                    if(element != null) {
+                        element.state = AnimationState.CLOSE;
+                    }
+                }
+            }
+            if(arrayListContainsModule(module) && (module.isHidden() || module.isAlwaysListening() || module.getCategory().equals(Category.CLIENT))) {
+                arrayListElements.remove(getArrayListElement(module));
+            }
+        }
+        sortModules();
+    }
+
+    private void sortModules() {
+        Comparator<ArrayListElement> comparator = (first, second) ->
+        {
+            String firstName = first.module.getDisplayName() + (first.module.getModuleInfo().length() > 0 ? first.module.getModuleInfo()+"[]" : "");
+            String secondName = second.module.getDisplayName() + (second.module.getModuleInfo().length() > 0 ? second.module.getModuleInfo()+"[]" : "");
+            float dif = Dactyl.fontUtil.getStringWidth(secondName) -  Dactyl.fontUtil.getStringWidth(firstName);
+            return dif != 0 ? (int) dif : secondName.compareTo(firstName);
+        };
+        arrayListElements.sort(comparator);
+    }
 
     @Override
     public void onScreen() {
@@ -62,6 +113,7 @@ public class HUD extends Module {
             return;
         }
         if(renderHud.getValue()) {
+            doArrayList();
             doWatermark();
             doOtherRender();
         }
@@ -69,7 +121,69 @@ public class HUD extends Module {
 
     private void doArrayList() {
         if(arrayListSetting.getValue()) {
+            if(renderingSetting.getValue() == Rendering.UP) {
+                int textY = 1;
+                for(ArrayListElement element : arrayListElements) {
+                    String moduleInfoString = TextFormatting.GRAY + " [" + TextFormatting.WHITE + element.module.getModuleInfo() + TextFormatting.GRAY + "]";
+                    String renderString = element.module.getDisplayName() + (element.module.hasModuleInfo() ? moduleInfoString : "");
+                    int currentX = (int) (RenderUtil.getScreenWidth() - Dactyl.fontUtil.getStringWidth(renderString)) - 2;
 
+                    if(element.state == AnimationState.OPEN) {
+                        element.ticks = element.ticks-arrayListFactor.getValue();
+                        if(element.ticks <= 0) {
+                            element.state = AnimationState.NONE;
+                        } else {
+                            currentX = (int) (RenderUtil.getScreenWidth() - Dactyl.fontUtil.getStringWidth(renderString)) - 2 + element.ticks;
+                        }
+                    } else if(element.state == AnimationState.CLOSE) {
+                        if(element.ticks <= 0) {
+                            element.ticks = 1;
+                        }
+                        element.ticks+=arrayListFactor.getValue();
+                        currentX = (int) (RenderUtil.getScreenWidth() - Dactyl.fontUtil.getStringWidth(renderString)) - 2 + element.ticks;
+                    }
+                    if (shadow.getValue()) {
+                        Dactyl.fontUtil.drawStringWithShadow(renderString, currentX, textY, Colors.INSTANCE.getColor(textY, false));
+                    } else {
+                        Dactyl.fontUtil.drawString(renderString, currentX, textY, Colors.INSTANCE.getColor(textY, false));
+                    }
+                    textY+=10;
+                }
+                arrayListElements.removeIf(element-> element.state == AnimationState.CLOSE && element.ticks >= 50);
+            } else {
+                int textY = RenderUtil.getScreenHeight()-(arrayListElements.size()*10)-1;
+                if(mc.currentScreen instanceof GuiChat) textY = textY-15;
+                for (int i = arrayListElements.size() - 1; i >= 0; i--) {
+                    if(arrayListElements.get(i) == null) {
+                        return;
+                    }
+                    String moduleInfoString = TextFormatting.GRAY + " [" + TextFormatting.WHITE + arrayListElements.get(i).module.getModuleInfo() + TextFormatting.GRAY + "]";
+                    String renderString = arrayListElements.get(i).module.getDisplayName() + (arrayListElements.get(i).module.hasModuleInfo() ? moduleInfoString : "");
+                    int currentX = (int) (RenderUtil.getScreenWidth() - Dactyl.fontUtil.getStringWidth(renderString)) - 2;
+
+                    if(arrayListElements.get(i).state == AnimationState.OPEN) {
+                        arrayListElements.get(i).ticks = arrayListElements.get(i).ticks-arrayListFactor.getValue();
+                        if(arrayListElements.get(i).ticks <= 0) {
+                            arrayListElements.get(i).state = AnimationState.NONE;
+                        } else {
+                            currentX = (int) (RenderUtil.getScreenWidth() - Dactyl.fontUtil.getStringWidth(renderString)) - 2 + arrayListElements.get(i).ticks;
+                        }
+                    } else if(arrayListElements.get(i).state == AnimationState.CLOSE) {
+                        if(arrayListElements.get(i).ticks <= 0) {
+                            arrayListElements.get(i).ticks = 1;
+                        }
+                        arrayListElements.get(i).ticks+=arrayListFactor.getValue();
+                        currentX = (int) (RenderUtil.getScreenWidth() - Dactyl.fontUtil.getStringWidth(renderString)) - 2 + arrayListElements.get(i).ticks;
+                    }
+                    if (shadow.getValue()) {
+                        Dactyl.fontUtil.drawStringWithShadow(renderString, currentX, textY, Colors.INSTANCE.getColor(textY, false));
+                    } else {
+                        Dactyl.fontUtil.drawString(renderString, currentX, textY, Colors.INSTANCE.getColor(textY, false));
+                    }
+                    textY+=10;
+                }
+                arrayListElements.removeIf(element-> element.state == AnimationState.CLOSE && element.ticks >= 50);
+            }
         }
     }
 
@@ -200,6 +314,24 @@ public class HUD extends Module {
         }
     }
 
+    private boolean arrayListContainsModule(Module module) {
+        for(ArrayListElement arrayListElement : arrayListElements) {
+            if(arrayListElement.module == module) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ArrayListElement getArrayListElement(Module module) {
+        for(ArrayListElement arrayListElement : arrayListElements) {
+            if(arrayListElement.module == module) {
+                return arrayListElement;
+            }
+        }
+        return null;
+    }
+
     private void doWatermark() {
         if(watermarkTypeSetting.getValue() != WatermarkType.NONE) {
             String drawingWatermark = "";
@@ -268,12 +400,20 @@ public class HUD extends Module {
         return dif != 0 ? (int) dif : second.getText().compareTo(first.getText());
     };
 
+    @Override
+    public void onToggle() {
+        arrayListElements.clear();
+        arrayTimer.reset();
+    }
+
     private class ArrayListElement {
         public Module module;
         public AnimationState state;
+        public int ticks;
 
         public ArrayListElement(Module module) {
             this.module = module;
+            this.ticks = 50;
             this.state = AnimationState.NONE;
         }
     }

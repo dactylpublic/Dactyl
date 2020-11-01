@@ -116,6 +116,12 @@ public class Module {
         return this.enabled;
     }
 
+    public boolean isHidden() {
+        return ((Setting<Boolean>)this.getSetting("Hidden")).getValue();
+    }
+
+    public boolean hasModuleInfo() { return (this.moduleInfo.length() > 0); }
+
     public boolean isSeen() {
         return this.seen;
     }
