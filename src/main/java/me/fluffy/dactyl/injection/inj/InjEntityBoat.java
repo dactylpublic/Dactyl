@@ -17,6 +17,13 @@ public abstract class InjEntityBoat extends InjEntity {
     @Shadow
     public abstract double getMountedYOffset();
 
+    @Inject(method = {"updateMotion"}, at = {@At("RETURN")})
+    private void updateMotion(CallbackInfo info) {
+        if (Minecraft.getMinecraft().player != null && Minecraft.getMinecraft().player.isRiding() && this.getRidingEntity() == Minecraft.getMinecraft().player && BoatFly.INSTANCE.isEnabled()) {
+            info.cancel();
+        }
+    }
+
     @Inject(method = "applyOrientationToEntity", at = @At("HEAD"), cancellable = true)
     private void applyOrientationToEntity(Entity passenger, CallbackInfo info) {
         if (Minecraft.getMinecraft().player != null && Minecraft.getMinecraft().player.isRiding() && Minecraft.getMinecraft().player == passenger && BoatFly.INSTANCE.isEnabled()) {
