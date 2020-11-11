@@ -1,6 +1,8 @@
 package me.fluffy.dactyl.module.impl.movement;
 
+import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
+import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.event.impl.player.PlayerTravelEvent;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
@@ -23,20 +25,30 @@ public class BoatFly extends Module {
 
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        if(event.getType() == PacketEvent.PacketType.OUTGOING) {
-            if(event.getPacket() instanceof CPacketVehicleMove) {
-                if (mc.player.isRiding() && mc.player.ticksExisted % 2 == 0) {
-                    mc.playerController.interactWithEntity(mc.player, mc.player.getRidingEntity(), EnumHand.MAIN_HAND);
+        if(event.getStage() != ForgeEvent.Stage.PRE) {
+            if(event.getType() == PacketEvent.PacketType.OUTGOING) {
+                if (event.getPacket() instanceof CPacketVehicleMove) {
+                    if (mc.player.isRiding() && mc.player.ticksExisted % 2 == 0) {
+                        mc.playerController.interactWithEntity(mc.player, mc.player.getRidingEntity(), EnumHand.MAIN_HAND);
+                    }
                 }
             }
+            return;
+        } else {
             if ((event.getPacket() instanceof net.minecraft.network.play.client.CPacketPlayer.Rotation || event.getPacket() instanceof net.minecraft.network.play.client.CPacketInput) && mc.player.isRiding()) {
                 event.setCanceled(true);
             }
-        } else {
-            if(event.getPacket() instanceof SPacketMoveVehicle) {
-                if(mc.player.isRiding()) {
-                    event.setCanceled(true);
-                }
+        }
+    }
+
+    @SubscribeEvent
+    public void onPacketEvent(PacketEvent event) {
+        if(event.getStage() != ForgeEvent.Stage.PRE) {
+            return;
+        }
+        if(event.getPacket() instanceof SPacketMoveVehicle) {
+            if(mc.player.isRiding()) {
+                event.setCanceled(true);
             }
         }
     }
@@ -50,6 +62,7 @@ public class BoatFly extends Module {
             return;
         }
         Entity riding = mc.player.getRidingEntity();
+        riding.setNoGravity(true);
         riding.rotationYaw = mc.player.rotationYaw;
         riding.motionY = (-glideSpeed.getValue().floatValue() / 10000.0F);
         double[] dir = MathUtil.directionSpeed(speed.getValue());

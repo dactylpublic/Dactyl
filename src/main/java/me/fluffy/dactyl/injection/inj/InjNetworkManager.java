@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.injection.inj;
 
 import io.netty.channel.ChannelHandlerContext;
+import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class InjNetworkManager {
     @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void onSendPacket(Packet<?> packet, CallbackInfo ci) {
-        PacketEvent e = new PacketEvent(packet, PacketEvent.PacketType.OUTGOING);
+        PacketEvent e = new PacketEvent(ForgeEvent.Stage.PRE, packet, PacketEvent.PacketType.OUTGOING);
         MinecraftForge.EVENT_BUS.post(e);
         if(e.isCanceled())
             ci.cancel();
@@ -22,7 +23,23 @@ public class InjNetworkManager {
 
     @Inject(method = "channelRead0", at = @At("HEAD"), cancellable = true)
     private void onChannelRead(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
-        PacketEvent e = new PacketEvent(packet, PacketEvent.PacketType.INCOMING);
+        PacketEvent e = new PacketEvent(ForgeEvent.Stage.PRE, packet, PacketEvent.PacketType.INCOMING);
+        MinecraftForge.EVENT_BUS.post(e);
+        if(e.isCanceled())
+            ci.cancel();
+    }
+
+    @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("RETURN"))
+    private void onSendPacketPost(Packet<?> packet, CallbackInfo ci) {
+        PacketEvent e = new PacketEvent(ForgeEvent.Stage.POST, packet, PacketEvent.PacketType.OUTGOING);
+        MinecraftForge.EVENT_BUS.post(e);
+        if(e.isCanceled())
+            ci.cancel();
+    }
+
+    @Inject(method = "channelRead0", at = @At("RETURN"))
+    private void onChannelReadPost(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
+        PacketEvent e = new PacketEvent(ForgeEvent.Stage.POST, packet, PacketEvent.PacketType.INCOMING);
         MinecraftForge.EVENT_BUS.post(e);
         if(e.isCanceled())
             ci.cancel();

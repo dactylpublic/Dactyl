@@ -8,8 +8,8 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable;
 public class PacketEvent extends ForgeEvent {
     private final Packet packet;
     private final PacketType packetType;
-    public PacketEvent(Packet packet, PacketType packetType) {
-        this.setStage(Stage.PRE);
+    public PacketEvent(Stage stage, Packet packet, PacketType packetType) {
+        this.setStage(stage);
         this.packet = packet;
         this.packetType = packetType;
     }
