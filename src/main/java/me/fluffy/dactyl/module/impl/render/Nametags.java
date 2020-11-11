@@ -108,9 +108,9 @@ public class Nametags extends Module {
         GL11.glDisable(2929);
         GlStateManager.enableBlend();
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 1.25f, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 1.25f, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
 
@@ -412,7 +412,7 @@ public class Nametags extends Module {
         if (player.isInvisible()) {
             colour = 0xff910022;
         } else if (player.isSneaking()) {
-            colour = 0xff004a05;
+            colour = -6481515;
         }
         return colour;
     }

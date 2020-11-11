@@ -3,10 +3,7 @@ package me.fluffy.dactyl;
 import me.fluffy.dactyl.config.Configuration;
 import me.fluffy.dactyl.config.friends.FriendManager;
 import me.fluffy.dactyl.gui.ClickGUI;
-import me.fluffy.dactyl.managers.ListenerManager;
-import me.fluffy.dactyl.managers.ModuleManager;
-import me.fluffy.dactyl.managers.TickRateManager;
-import me.fluffy.dactyl.managers.TotemManager;
+import me.fluffy.dactyl.managers.*;
 import me.fluffy.dactyl.util.render.font.FontUtil;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -19,13 +16,14 @@ import org.lwjgl.opengl.Display;
 public class Dactyl {
     public static final String MODID = "dactyl";
     public static final String NAME = "Dactyl";
-    public static final String VERSION = "v0.4.6";
+    public static final String VERSION = "v0.4.8";
 
     public static Logger logger;
 
     public static final Dactyl INSTANCE = new Dactyl();
 
     public static ModuleManager moduleManager;
+    public static CommandManager commandManager;
     public static FontUtil fontUtil;
     public static ListenerManager listenerManager;
     public static ClickGUI clickGUI;
@@ -42,6 +40,7 @@ public class Dactyl {
     @Mod.EventHandler
     public void initialization(FMLInitializationEvent event) {
         moduleManager = new ModuleManager();
+        commandManager = new CommandManager();
         fontUtil = new FontUtil();
         listenerManager = new ListenerManager();
         clickGUI = new ClickGUI();

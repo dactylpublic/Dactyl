@@ -49,6 +49,7 @@ public class HUD extends Module {
 
     public Setting<Boolean> shadow = new Setting<Boolean>("Shadow", false, v->renderHud.getValue());
 
+    public Setting<String> commandPrefix = new Setting<String>("CommandPrefix", "-");
 
 
     public static HUD INSTANCE;
