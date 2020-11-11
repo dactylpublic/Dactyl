@@ -9,11 +9,13 @@ import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.injection.inj.access.ICPacketPlayer;
 import me.fluffy.dactyl.injection.inj.access.ICPacketUseEntity;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.RotationUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import me.fluffy.dactyl.util.render.RenderUtil;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderCrystal;
@@ -88,6 +90,15 @@ public class AutoCrystal extends Module {
 
     // render
     Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, vis->settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, vis->settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, vis->settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> outline = new Setting<Boolean>("Outline", true, vis->settingPage.getValue() == SettingPage.RENDER);
+    Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, vis->settingPage.getValue() == SettingPage.RENDER&&outline.getValue());
+    Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER);
+    Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER&&!colorSync.getValue());
+    Setting<Integer> colorGreen = new Setting<Integer>("Green", 175, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER&&!colorSync.getValue());
+    Setting<Integer> colorBlue = new Setting<Integer>("Blue", 255, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER&&!colorSync.getValue());
+
 
     public static AutoCrystal INSTANCE;
 
@@ -107,6 +118,7 @@ public class AutoCrystal extends Module {
     private float oldYaw, oldPitch;
     private static boolean togglePitch = false;
     private static BlockPos crystalRender = null;
+    private static double damage = 0.0d;
     private EntityEnderCrystal currentAttacking = null;
 
     private final Set<BlockPos> placedCrystals = new HashSet<>();
@@ -282,6 +294,7 @@ public class AutoCrystal extends Module {
         if(mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
             this.setModuleInfo("");
             crystalRender = null;
+            damage = 0.0d;
             resetRots();
             checkTimer.reset();
             return;
@@ -290,6 +303,7 @@ public class AutoCrystal extends Module {
             return;
         }
         BlockPos placePosition = CombatUtil.getBestPlacePosition(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+
         EnumHand placeHand = null;
 
         if(CombatUtil.getBestPlacePosIgnoreAlreadyPlaced(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
@@ -304,10 +318,12 @@ public class AutoCrystal extends Module {
         if(placePosition != null) {
             if(getCrystalsInRange() >= maxInRange.getValue()) {
                 crystalRender = null;
+                damage = 0.0d;
                 //resetRots();
                 return;
             }
             crystalRender = placePosition;
+            damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] rots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
             if(placeRotate.getValue()) {
                 if(updateLogic.getValue() == UpdateLogic.WALKING) {
@@ -363,6 +379,7 @@ public class AutoCrystal extends Module {
         } else {
             //this.setModuleInfo("");
             crystalRender = null;
+            damage = 0.0d;
             resetRots();
         }
     }
@@ -371,7 +388,18 @@ public class AutoCrystal extends Module {
     public void onRender3D(Render3DEvent event) {
         if(renderESP.getValue()) {
             if (crystalRender != null && CombatUtil.isHoldingCrystal()) {
-                RenderUtil.drawBoxESP(crystalRender, new Color(0, 13, 255, 255), 1.5f, true, true, 40);
+                if(!colorSync.getValue()) {
+                    RenderUtil.drawBoxESP(crystalRender, new Color(colorRed.getValue(), colorGreen.getValue(), colorBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                } else {
+                    Color syncColor = Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false));
+                    RenderUtil.drawBoxESP(crystalRender, syncColor, lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                }
+            }
+        }
+        if(damageText.getValue()) {
+            if (crystalRender != null && CombatUtil.isHoldingCrystal()) {
+                String dmgTextRender = ((Math.floor(damage) == damage) ? Integer.valueOf((int)damage) : String.format("%.1f", damage)) + "";
+                RenderUtil.drawText(crystalRender, dmgTextRender);
             }
         }
     }
@@ -514,6 +542,7 @@ public class AutoCrystal extends Module {
         attackedCrystals.clear();
         crystalRender = null;
         currentAttacking = null;
+        damage = 0.0d;
         resetRots();
     }
 

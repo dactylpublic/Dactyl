@@ -69,7 +69,23 @@ public class Surround extends Module {
             return;
         }
         for (int i = 0; i < (int)quota.getValue(); i++) {
-            if (this.offsetStep >= CombatUtil.protectionoffsets.length) {
+            if (this.offsetStep >= CombatUtil.getProtectionOffsets().size()) {
+                endLoop();
+                return;
+            }
+            int obi = CombatUtil.findBlockInHotbar(Blocks.OBSIDIAN);
+            if(obi == -1) {
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(this.playerHotbarSlot));
+                this.toggle();
+                return;
+            }
+            Vec3d offset = CombatUtil.getProtectionOffsets().get(offsetStep);
+            //Vec3d offset = CombatUtil.protectionoffsets[this.offsetStep];
+            BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
+            this.lastHotbarSlot = obi;
+            CombatUtil.placeBlock(placePosition, false, rotate.getValue(), true, true, allowEating.getValue(), obi);
+            this.offsetStep++;
+            /*if (this.offsetStep >= CombatUtil.protectionoffsets.length) {
                 endLoop();
                 return;
             }
@@ -83,7 +99,7 @@ public class Surround extends Module {
             BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
             this.lastHotbarSlot = obi;
             CombatUtil.placeBlock(placePosition, false, rotate.getValue(), true, true, allowEating.getValue(), obi);
-            this.offsetStep++;
+            this.offsetStep++;*/
         }
         timer.reset();
     }

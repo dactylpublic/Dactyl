@@ -8,17 +8,11 @@ import me.fluffy.dactyl.module.impl.client.Components;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.module.impl.combat.*;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
-import me.fluffy.dactyl.module.impl.movement.NoSlow;
-import me.fluffy.dactyl.module.impl.movement.ReverseStep;
-import me.fluffy.dactyl.module.impl.movement.Strafe;
-import me.fluffy.dactyl.module.impl.movement.Velocity;
+import me.fluffy.dactyl.module.impl.movement.*;
 import me.fluffy.dactyl.module.impl.player.FastItem;
 import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.module.impl.player.NoHitbox;
-import me.fluffy.dactyl.module.impl.render.Fullbright;
-import me.fluffy.dactyl.module.impl.render.HandColor;
-import me.fluffy.dactyl.module.impl.render.HoleESP;
-import me.fluffy.dactyl.module.impl.render.Nametags;
+import me.fluffy.dactyl.module.impl.render.*;
 import me.fluffy.dactyl.setting.Setting;
 
 import java.lang.reflect.Field;
@@ -52,6 +46,7 @@ public class ModuleManager {
         modules.add(new Strafe());
         modules.add(new NoSlow());
         modules.add(new Velocity());
+        modules.add(new Step());
         modules.add(new ReverseStep());
 
         // render
@@ -59,6 +54,7 @@ public class ModuleManager {
         modules.add(new HandColor());
         modules.add(new Nametags());
         modules.add(new Fullbright());
+        modules.add(new NoRender());
 
         // client
         modules.add(new ClickGuiModule());

@@ -14,7 +14,8 @@ import net.minecraft.world.IBlockAccess;
 
 public class ReverseStep extends Module {
     Setting<StepMode> stepModeSetting = new Setting<StepMode>("Mode", StepMode.HOLES);
-    Setting<Boolean> inWater = new Setting<Boolean>("inWater", false, v->stepModeSetting.getValue()==StepMode.ALL);
+    Setting<Boolean> allWhenStep = new Setting<Boolean>("SwitchEnabled", true, "Switches mode to all when Step module is enabled.");
+    //Setting<Boolean> inWater = new Setting<Boolean>("inWater", false, v->stepModeSetting.getValue()==StepMode.ALL);
     public ReverseStep() {
         super("ReverseStep", Category.MOVEMENT);
     }
@@ -31,7 +32,11 @@ public class ReverseStep extends Module {
             return;
         }
         this.setModuleInfo(stepModeSetting.getValue() == StepMode.ALL ? "All" : "Holes");
-        if(stepModeSetting.getValue() == StepMode.HOLES) {
+        boolean doSwitch = false;
+        if(allWhenStep.getValue() && Step.INSTANCE.isEnabled()) {
+            doSwitch = true;
+        }
+        if(stepModeSetting.getValue() == StepMode.HOLES && !doSwitch) {
             if (!mc.player.onGround) {
                 if (mc.gameSettings.keyBindJump.isKeyDown())
                     this.jumped = true;
@@ -50,8 +55,8 @@ public class ReverseStep extends Module {
                     this.packets = 0;
                 }
             }
-        } else {
-            if (mc.player == null || mc.world == null || (!inWater.getValue() && (mc.player.isInLava() || mc.player.isInWater()))) {
+        } else if (stepModeSetting.getValue() == StepMode.ALL || doSwitch){
+            if (mc.player == null || mc.world == null || (mc.player.isInLava() || mc.player.isInWater())) {
                 return;
             }
             if (mc.player.onGround) {

@@ -8,6 +8,8 @@
     "InjEntityPlayerSP",
     "InjEntityRenderer",
     "InjGuiIngame",
+    "InjItemRenderer",
+    "InjLayerArmorBase",
     "InjMinecraft",
     "InjMovementInputFromOptions",
     "InjNetworkManager",

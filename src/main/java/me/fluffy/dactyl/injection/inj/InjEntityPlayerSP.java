@@ -5,9 +5,11 @@ import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.event.impl.world.BlockPushEvent;
+import me.fluffy.dactyl.module.impl.render.NoRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.MoverType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,6 +26,20 @@ public class InjEntityPlayerSP extends AbstractClientPlayer {
 
     public InjEntityPlayerSP(World p_i45074_1_, GameProfile p_i45074_2_) {
         super(p_i45074_1_, p_i45074_2_);
+    }
+
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/EntityPlayerSP;closeScreen()V"))
+    public void closeScreen(EntityPlayerSP entityPlayerSP) {
+        if(NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.portalAnim.getValue()) {
+            return;
+        }
+    }
+
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;displayGuiScreen(Lnet/minecraft/client/gui/GuiScreen;)V"))
+    public void closeScreen(Minecraft minecraft, GuiScreen screen) {
+        if(NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.portalAnim.getValue()) {
+            return;
+        }
     }
 
     @Inject(method = "onUpdateWalkingPlayer", at = @At("HEAD"))

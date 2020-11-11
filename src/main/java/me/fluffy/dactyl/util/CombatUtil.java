@@ -51,6 +51,27 @@ public class CombatUtil {
 
     public static final Vec3d[] protectionoffsets = new Vec3d[] {new Vec3d(0.0D, 0.0D, 0.0D), new Vec3d(1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, 1.0D), new Vec3d(-1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, -1.0D), new Vec3d(1.0D, 0.0D, 0.0D), new Vec3d(0.0D, 0.0D, 1.0D), new Vec3d(-1.0D, 0.0D, 0.0D), new Vec3d(0.0D, 0.0D, -1.0D), new Vec3d(1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, 1.0D), new Vec3d(-1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, -1.0D)};
 
+    public static final BlockPos[] surroundOffset = new BlockPos[] {new BlockPos(0, -1, 0), new BlockPos(0, 0, -1), new BlockPos(1, 0, 0), new BlockPos(0, 0, 1), new BlockPos(-1, 0, 0)};
+
+    public static ArrayList<Vec3d> getProtectionOffsets() {
+        ArrayList<Vec3d> vec3dArrayList = new ArrayList<>();
+        BlockPos basePos = (new BlockPos(mc.player.getPositionVector())).down();
+
+        for(int i = 0; i < protectionoffsets.length; i++) {
+            Vec3d offset = CombatUtil.protectionoffsets[i];
+            BlockPos placePosition = new BlockPos(basePos.add(offset.x, offset.y, offset.z));
+            if(checkCanPlace(placePosition)) {
+                vec3dArrayList.add(offset);
+            }
+        }
+
+        return vec3dArrayList;
+    }
+
+    public static BlockPos flooredPos() {
+        return new BlockPos(Math.floor(mc.player.posX), Math.floor(mc.player.posY), Math.floor(mc.player.posZ));
+    }
+
     public static int findCrapple() {
         if (mc.player == null) {
             return -1;
@@ -259,8 +280,14 @@ public class CombatUtil {
         mc.player.setPositionAndUpdate(pos.getX() + 0.5, mc.player.getPosition().getY(), pos.getZ() + 0.5);
     }
 
+
+
     public static Vec3d roundVec(final Vec3d vec3d, final int places) {
         return new Vec3d(round(vec3d.x, places), round(vec3d.y, places), round(vec3d.z, places));
+    }
+
+    public static Vec3d roundVec(final Vec3d vec3d, double offset, final int places) {
+        return new Vec3d(round(vec3d.x, places), round(vec3d.y+offset, places), round(vec3d.z, places));
     }
 
     public static double round(final double value, final int places) {
@@ -479,6 +506,69 @@ public class CombatUtil {
             return null;
         }
         return placePosition;
+    }
+
+    public static double getDamageBestPos(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+        BlockPos placePosition = null;
+        final List<BlockPos> placePositions = findPossiblePlacePoses(oneBlockCA, placeRange);
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        double damage = 2.0;
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            for(BlockPos blockPos : placePositions) {
+                if(doPlaceTrace) {
+                    if(!canSeeBlock(blockPos)) {
+                        if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                            continue;
+                        }
+                    }
+                }
+                if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+                    continue;
+                }
+                if(entity.getDistanceSq(blockPos) > 56.2) {
+                    continue;
+                }
+                double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+                float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+                if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                    continue;
+                }
+                if(targetDamage <= 2.0) {
+                    continue;
+                }
+                if (targetDamage <= damage) {
+                    continue;
+                }
+                double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+                float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                if(antiSuicide) {
+                    if(selfDamage > maxSelfDmg) {
+                        continue;
+                    }
+                    if((selfDamage >= playerHealth)) {
+                        continue;
+                    }
+                }
+                if(selfDamage > targetDamage) {
+                    continue;
+                }
+                placePosition = blockPos;
+                damage = targetDamage;
+            }
+        }
+        if (damage == 2.0) {
+            return 0.0d;
+        }
+        return damage;
     }
 
     public static boolean isFacePlaceCrystal(EntityEnderCrystal crystal, double minFacePlaceHP, boolean placeTrace, double wallsPlaceRange, double placeRange, double enemyRange) {
