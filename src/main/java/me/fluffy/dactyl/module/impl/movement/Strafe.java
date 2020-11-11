@@ -30,7 +30,7 @@ public class Strafe extends Module {
     private double moveSpeed, lastDist;
 
     private final TimeUtil timer = new TimeUtil();
-
+    
 
     @Override
     public void onClientUpdate() {

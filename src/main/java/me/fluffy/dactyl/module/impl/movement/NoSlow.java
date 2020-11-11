@@ -10,12 +10,14 @@ import me.fluffy.dactyl.util.CombatUtil;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemShield;
+import net.minecraft.item.*;
+import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Keyboard;
 
@@ -27,6 +29,7 @@ public class NoSlow extends Module {
     Setting<Boolean> inventoryMove = new Setting<Boolean>("InvMove", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSlowItem = new Setting<Boolean>("Items", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSoulSand = new Setting<Boolean>("SoulSand", true, v->page.getValue() == SettingPage.COMMON);
+    Setting<Boolean> sneakBypass = new Setting<Boolean>("SneakBypass", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Double> soulSandSpeed = new Setting<Double>("SoulSpeed", 1.5D, 0.1D, 6.0D);
 
     // webs
@@ -42,6 +45,13 @@ public class NoSlow extends Module {
         super("NoSlow", Category.MOVEMENT);
     }
 
+    private boolean sneaking = false;
+
+    @Override
+    public void onToggle() {
+        sneaking = false;
+    }
+
     @Override
     public void onClientUpdate() {
         if(mc.player == null || mc.world == null || mc.gameSettings == null) {
@@ -49,6 +59,7 @@ public class NoSlow extends Module {
         }
         handleWebYMovement();
         handleShieldOffhand();
+        handleSneakBypass();
     }
 
     @SubscribeEvent
@@ -72,6 +83,28 @@ public class NoSlow extends Module {
     public void onPacket(PacketEvent event) {
         if(event.getPacket() instanceof CPacketPlayer) {
             handleStrictPacket();
+        }
+    }
+
+    @SubscribeEvent
+    public void onItem(LivingEntityUseItemEvent event) {
+        if(!sneakBypass.getValue()) {
+            return;
+        }
+        if(!sneaking) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+            sneaking = true;
+        }
+    }
+
+    private void handleSneakBypass() {
+        if(!sneakBypass.getValue()) {
+            return;
+        }
+        Item item = mc.player.getActiveItemStack().getItem();
+        if (sneaking && ((!mc.player.isHandActive() && item instanceof ItemFood || item instanceof ItemBow || item instanceof ItemPotion))) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+            sneaking = false;
         }
     }
 
