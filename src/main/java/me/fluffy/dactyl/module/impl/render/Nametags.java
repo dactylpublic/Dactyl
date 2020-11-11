@@ -108,9 +108,9 @@ public class Nametags extends Module {
         GL11.glDisable(2929);
         GlStateManager.enableBlend();
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 1, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 1, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
 
@@ -221,15 +221,15 @@ public class Nametags extends Module {
         return 0;
     }
 
-    public void drawBorderedRect(double x, double y, double x1, double y1, double width, int internalColor, int borderColor) {
+    public void drawBorderedRect(double x, double y, double x1, double y1, double width, double borderWidth, int internalColor, int borderColor) {
         GL11.glPushMatrix();
         enableGL2D();
         RenderUtil.drawRect(x + width, y + width, x1 - width, y1 - width, internalColor);
         if(border.getValue()) {
-            RenderUtil.drawRect(x + width, y, x1 - width, y + width, borderColor);
-            RenderUtil.drawRect(x, y, x + width, y1, borderColor);
-            RenderUtil.drawRect(x1 - width, y, x1, y1, borderColor);
-            RenderUtil.drawRect(x + width, y1 - width, x1 - width, y1, borderColor);
+            RenderUtil.drawRect(x + borderWidth, y, x1 - borderWidth, y + borderWidth, borderColor);
+            RenderUtil.drawRect(x, y, x + borderWidth, y1, borderColor);
+            RenderUtil.drawRect(x1 - borderWidth, y, x1, y1, borderColor);
+            RenderUtil.drawRect(x + borderWidth, y1 - borderWidth, x1 - borderWidth, y1, borderColor);
         }
         disableGL2D();
         GL11.glPopMatrix();
