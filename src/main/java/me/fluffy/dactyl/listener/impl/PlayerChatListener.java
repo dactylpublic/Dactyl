@@ -24,6 +24,9 @@ public class PlayerChatListener extends Listener {
                 MinecraftForge.EVENT_BUS.post(e);
                 String cmd = e.getMessage().split(" ")[0].replace(Dactyl.commandManager.getPrefix(), "");
                 if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix()) || Dactyl.commandManager.matchesCommand(cmd)) {
+                    if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix()) && !Dactyl.commandManager.matchesCommand(cmd)) {
+                        Dactyl.commandManager.sendHelp();
+                    }
                     event.setCanceled(true);
                 }
             }
@@ -37,8 +40,6 @@ public class PlayerChatListener extends Listener {
             if (Dactyl.commandManager.matchesCommand(cmd)) {
                 CommandSendEvent e = new CommandSendEvent(cmd, event.getMessage().split(" "));
                 MinecraftForge.EVENT_BUS.post(e);
-            } else {
-                Dactyl.commandManager.sendHelp();
             }
         }
     }
