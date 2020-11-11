@@ -33,10 +33,10 @@ public class NoSlow extends Module {
     Setting<Boolean> webs = new Setting<Boolean>("Webs", true, v->page.getValue() == SettingPage.WEB);
 
     Setting<Boolean> webXZ = new Setting<Boolean>("Webs", true, v->page.getValue() == SettingPage.WEB);
-    Setting<Double> webXZSpeed = new Setting<Double>("WebXZSpeed", 3.5D, 0.1D, 6.0D, v->webXZ.getValue() && page.getValue() == SettingPage.WEB);
+    Setting<Double> webXZSpeed = new Setting<Double>("WebXZSpeed", 3.5D, 0.1D, 8.0D, v->webXZ.getValue() && page.getValue() == SettingPage.WEB);
 
     Setting<Boolean> webY = new Setting<Boolean>("WebY", true, v->page.getValue() == SettingPage.WEB);
-    Setting<Double> webYSpeed = new Setting<Double>("WebXZSpeed", 8.0D, 0.1D, 6.0D, v->webXZ.getValue() && page.getValue() == SettingPage.WEB);
+    Setting<Double> webYSpeed = new Setting<Double>("WebYSpeed", 6.0D, 0.1D, 8.0D, v->webXZ.getValue() && page.getValue() == SettingPage.WEB);
 
     public NoSlow() {
         super("NoSlow", Category.MOVEMENT);

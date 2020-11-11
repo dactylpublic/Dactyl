@@ -8,6 +8,7 @@ import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
@@ -41,6 +42,7 @@ public class Surround extends Module {
         }
         playerHotbarSlot = mc.player.inventory.currentItem;
         lastHotbarSlot = -1;
+        timer.reset();
     }
 
     @Override
@@ -50,10 +52,6 @@ public class Surround extends Module {
         }
         lastHotbarSlot = -1;
         playerHotbarSlot = -1;
-    }
-
-    @Override
-    public void onToggle() {
         timer.reset();
     }
 
@@ -62,6 +60,7 @@ public class Surround extends Module {
         if(mc.world == null || mc.player == null || Freecam.INSTANCE.isEnabled()) {
             return;
         }
+
         if(this.offsetStep == 0) {
             this.basePos = (new BlockPos(mc.player.getPositionVector())).down();
             this.playerHotbarSlot = mc.player.inventory.currentItem;

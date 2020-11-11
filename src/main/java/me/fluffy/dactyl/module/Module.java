@@ -75,17 +75,15 @@ public class Module {
         } else {
             MinecraftForge.EVENT_BUS.unregister(this);
         }
-        onToggle();
-    }
-
-    public void onToggle() {
         if(this.enabled) {
             onEnable();
         } else {
             onDisable();
         }
+        onToggle();
     }
 
+    public void onToggle() {}
     public void onEnable() {}
     public void onDisable() {}
     public void onClientUpdate() {}

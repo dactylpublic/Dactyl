@@ -36,6 +36,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -252,9 +254,22 @@ public class CombatUtil {
 
 
     public static void centerToNearestblock() {
-        double posX = mc.player.posX + MathHelper.clamp(getCenterDiff().x, -0.2, 0.2);
-        double posZ = mc.player.posZ + MathHelper.clamp(getCenterDiff().z, -0.2, 0.2);
-        mc.player.setPosition(posX, mc.player.posY, posZ);
+        BlockPos pos = new BlockPos(roundVec(mc.player.getPositionVector(), 0));
+        mc.player.connection.sendPacket(new CPacketPlayer.Position(pos.getX() + 0.5, mc.player.getPosition().getY(), pos.getZ() + 0.5, true));
+        mc.player.setPositionAndUpdate(pos.getX() + 0.5, mc.player.getPosition().getY(), pos.getZ() + 0.5);
+    }
+
+    public static Vec3d roundVec(final Vec3d vec3d, final int places) {
+        return new Vec3d(round(vec3d.x, places), round(vec3d.y, places), round(vec3d.z, places));
+    }
+
+    public static double round(final double value, final int places) {
+        if (places < 0) {
+            throw new IllegalArgumentException();
+        }
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.FLOOR);
+        return bd.doubleValue();
     }
 
     private static Vec3d getHitVector(BlockPos pos, EnumFacing opposingSide) {
