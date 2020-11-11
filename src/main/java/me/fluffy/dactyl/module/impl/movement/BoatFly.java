@@ -26,7 +26,7 @@ public class BoatFly extends Module {
         if(event.getType() == PacketEvent.PacketType.OUTGOING) {
             if(event.getPacket() instanceof CPacketVehicleMove) {
                 if (mc.player.isRiding() && mc.player.ticksExisted % 2 == 0) {
-                    mc.playerController.interactWithEntity(mc.player, mc.player.getRidingEntity(), EnumHand.OFF_HAND);
+                    mc.playerController.interactWithEntity(mc.player, mc.player.getRidingEntity(), EnumHand.MAIN_HAND);
                 }
             }
             if ((event.getPacket() instanceof net.minecraft.network.play.client.CPacketPlayer.Rotation || event.getPacket() instanceof net.minecraft.network.play.client.CPacketInput) && mc.player.isRiding()) {
@@ -43,6 +43,9 @@ public class BoatFly extends Module {
 
     @SubscribeEvent
     public void onTravel(PlayerTravelEvent event) {
+        if(mc == null || mc.player == null || mc.player.getRidingEntity() == null) {
+            return;
+        }
         if(!mc.player.isRiding()) {
             return;
         }
