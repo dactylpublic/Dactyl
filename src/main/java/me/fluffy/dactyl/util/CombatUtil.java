@@ -4,22 +4,31 @@ import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.injection.inj.access.IVec3i;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.BlockObsidian;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CPacketAnimation;
+import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.potion.Potion;
-import net.minecraft.util.CombatRules;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.NonNullList;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -34,6 +43,11 @@ public class CombatUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     private static final List<Integer> invalidSlots = Arrays.asList(0, 5, 6, 7, 8);
+
+    public static final List<Block> blackList = Arrays.asList(Blocks.TALLGRASS, Blocks.ENDER_CHEST, (Block)Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.CRAFTING_TABLE, Blocks.ANVIL, Blocks.BREWING_STAND, (Block)Blocks.HOPPER, Blocks.DROPPER, Blocks.DISPENSER, Blocks.TRAPDOOR);
+    public static final List<Block> shulkerList = Arrays.asList(Blocks.WHITE_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX, Blocks.YELLOW_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX, Blocks.SILVER_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX, Blocks.BROWN_SHULKER_BOX, Blocks.GREEN_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.BLACK_SHULKER_BOX);
+
+    public static final Vec3d[] protectionoffsets = new Vec3d[] {new Vec3d(0.0D, 0.0D, 0.0D), new Vec3d(1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, 1.0D), new Vec3d(-1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, -1.0D), new Vec3d(1.0D, 0.0D, 0.0D), new Vec3d(0.0D, 0.0D, 1.0D), new Vec3d(-1.0D, 0.0D, 0.0D), new Vec3d(0.0D, 0.0D, -1.0D), new Vec3d(1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, 1.0D), new Vec3d(-1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, -1.0D)};
 
     public static int findCrapple() {
         if (mc.player == null) {
@@ -126,6 +140,35 @@ public class CombatUtil {
         return new Vec3d(entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * mc.getRenderPartialTicks(), entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * mc.getRenderPartialTicks(), entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * mc.getRenderPartialTicks());
     }
 
+    public static int findBlockInHotbar(Block bc) {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack != ItemStack.EMPTY && stack.getItem() instanceof ItemBlock) {
+                Block block = ((ItemBlock)stack.getItem()).getBlock();
+                if (block == bc) {
+                    slot = i;
+                    break;
+                }
+            }
+        }
+        return slot;
+    }
+
+    public static int findItemInHotbar(Item it) {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack != ItemStack.EMPTY && !(stack.getItem() instanceof ItemBlock)) {
+                if(stack.getItem() == it) {
+                    slot = i;
+                    break;
+                }
+            }
+        }
+        return slot;
+    }
+
     public static void switchOffhandStrict(int targetSlot, int step) {
         switch(step) {
             case 0:
@@ -156,6 +199,89 @@ public class CombatUtil {
         mc.playerController.windowClick(mc.player.inventoryContainer.windowId, 45, 0, ClickType.PICKUP, mc.player);
         mc.playerController.windowClick(mc.player.inventoryContainer.windowId, targetSlot, 0,ClickType.PICKUP, mc.player);
         mc.playerController.updateController();
+    }
+
+    // im sneaking and unsneaking on place as people really underestimate the amount of packets you can send per tick
+    public static boolean placeBlock(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetRotate, boolean doSwitch, boolean silentSwitch, int toSwitch) {
+        if(!checkCanPlace(blockPos)) {
+            return false;
+        }
+
+        EnumFacing placeSide = getPlaceSide(blockPos);
+        BlockPos adjacentBlock = blockPos.offset(placeSide);
+        EnumFacing opposingSide = placeSide.getOpposite();
+        if(!mc.world.getBlockState(adjacentBlock).getBlock().canCollideCheck(mc.world.getBlockState(adjacentBlock), false)) {
+            return false;
+        }
+        if(doSwitch) {
+            if(silentSwitch) {
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
+            } else {
+                if(mc.player.inventory.currentItem != toSwitch) {
+                    mc.player.inventory.currentItem = toSwitch;
+                }
+            }
+        }
+        boolean isSneak = false;
+        if(blackList.contains(mc.world.getBlockState(adjacentBlock).getBlock()) || shulkerList.contains(mc.world.getBlockState(adjacentBlock).getBlock())) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+            isSneak = true;
+        }
+        Vec3d hitVector = getHitVector(adjacentBlock, opposingSide);
+        if(rotate) {
+            final float[] angle = getLegitRotations(hitVector);
+            mc.player.connection.sendPacket(new CPacketPlayer.Rotation(angle[0], angle[1], mc.player.onGround));
+        }
+
+        EnumHand actionHand = offhand ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+        mc.playerController.processRightClickBlock(mc.player, mc.world, adjacentBlock, opposingSide, hitVector, actionHand);
+        mc.player.connection.sendPacket(new CPacketAnimation(actionHand));
+        if(isSneak) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+        }
+        return true;
+    }
+
+    public static Vec3d getCenterDiff() {
+        return new Vec3d(roundToCenter(mc.player.posX), mc.player.posY, roundToCenter(mc.player.posZ)).subtract(mc.player.getPositionVector());
+    }
+
+    public static double roundToCenter(double doubleIn) {
+        return Math.round(doubleIn + 0.5) - 0.5;
+    }
+
+
+    public static void centerToNearestblock() {
+        double posX = mc.player.posX + MathHelper.clamp(getCenterDiff().x, -0.2, 0.2);
+        double posZ = mc.player.posZ + MathHelper.clamp(getCenterDiff().z, -0.2, 0.2);
+        mc.player.setPosition(posX, mc.player.posY, posZ);
+    }
+
+    private static Vec3d getHitVector(BlockPos pos, EnumFacing opposingSide) {
+        return new Vec3d(pos).add(0.5, 0.5, 0.5).add(new Vec3d(opposingSide.getDirectionVec()).scale(0.5));
+    }
+
+    private static EnumFacing getPlaceSide(BlockPos blockPos) {
+        EnumFacing placeableSide = null;
+        for (EnumFacing side : EnumFacing.values()) {
+            BlockPos adjacent = blockPos.offset(side);
+            if (mc.world.getBlockState(adjacent).getBlock().canCollideCheck(mc.world.getBlockState(adjacent), false) && !mc.world.getBlockState(adjacent).getMaterial().isReplaceable()) {
+                placeableSide = side;
+            }
+        }
+        return placeableSide;
+    }
+
+    public static boolean checkCanPlace(BlockPos pos) {
+        if (!(mc.world.getBlockState(pos).getBlock() instanceof BlockAir) && !(mc.world.getBlockState(pos).getBlock() instanceof BlockLiquid)) {
+            return false;
+        }
+        for (Entity entity : mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(pos))) {
+            if (!(entity instanceof EntityItem) && !(entity instanceof EntityXPOrb) && !(entity instanceof EntityArrow)) {
+                return false;
+            }
+        }
+        return getPlaceSide(pos) != null;
     }
 
 
@@ -600,6 +726,21 @@ public class CombatUtil {
         final double difZ = to.z - from.z;
         final double dist = MathHelper.sqrt(difX * difX + difZ * difZ);
         return new float[] { (float)MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(difZ, difX)) - 90.0), (float)MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(difY, dist))) };
+    }
+
+    public static float[] getLegitRotations(Vec3d vec) {
+        Vec3d eyesPos = new Vec3d(mc.player.posX, mc.player.posY + mc.player.getEyeHeight(), mc.player.posZ);
+        double diffX = vec.x - eyesPos.x;
+        double diffY = vec.y - eyesPos.y;
+        double diffZ = vec.z - eyesPos.z;
+        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+        float yaw = (float)Math.toDegrees(Math.atan2(diffZ, diffX)) - 90.0F;
+        float pitch = (float)-Math.toDegrees(Math.atan2(diffY, diffXZ));
+
+        return new float[] { mc.player.rotationYaw +
+                MathHelper.wrapDegrees(yaw - mc.player.rotationYaw), mc.player.rotationPitch +
+                MathHelper.wrapDegrees(pitch - mc.player.rotationPitch) };
     }
 
 

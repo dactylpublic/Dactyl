@@ -6,10 +6,7 @@ import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.client.Components;
 import me.fluffy.dactyl.module.impl.client.HUD;
-import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
-import me.fluffy.dactyl.module.impl.combat.Criticals;
-import me.fluffy.dactyl.module.impl.combat.Killaura;
-import me.fluffy.dactyl.module.impl.combat.Offhand;
+import me.fluffy.dactyl.module.impl.combat.*;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
 import me.fluffy.dactyl.module.impl.movement.NoSlow;
 import me.fluffy.dactyl.module.impl.movement.ReverseStep;
@@ -39,6 +36,8 @@ public class ModuleManager {
         modules.add(new Offhand());
         modules.add(new Killaura());
         modules.add(new Criticals());
+        modules.add(new AutoTrap());
+        modules.add(new Surround());
 
         // player
         modules.add(new Freecam());

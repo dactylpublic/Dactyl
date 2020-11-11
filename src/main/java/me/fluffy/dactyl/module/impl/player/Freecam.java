@@ -18,8 +18,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Freecam extends Module {
     Setting<Double> speed = new Setting<Double>("Speed", 1D, 0.1D, 5.0D);
     Setting<Boolean> cancelPackets = new Setting<Boolean>("CancelPackets", true);
+    public static Freecam INSTANCE;
     public Freecam() {
         super("Freecam", Category.PLAYER);
+        INSTANCE = this;
     }
 
     private Entity riding;
