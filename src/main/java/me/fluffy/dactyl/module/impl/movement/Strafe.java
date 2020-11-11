@@ -125,8 +125,7 @@ public class Strafe extends Module {
     }
 
     private double getBaseMoveSpeed() {
-        //double baseSpeed = 0.272;
-        double baseSpeed = 0.2873;
+        double baseSpeed = 0.272;
         if (mc.player.isPotionActive(MobEffects.SPEED)) {
             final int amplifier = Objects.requireNonNull(mc.player.getActivePotionEffect(MobEffects.SPEED)).getAmplifier();
             baseSpeed *= 1.0 + (0.2 * (amplifier+1));
