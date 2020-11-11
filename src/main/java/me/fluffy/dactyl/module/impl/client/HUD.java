@@ -24,10 +24,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.*;
 
 public class HUD extends Module {
 
@@ -44,6 +41,10 @@ public class HUD extends Module {
     public Setting<Boolean> speed = new Setting<Boolean>("Speed", true, v->renderHud.getValue());
     public Setting<Boolean> ping = new Setting<Boolean>("Ping", true, v->renderHud.getValue());
     public Setting<Boolean> clock = new Setting<Boolean>("Clock", true, v->renderHud.getValue());
+    public Setting<Boolean> direction = new Setting<Boolean>("Direction", true, v->renderHud.getValue());
+    public Setting<Boolean> coords = new Setting<Boolean>("Coords", true, v->renderHud.getValue());
+    public Setting<Boolean> netherCoords = new Setting<Boolean>("NetherCoords", true, v->renderHud.getValue() && coords.getValue());
+    //public Setting<CoordsSide> coordsSideSetting = new Setting<CoordsSide>("Side", CoordsSide.LEFT, v->renderHud.getValue() && coords.getValue());
     public Setting<Boolean> lagNotifier = new Setting<Boolean>("LagNotifier", true, v->renderHud.getValue());
     public Setting<Boolean> armorHud = new Setting<Boolean>("ArmorHUD", true, v->renderHud.getValue());
     public Setting<Boolean> totemCount = new Setting<Boolean>("TotemCount", true, v->renderHud.getValue());
@@ -124,6 +125,7 @@ public class HUD extends Module {
             doArrayList();
             doWatermark();
             doOtherRender();
+            renderDirAndCoords();
             renderArmorHUD();
             renderTotemHUD();
         }
@@ -345,6 +347,37 @@ public class HUD extends Module {
         return null;
     }
 
+    public void renderDirAndCoords() {
+        if(!direction.getValue()) {
+            return;
+        }
+        String directionText = TextFormatting.RESET + EntityUtil.getFacingWithProperCapitals() + " [" + TextFormatting.WHITE + EntityUtil.getRelativeDirection() + TextFormatting.RESET + "]";
+        int dirY = RenderUtil.getScreenHeight()-(coords.getValue() ? 10 : 0)-(mc.currentScreen instanceof GuiChat ? 15 : 0)-10;
+        if(shadow.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow(directionText, 1, dirY, Colors.INSTANCE.getColor(dirY, false));
+        } else {
+            Dactyl.fontUtil.drawString(directionText, 1, dirY, Colors.INSTANCE.getColor(dirY, false));
+        }
+        if(!coords.getValue()) {
+            return;
+        }
+        int coordY = RenderUtil.getScreenHeight()-(mc.currentScreen instanceof GuiChat ? 15 : 0)-10;
+        String xCoord = String.format("%.1f", mc.player.posX);
+        String yCoord = String.format("%.1f", mc.player.posY);
+        String zCoord = String.format("%.1f", mc.player.posZ);
+        String xyzText = "XYZ " + TextFormatting.WHITE + xCoord + TextFormatting.RESET + ", " + TextFormatting.WHITE + yCoord + TextFormatting.RESET + ", " + TextFormatting.WHITE + zCoord + TextFormatting.RESET;
+        if(netherCoords.getValue()) {
+            String netherX = mc.player.dimension != -1 ? String.format("%.1f", mc.player.posX / 8) : String.format("%.1f", mc.player.posX * 8);
+            String netherZ = mc.player.dimension != -1 ? String.format("%.1f", mc.player.posZ / 8) : String.format("%.1f", mc.player.posZ * 8);
+            xyzText+= " [" + TextFormatting.WHITE + netherX + TextFormatting.RESET + ", " + TextFormatting.WHITE + netherZ + TextFormatting.RESET + "]";
+        }
+        if(shadow.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow(xyzText, 1, coordY, Colors.INSTANCE.getColor(coordY, false));
+        } else {
+            Dactyl.fontUtil.drawString(xyzText, 1, coordY, Colors.INSTANCE.getColor(coordY, false));
+        }
+    }
+
     public void renderTotemHUD() {
         if(!totemCount.getValue()) {
             return;
@@ -522,6 +555,11 @@ public class HUD extends Module {
         public boolean isPot() {
             return this.isPotion;
         }
+    }
+
+    public enum CoordsSide {
+        LEFT,
+        RIGHT
     }
 
     public enum AnimationState {

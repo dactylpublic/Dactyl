@@ -187,12 +187,12 @@ public class ClickGUI extends GuiScreen {
     public void handleMouseInput() throws IOException {
         if(Mouse.getEventDWheel() > 0) {
             for(ModulePanel panel : modulePanels) {
-                panel.setY(panel.getY()-13);
+                panel.setY(panel.getY()+13);
             }
         }
         if(Mouse.getEventDWheel() < 0) {
             for(ModulePanel panel : modulePanels) {
-                panel.setY(panel.getY()+13);
+                panel.setY(panel.getY()-13);
             }
         }
         super.handleMouseInput();
