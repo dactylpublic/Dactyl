@@ -28,7 +28,7 @@ public class BoatFly extends Module {
         if(event.getStage() != ForgeEvent.Stage.PRE) {
             if(event.getType() == PacketEvent.PacketType.OUTGOING) {
                 if (event.getPacket() instanceof CPacketVehicleMove) {
-                    if (mc.player.isRiding() && mc.player.ticksExisted % 2 == 0) {
+                    if (mc.player.isRiding() && mc.player.ticksExisted % 4 == 0) {
                         mc.playerController.interactWithEntity(mc.player, mc.player.getRidingEntity(), EnumHand.MAIN_HAND);
                     }
                 }

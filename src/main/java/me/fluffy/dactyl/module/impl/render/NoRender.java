@@ -63,7 +63,7 @@ public class NoRender extends Module {
 
     @SubscribeEvent
     public void noFogInLiquid(EntityViewRenderEvent.FogDensity event) {
-        if(mc.player.isInLava() || mc.player.isInWater()) {
+        if((mc.player.isInLava() || mc.player.isInWater()) && liquidVision.getValue()) {
             event.setDensity(0.0f);
             event.setCanceled(true);
         }

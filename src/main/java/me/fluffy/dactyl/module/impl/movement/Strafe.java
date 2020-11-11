@@ -6,6 +6,7 @@ import me.fluffy.dactyl.injection.inj.access.IMinecraft;
 import me.fluffy.dactyl.injection.inj.access.ITimer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.MathUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.init.MobEffects;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -15,6 +16,8 @@ import java.util.Objects;
 public class Strafe extends Module {
     Setting<Boolean> useTimer = new Setting<Boolean>("UseTimer", true);
     Setting<Boolean> autoSprint = new Setting<Boolean>("AutoSprint", true);
+    Setting<Boolean> extraSpeed = new Setting<Boolean>("Extra", false);
+    Setting<Double> vanillaSpeed = new Setting<Double>("VanillaSpeed", 6.0d, 0.1d, 10.0d, vis->extraSpeed.getValue());
     Setting<SkipMode> skipModeSetting = new Setting<SkipMode>("Skips", SkipMode.TICK);
     Setting<Integer> skipTickHops = new Setting<Integer>("SkipTicks", 1, 1, 10, vis->skipModeSetting.getValue() == SkipMode.TICK);
     Setting<Integer> skipDelayHops = new Setting<Integer>("SkipDelay", 25, 1, 100, vis->skipModeSetting.getValue() == SkipMode.MS);
@@ -30,7 +33,6 @@ public class Strafe extends Module {
     private double moveSpeed, lastDist;
 
     private final TimeUtil timer = new TimeUtil();
-    
 
     @Override
     public void onClientUpdate() {
@@ -108,6 +110,11 @@ public class Strafe extends Module {
         ++stage;
         cooldown = 0;
         timer.reset();
+        if(extraSpeed.getValue()) {
+            double[] vanillaCalc = MathUtil.directionSpeed(vanillaSpeed.getValue());
+            event.setX(vanillaCalc[0]);
+            event.setZ(vanillaCalc[1]);
+        }
     }
 
     @Override

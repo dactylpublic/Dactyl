@@ -20,6 +20,17 @@ public class Criticals extends Module {
 
     public boolean ignoring = false;
 
+    @Override
+    public void onClientUpdate() {
+        if(critModeSetting.getValue() == CritMode.JUMP) {
+            this.setModuleInfo("Jump");
+        } else if(critModeSetting.getValue() == CritMode.MINI) {
+            this.setModuleInfo("Mini");
+        } else {
+            this.setModuleInfo("Packet");
+        }
+    }
+
     @SubscribeEvent
     public void onAttack(PacketEvent event) {
         if(onlyAura.getValue()) {

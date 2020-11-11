@@ -299,7 +299,7 @@ public class AutoCrystal extends Module {
             checkTimer.reset();
             return;
         }
-        if(!checkTimer.hasPassed(75L)) {
+        if(!checkTimer.hasPassed(100L)) {
             return;
         }
         BlockPos placePosition = CombatUtil.getBestPlacePosition(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());

@@ -13,6 +13,7 @@ import me.fluffy.dactyl.module.impl.movement.*;
 import me.fluffy.dactyl.module.impl.player.FastItem;
 import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.module.impl.player.NoHitbox;
+import me.fluffy.dactyl.module.impl.player.Scaffold;
 import me.fluffy.dactyl.module.impl.render.*;
 import me.fluffy.dactyl.setting.Setting;
 
@@ -39,6 +40,7 @@ public class ModuleManager {
         modules.add(new Freecam());
         modules.add(new FastItem());
         modules.add(new NoHitbox());
+        modules.add(new Scaffold());
 
         // misc
         modules.add(new FakePlayer());

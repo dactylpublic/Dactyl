@@ -20,4 +20,12 @@ public class TimeUtil {
     }
 
     public long getLastRecorded() { return this.lastRecorded; }
+
+    public boolean sleep(long time) {
+        if ((System.nanoTime() / 1000000L-getLastRecorded()) >= time) {
+            reset();
+            return true;
+        }
+        return false;
+    }
 }
