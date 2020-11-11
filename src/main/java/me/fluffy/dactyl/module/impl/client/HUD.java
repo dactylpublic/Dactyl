@@ -14,7 +14,11 @@ import me.fluffy.dactyl.util.MathUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextFormatting;
@@ -41,6 +45,8 @@ public class HUD extends Module {
     public Setting<Boolean> ping = new Setting<Boolean>("Ping", true, v->renderHud.getValue());
     public Setting<Boolean> clock = new Setting<Boolean>("Clock", true, v->renderHud.getValue());
     public Setting<Boolean> lagNotifier = new Setting<Boolean>("LagNotifier", true, v->renderHud.getValue());
+    public Setting<Boolean> armorHud = new Setting<Boolean>("ArmorHUD", true, v->renderHud.getValue());
+    public Setting<Boolean> totemCount = new Setting<Boolean>("TotemCount", true, v->renderHud.getValue());
     public Setting<Rendering> renderingSetting = new Setting<Rendering>("Rendering", Rendering.UP, v->renderHud.getValue());
 
     public Setting<WatermarkType> watermarkTypeSetting = new Setting<WatermarkType>("Logo", WatermarkType.DACTYL_IE, v->renderHud.getValue());
@@ -62,6 +68,7 @@ public class HUD extends Module {
     public static final TimeUtil arrayTimer = new TimeUtil();
 
     private long serverLastUpdated;
+    private static ItemStack totemStack = new ItemStack(Items.TOTEM_OF_UNDYING);
 
     @Override
     public void onClientUpdate() {
@@ -117,6 +124,8 @@ public class HUD extends Module {
             doArrayList();
             doWatermark();
             doOtherRender();
+            renderArmorHUD();
+            renderTotemHUD();
         }
     }
 
@@ -334,6 +343,75 @@ public class HUD extends Module {
             }
         }
         return null;
+    }
+
+    public void renderTotemHUD() {
+        if(!totemCount.getValue()) {
+            return;
+        }
+        ScaledResolution renderer = new ScaledResolution(mc);
+        final int width = renderer.getScaledWidth();
+        final int height = renderer.getScaledHeight();
+        int totems = HUD.mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == Items.TOTEM_OF_UNDYING).mapToInt(ItemStack::getCount).sum();
+        if (HUD.mc.player.getHeldItemOffhand().getItem() == Items.TOTEM_OF_UNDYING) {
+            totems += HUD.mc.player.getHeldItemOffhand().getCount();
+        }
+        if (totems > 0) {
+            GlStateManager.enableTexture2D();
+            final int i = width / 2;
+            final int iteration = 0;
+            final int y = height - 55 - ((HUD.mc.player.isInWater() && HUD.mc.playerController.gameIsSurvivalOrAdventure()) ? 10 : 0);
+            final int x = i - 189 + 180 + 2;
+            GlStateManager.enableDepth();
+            mc.getRenderItem().zLevel = 200.0f;
+            mc.getRenderItem().renderItemAndEffectIntoGUI(totemStack, x, y);
+            mc.getRenderItem().renderItemOverlayIntoGUI(HUD.mc.fontRenderer, totemStack, x, y, "");
+            mc.getRenderItem().zLevel = 0.0f;
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableLighting();
+            GlStateManager.disableDepth();
+            Dactyl.fontUtil.drawStringWithShadow(totems + "", (int)(x + 19 - 2 - Dactyl.fontUtil.getStringWidth(totems + "")), (int)(y + 9), 16777215);
+            GlStateManager.enableDepth();
+            GlStateManager.disableLighting();
+        }
+    }
+
+    public void renderArmorHUD() {
+        if(!armorHud.getValue()) {
+            return;
+        }
+        ScaledResolution renderer = new ScaledResolution(mc);
+        final int width = renderer.getScaledWidth();
+        final int height = renderer.getScaledHeight();
+        GlStateManager.enableTexture2D();
+        final int i = width / 2;
+        int iteration = 0;
+        final int y = height - 55 - ((HUD.mc.player.isInWater() && HUD.mc.playerController.gameIsSurvivalOrAdventure()) ? 10 : 0);
+        for (final ItemStack is : HUD.mc.player.inventory.armorInventory) {
+            ++iteration;
+            if (is.isEmpty()) {
+                continue;
+            }
+            final int x = i - 90 + (9 - iteration) * 20 + 2;
+            GlStateManager.enableDepth();
+            mc.getRenderItem().zLevel = 200.0f;
+            mc.getRenderItem().renderItemAndEffectIntoGUI(is, x, y);
+            mc.getRenderItem().renderItemOverlayIntoGUI(HUD.mc.fontRenderer, is, x, y, "");
+            mc.getRenderItem().zLevel = 0.0f;
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableLighting();
+            GlStateManager.disableDepth();
+            final String s = (is.getCount() > 1) ? (is.getCount() + "") : "";
+            Dactyl.fontUtil.drawStringWithShadow(s, (int)(x + 19 - 2 - Dactyl.fontUtil.getStringWidth(s)), (int)(y + 9), 16777215);
+            int dmg = 0;
+            final int itemDurability = is.getMaxDamage() - is.getItemDamage();
+            final float green = (is.getMaxDamage() - (float)is.getItemDamage()) / is.getMaxDamage();
+            final float red = 1.0f - green;
+            dmg = 100 - (int)(red * 100.0f);
+            Dactyl.fontUtil.drawStringWithShadow(dmg + "", (int)(x + 8 - Dactyl.fontUtil.getStringWidth(dmg + "") / 2), (int)(y - 11), RenderUtil.toRGBA((int)(red * 255.0f), (int)(green * 255.0f), 0));
+        }
+        GlStateManager.enableDepth();
+        GlStateManager.disableLighting();
     }
 
     private void doWatermark() {

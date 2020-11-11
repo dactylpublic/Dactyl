@@ -37,6 +37,8 @@ public class PlayerChatListener extends Listener {
             if (Dactyl.commandManager.matchesCommand(cmd)) {
                 CommandSendEvent e = new CommandSendEvent(cmd, event.getMessage().split(" "));
                 MinecraftForge.EVENT_BUS.post(e);
+            } else {
+                Dactyl.commandManager.sendHelp();
             }
         }
     }

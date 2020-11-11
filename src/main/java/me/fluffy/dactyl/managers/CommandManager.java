@@ -1,8 +1,11 @@
 package me.fluffy.dactyl.managers;
 
 import me.fluffy.dactyl.command.Command;
+import me.fluffy.dactyl.command.impl.ConfigCommand;
 import me.fluffy.dactyl.command.impl.FriendCommand;
+import me.fluffy.dactyl.command.impl.HelpCommand;
 import me.fluffy.dactyl.module.impl.client.HUD;
+import me.fluffy.dactyl.util.ChatUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,8 @@ public class CommandManager {
     public CommandManager() {
         commandList = new ArrayList<>();
         commandList.add(new FriendCommand());
+        commandList.add(new HelpCommand());
+        commandList.add(new ConfigCommand());
     }
 
     public List<Command> getCommandList() {
@@ -28,6 +33,10 @@ public class CommandManager {
             }
         }
         return false;
+    }
+
+    public void sendHelp() {
+        ChatUtil.printMsg("&cInvalid command!", true, false);
     }
 
     public void processCommand(String cmd, String[] args) {

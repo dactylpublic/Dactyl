@@ -15,6 +15,7 @@ public class ListenerManager {
         listeners.add(new RenderListener());
         listeners.add(new SpeedListener());
         listeners.add(new TotemListener());
+        listeners.add(new PlayerChatListener());
         listeners.add(new CommandSendListener());
         registerListeners();
     }

@@ -8,6 +8,7 @@ import me.fluffy.dactyl.module.impl.client.Components;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.module.impl.combat.*;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
+import me.fluffy.dactyl.module.impl.misc.MCF;
 import me.fluffy.dactyl.module.impl.movement.*;
 import me.fluffy.dactyl.module.impl.player.FastItem;
 import me.fluffy.dactyl.module.impl.player.Freecam;
@@ -41,6 +42,7 @@ public class ModuleManager {
 
         // misc
         modules.add(new FakePlayer());
+        modules.add(new MCF());
 
         // movement
         modules.add(new Strafe());
