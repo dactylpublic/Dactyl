@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.listener.impl;
 
+import com.mojang.realmsclient.gui.ChatFormatting;
 import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.listener.Listener;
@@ -9,12 +10,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
-
-/*
-* @author 3arthqu4ke
-* Taken from phobos as speed calculations are annoying as hell.
- */
 
 public class SpeedListener extends Listener {
     public static SpeedListener INSTANCE;
@@ -50,6 +47,7 @@ public class SpeedListener extends Listener {
 
     private int distancer = 20;
 
+
     private static Minecraft mc = Minecraft.getMinecraft();
 
     public static void setDidJumpThisTick(boolean val) {
@@ -69,7 +67,7 @@ public class SpeedListener extends Listener {
         if(mc.player == null || mc.world == null) {
             return;
         }
-        if(event.getStage() == ForgeEvent.Stage.PRE) {
+        if(event.getStage() == ForgeEvent.Stage.POST) {
             updateValues();
         }
     }

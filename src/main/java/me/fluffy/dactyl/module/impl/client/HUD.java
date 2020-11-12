@@ -263,8 +263,7 @@ public class HUD extends Module {
         }
 
         if(speed.getValue()) {
-            double accurateSpeed = (50f / ((ITimer)((IMinecraft)mc).getTimer()).getTickLength())*SpeedListener.INSTANCE.getSpeedKpH();
-            normal.add(new TextElement(TextFormatting.RESET + "Speed " + TextFormatting.WHITE + String.format( "%.2f", accurateSpeed) + " km/h", 0xffffffff, false));
+            normal.add(new TextElement(TextFormatting.RESET + "Speed " + TextFormatting.WHITE + SpeedListener.INSTANCE.getSpeedKpH() + " km/h", 0xffffffff, false));
         }
 
 
