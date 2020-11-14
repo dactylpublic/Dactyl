@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.injection.inj;
 
 import me.fluffy.dactyl.module.impl.render.NoRender;
+import me.fluffy.dactyl.module.impl.render.ViewModel;
 import net.minecraft.client.renderer.ItemRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,5 +22,10 @@ public class InjItemRenderer {
         if (NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.noBlocks.getValue()) {
             ci.cancel();
         }
+    }
+
+    @Inject(method = "updateEquippedItem", at = @At("HEAD"), cancellable = true)
+    public void updateEquippedItem(CallbackInfo callbackInfo) {
+        ViewModel.INSTANCE.updateEquipped();
     }
 }

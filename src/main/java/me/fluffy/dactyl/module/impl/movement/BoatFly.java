@@ -8,6 +8,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.MathUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.util.EnumHand;
@@ -29,7 +30,8 @@ public class BoatFly extends Module {
             if(event.getType() == PacketEvent.PacketType.OUTGOING) {
                 if (event.getPacket() instanceof CPacketVehicleMove) {
                     if (mc.player.isRiding() && mc.player.ticksExisted % 2 == 0) {
-                        mc.playerController.interactWithEntity(mc.player, mc.player.getRidingEntity(), EnumHand.OFF_HAND);
+                        mc.player.connection.sendPacket(new CPacketUseEntity(mc.player.getRidingEntity(), EnumHand.OFF_HAND, mc.player.getPositionVector()));
+                        //mc.playerController.interactWithEntity(mc.player, mc.player.getRidingEntity(), EnumHand.OFF_HAND);
                     }
                 }
             }
@@ -62,7 +64,7 @@ public class BoatFly extends Module {
             return;
         }
         Entity riding = mc.player.getRidingEntity();
-        riding.setNoGravity(true);
+        //riding.setNoGravity(true);
         riding.rotationYaw = mc.player.rotationYaw;
         riding.motionY = (-glideSpeed.getValue().floatValue() / 10000.0F);
         double[] dir = MathUtil.directionSpeed(speed.getValue());

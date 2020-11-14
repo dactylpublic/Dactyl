@@ -110,8 +110,12 @@ public class Strafe extends Module {
         ++stage;
         cooldown = 0;
         timer.reset();
+    }
+
+    @SubscribeEvent
+    public void onMoveExtra(MoveEvent event) {
         if(extraSpeed.getValue()) {
-            double[] vanillaCalc = MathUtil.directionSpeed(vanillaSpeed.getValue());
+            double[] vanillaCalc = MathUtil.directionSpeed(vanillaSpeed.getValue()/10);
             event.setX(vanillaCalc[0]);
             event.setZ(vanillaCalc[1]);
         }

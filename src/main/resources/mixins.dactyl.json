@@ -20,6 +20,7 @@
     "InjWorld",
     "access.ICPacketPlayer",
     "access.ICPacketUseEntity",
+    "access.IItemRenderer",
     "access.IMinecraft",
     "access.IRenderManager",
     "access.ITimer",

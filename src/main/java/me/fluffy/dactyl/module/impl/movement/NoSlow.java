@@ -129,6 +129,9 @@ public class NoSlow extends Module {
     }
 
     private void handleWebXZMovement(MoveEvent event) {
+        if(!webs.getValue()) {
+            return;
+        }
         if(mc.currentScreen == Dactyl.clickGUI) {
             return;
         }
@@ -153,6 +156,9 @@ public class NoSlow extends Module {
     }
 
     private void handleWebYMovement() {
+        if(!webs.getValue()) {
+            return;
+        }
         if(mc.currentScreen == Dactyl.clickGUI) {
             return;
         }
