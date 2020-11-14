@@ -8,10 +8,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class EnumElement extends SettingElement{
     public EnumElement(Setting setting, int x, int y) {
         super(setting, x, y);
     }
+
+    private static final String[] whitelistedWords = new String[] {"AAC", "NCP"};
 
     @Override
     public void drawScreen(int drawX, int drawY, float partialTicks) {
@@ -28,7 +33,7 @@ public class EnumElement extends SettingElement{
     }
 
     private String getEnumName(Enum en) {
-        if(StringUtil.isStringUpperCase(en.name())) {
+        if(StringUtil.isStringUpperCase(en.name()) && !Arrays.asList(whitelistedWords).contains(whitelistedWords)) {
             return en.name().toLowerCase().substring(0, 1).toUpperCase() + en.name().toLowerCase().substring(1);
         } else {
             return en.toString();
