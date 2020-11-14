@@ -52,7 +52,6 @@ public class ModuleManager {
         modules.add(new Velocity());
         modules.add(new Step());
         modules.add(new ReverseStep());
-        modules.add(new BoatFly());
 
         // render
         modules.add(new HoleESP());
