@@ -43,7 +43,7 @@ public class LongJump extends Module {
         if(canSprint() && autoSprint.getValue()) {
             mc.player.setSprinting(true);
         }
-        this.setModuleInfo(timeOut.getValue() ? "Boost" : "Timeout");
+        this.setModuleInfo(timeOut.getValue() ? "Timeout" : "Boost");
     }
 
     @SubscribeEvent
