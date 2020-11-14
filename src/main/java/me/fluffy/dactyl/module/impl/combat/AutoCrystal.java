@@ -83,6 +83,7 @@ public class AutoCrystal extends Module {
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", true, vis->settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
@@ -327,7 +328,12 @@ public class AutoCrystal extends Module {
             double[] rots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
             if(placeRotate.getValue()) {
                 if(updateLogic.getValue() == UpdateLogic.WALKING) {
-                    RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
+                    if(constRotate.getValue()) {
+                        double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
+                        RotationUtil.setPlayerRotations((float) constRots[0], (float) constRots[1]);
+                    } else {
+                        RotationUtil.setPlayerRotations((float) rots[0], (float) rots[1]);
+                    }
                 } else {
                     setRotations(rots[0], rots[1]);
                 }

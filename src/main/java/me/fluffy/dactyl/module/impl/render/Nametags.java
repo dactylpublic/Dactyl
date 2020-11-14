@@ -41,7 +41,7 @@ public class Nametags extends Module {
     Setting<Boolean> gamemode = new Setting<Boolean>("Gamemode", true);
     Setting<Boolean> invisibles = new Setting<Boolean>("Invisibles", true);
     Setting<Boolean> durability = new Setting<Boolean>("Durability", true);
-    Setting<Boolean> itemName = new Setting<Boolean>("Armor", true);
+    Setting<Boolean> itemName = new Setting<Boolean>("ItemName", true);
     Setting<Boolean> totemPops = new Setting<Boolean>("TotemPops", true);
     Setting<Integer> scaling = new Setting<Integer>("Scaling", 3, 1, 5);
     Setting<Boolean> border = new Setting<Boolean>("Border", true);
@@ -108,12 +108,11 @@ public class Nametags extends Module {
         GL11.glDisable(2929);
         GlStateManager.enableBlend();
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 1, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 0.75F, 0.75F, 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 1, 1, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 0.75F, 0.75F, 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
-
         GlStateManager.disableAlpha();
         GlStateManager.glNormal3f(0.0F, 1.0F, 0.0F);
         GL11.glColor4f(1.0f, 10.0f, 1.0f, 1.0f);
@@ -226,10 +225,11 @@ public class Nametags extends Module {
         enableGL2D();
         RenderUtil.drawRect(x + width, y + width, x1 - width, y1 - width, internalColor);
         if(border.getValue()) {
-            RenderUtil.drawRect(x + borderWidth, y, x1 - borderWidth, y + borderWidth, borderColor);
-            RenderUtil.drawRect(x, y, x + borderWidth, y1, borderColor);
-            RenderUtil.drawRect(x1 - borderWidth, y, x1, y1, borderColor);
-            RenderUtil.drawRect(x + borderWidth, y1 - borderWidth, x1 - borderWidth, y1, borderColor);
+            RenderUtil.drawBetterColoredRect(x + borderWidth, y + borderWidth, x1 - borderWidth, y1 - borderWidth, borderColor);
+            //RenderUtil.drawBetterColoredRect(x + borderWidth, y, x1 - borderWidth, y + borderWidth, borderColor);
+            //RenderUtil.drawBetterColoredRect(x, y, x + borderWidth, y1, borderColor);
+            //RenderUtil.drawBetterColoredRect(x1 - borderWidth, y, x1, y1, borderColor);
+            //RenderUtil.drawBetterColoredRect(x + borderWidth, y1 - borderWidth, x1 - borderWidth, y1, borderColor);
         }
         disableGL2D();
         GL11.glPopMatrix();
