@@ -51,6 +51,9 @@ public class Strafe extends Module {
         if(event.getStage() != ForgeEvent.Stage.PRE) {
             return;
         }
+        if(LongJump.INSTANCE.isEnabled()) {
+            return;
+        }
         //if(mc.player.isInWeb) {
         //    return;
         //}
