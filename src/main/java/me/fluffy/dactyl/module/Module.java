@@ -3,6 +3,7 @@ package me.fluffy.dactyl.module;
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.Bind;
+import me.fluffy.dactyl.util.ChatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.common.MinecraftForge;
@@ -66,6 +67,11 @@ public class Module {
         this.alwaysListening = alwaysListening;
         this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
         this.register(new Setting<Boolean>("Hidden", false));
+    }
+
+    public void toggleWithReason(String reason) {
+        ChatUtil.printMsg(reason, true, false);
+        this.toggle();
     }
 
     public void toggle() {

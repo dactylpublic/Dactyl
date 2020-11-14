@@ -51,6 +51,9 @@ public class LongJump extends Module {
         if(event.getStage() != ForgeEvent.Stage.PRE) {
             return;
         }
+        if(mc.player.isElytraFlying() || mc.player.isInLava() || mc.player.isInWater()) {
+            return;
+        }
         if(timeOut.getValue() && !timer.hasPassed(timeOutDelay.getValue().longValue())) {
             return;
         }

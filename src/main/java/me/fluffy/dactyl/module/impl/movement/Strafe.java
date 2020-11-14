@@ -21,6 +21,11 @@ public class Strafe extends Module {
     Setting<SkipMode> skipModeSetting = new Setting<SkipMode>("Skips", SkipMode.TICK);
     Setting<Integer> skipTickHops = new Setting<Integer>("SkipTicks", 1, 1, 10, vis->skipModeSetting.getValue() == SkipMode.TICK);
     Setting<Integer> skipDelayHops = new Setting<Integer>("SkipDelay", 25, 1, 100, vis->skipModeSetting.getValue() == SkipMode.MS);
+    Setting<Boolean> fastSwim = new Setting<Boolean>("FastSwim", true);
+    Setting<Double> fastSwimXZWater = new Setting<Double>("WaterXZ", 4.4D, 1.0D, 10.0D, v->fastSwim.getValue());
+    Setting<Double> fastSwimYWater = new Setting<Double>("WaterY", 1.5D, 1.0D, 10.0D, v->fastSwim.getValue());
+    Setting<Double> fastSwimXZLava = new Setting<Double>("LavaXZ", 4.4D, 1.0D, 10.0D, v->fastSwim.getValue());
+    Setting<Double> fastSwimYLava = new Setting<Double>("LavaY", 1.5D, 1.0D, 10.0D, v->fastSwim.getValue());
 
     public static Strafe INSTANCE;
     public Strafe() {
@@ -52,6 +57,9 @@ public class Strafe extends Module {
             return;
         }
         if(LongJump.INSTANCE.isEnabled()) {
+            return;
+        }
+        if(mc.player.isElytraFlying() || mc.player.isInLava() || mc.player.isInWater()) {
             return;
         }
         //if(mc.player.isInWeb) {
@@ -121,6 +129,25 @@ public class Strafe extends Module {
             double[] vanillaCalc = MathUtil.directionSpeed(vanillaSpeed.getValue()/10);
             event.setX(vanillaCalc[0]);
             event.setZ(vanillaCalc[1]);
+        }
+    }
+
+    @SubscribeEvent
+    public void onMoveSwim(MoveEvent event) {
+        if(!(mc.player.isInWater() || mc.player.isInLava())) {
+            return;
+        }
+        if(!fastSwim.getValue()) {
+            return;
+        }
+        if(mc.player.isInWater()) {
+            event.setX(event.getX()*fastSwimXZWater.getValue());
+            event.setY(event.getY()*fastSwimYWater.getValue());
+            event.setZ(event.getZ()*fastSwimXZWater.getValue());
+        } else if(mc.player.isInLava()) {
+            event.setX(event.getX()*fastSwimXZLava.getValue());
+            event.setY(event.getY()*fastSwimYLava.getValue());
+            event.setZ(event.getZ()*fastSwimXZLava.getValue());
         }
     }
 

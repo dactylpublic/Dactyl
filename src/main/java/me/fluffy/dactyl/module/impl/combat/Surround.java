@@ -4,6 +4,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
+import me.fluffy.dactyl.util.HoleUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
@@ -11,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.text.TextFormatting;
 
 public class Surround extends Module {
     public Setting<Integer> quota = new Setting<Integer>("Quota", 4, 1, 10);
@@ -60,6 +62,8 @@ public class Surround extends Module {
         if(mc.world == null || mc.player == null || Freecam.INSTANCE.isEnabled()) {
             return;
         }
+
+        this.setModuleInfo(HoleUtil.isInHole() ? TextFormatting.GREEN + "Safe" : TextFormatting.RED + "Unsafe");
 
         if(this.offsetStep == 0) {
             this.basePos = (new BlockPos(mc.player.getPositionVector())).down();

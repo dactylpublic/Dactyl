@@ -33,7 +33,7 @@ public class EnumElement extends SettingElement{
     }
 
     private String getEnumName(Enum en) {
-        if(StringUtil.isStringUpperCase(en.name()) && !Arrays.asList(whitelistedWords).contains(whitelistedWords)) {
+        if(StringUtil.isStringUpperCase(en.name()) && !Arrays.asList(whitelistedWords).contains(en.name())) {
             return en.name().toLowerCase().substring(0, 1).toUpperCase() + en.name().toLowerCase().substring(1);
         } else {
             return en.toString();

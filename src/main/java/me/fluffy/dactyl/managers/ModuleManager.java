@@ -9,11 +9,8 @@ import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.module.impl.combat.*;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
 import me.fluffy.dactyl.module.impl.misc.MCF;
+import me.fluffy.dactyl.module.impl.player.*;
 import me.fluffy.dactyl.module.impl.movement.*;
-import me.fluffy.dactyl.module.impl.player.FastItem;
-import me.fluffy.dactyl.module.impl.player.Freecam;
-import me.fluffy.dactyl.module.impl.player.NoHitbox;
-import me.fluffy.dactyl.module.impl.player.Scaffold;
 import me.fluffy.dactyl.module.impl.render.*;
 import me.fluffy.dactyl.setting.Setting;
 
@@ -41,6 +38,9 @@ public class ModuleManager {
         modules.add(new FastItem());
         modules.add(new NoHitbox());
         modules.add(new Scaffold());
+        modules.add(new PortalGodMode());
+        modules.add(new XCarry());
+        modules.add(new JumpFill());
 
         // misc
         modules.add(new FakePlayer());
