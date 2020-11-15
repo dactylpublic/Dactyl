@@ -452,7 +452,7 @@ public class AutoCrystal extends Module {
             Entity crystal = entry.getKey();
             float damage = ((Float)entry.getValue()).floatValue();
             boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystal((EntityEnderCrystal) crystal, facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
-            if(damage >= minPlaceDMG.getValue() && ((mc.player.getDistance(crystal) <= placeRange.getValue()) || (isFacePlaceCrystal && countFacePlace.getValue()))) {
+            if((damage >= minPlaceDMG.getValue() || (isFacePlaceCrystal && countFacePlace.getValue())) && ((mc.player.getDistance(crystal) <= placeRange.getValue()))) {
                 if(antiMultiLethal.getValue() && damage >= lethalMin.getValue()) {
                     crystalCount = maxInRange.getValue();
                     return crystalCount;
