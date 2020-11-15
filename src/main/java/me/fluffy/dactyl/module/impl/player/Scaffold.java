@@ -1,8 +1,11 @@
 package me.fluffy.dactyl.module.impl.player;
 
+import me.fluffy.dactyl.event.ForgeEvent;
+import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.PlaceUtil;
+import me.fluffy.dactyl.util.RotationUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.block.Block;
 import net.minecraft.entity.projectile.EntitySnowball;
@@ -19,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Scaffold extends Module {
     public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d);
@@ -55,46 +59,47 @@ public class Scaffold extends Module {
     public boolean teleported;
 
 
-    @Override
-    public void onClientUpdate() {
-        if(mc.player == null || mc.world == null) {
+    @SubscribeEvent
+    public void onUpdate(EventUpdateWalkingPlayer event) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
-        int downDistance = 1;
-        if (this.keepY) {
-            if ((!((mc.player.moveForward != 0.0F || mc.player.moveStrafing != 0.0F)) && mc.gameSettings.keyBindJump.isKeyDown()) || mc.player.collidedVertically || mc.player.onGround)
+        if(event.getStage() == ForgeEvent.Stage.PRE) {
+            RotationUtil.updateRotations();
+            int downDistance = 1;
+            if (this.keepY) {
+                if ((!((mc.player.moveForward != 0.0F || mc.player.moveStrafing != 0.0F)) && mc.gameSettings.keyBindJump.isKeyDown()) || mc.player.collidedVertically || mc.player.onGround)
+                    this.lastY = MathHelper.floor(mc.player.posY);
+            } else {
                 this.lastY = MathHelper.floor(mc.player.posY);
-        } else {
-            this.lastY = MathHelper.floor(mc.player.posY);
-        }
-        this.blockData = null;
-        double x = mc.player.posX;
-        double z = mc.player.posZ;
-        double y = this.keepY ? this.lastY : mc.player.posY;
-        double forward = mc.player.movementInput.moveForward;
-        double strafe = mc.player.movementInput.moveStrafe;
-        float yaw = mc.player.rotationYaw;
-        if (!mc.player.collidedHorizontally) {
-            double[] coords = PlaceUtil.getExpandCoords(x, z, forward, strafe, yaw);
-            x = coords[0];
-            z = coords[1];
-        }
-        if (PlaceUtil.canPlace(mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - downDistance, mc.player.posZ)).getBlock())) {
-            x = mc.player.posX;
-            z = mc.player.posZ;
-        }
-        BlockPos blockBelow = new BlockPos(x, y - downDistance, z);
-        this.pos = blockBelow;
-        if (mc.world.getBlockState(blockBelow).getBlock() == Blocks.AIR) {
-            this.blockData = getBlockData2(blockBelow);
-            if (this.blockData != null) {
-                float yaw1 = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[0];
-                float pitch = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[1];
-                this.lastYaw = yaw1;
-                this.lastPitch = pitch;
             }
-        }
-        if (this.blockData != null) {
+            this.blockData = null;
+            double x = mc.player.posX;
+            double z = mc.player.posZ;
+            double y = this.keepY ? this.lastY : mc.player.posY;
+            double forward = mc.player.movementInput.moveForward;
+            double strafe = mc.player.movementInput.moveStrafe;
+            float yaw = mc.player.rotationYaw;
+            if (!mc.player.collidedHorizontally) {
+                double[] coords = PlaceUtil.getExpandCoords(x, z, forward, strafe, yaw);
+                x = coords[0];
+                z = coords[1];
+            }
+            if (PlaceUtil.canPlace(mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - downDistance, mc.player.posZ)).getBlock())) {
+                x = mc.player.posX;
+                z = mc.player.posZ;
+            }
+            BlockPos blockBelow = new BlockPos(x, y - downDistance, z);
+            this.pos = blockBelow;
+            if (mc.world.getBlockState(blockBelow).getBlock() == Blocks.AIR) {
+                this.blockData = getBlockData2(blockBelow);
+                if (this.blockData != null) {
+                    float yaw1 = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[0];
+                    float pitch = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[1];
+                    RotationUtil.setPlayerRotations(yaw1, pitch);
+                }
+            }
+        } else if (this.blockData != null) {
             if (PlaceUtil.getBlockCountHotbar() <= 0 || (!this.Switch && mc.player.getHeldItemMainhand().getItem() != null && !(mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock))) {
                 return;
             }
@@ -138,6 +143,7 @@ public class Scaffold extends Module {
             } else {
                 mc.player.inventory.currentItem = heldItem;
             }
+            RotationUtil.restoreRotations();
         }
     }
 
