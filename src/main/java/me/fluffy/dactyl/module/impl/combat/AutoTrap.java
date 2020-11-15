@@ -58,7 +58,8 @@ public class AutoTrap extends Module {
 
     @Override
     public void onToggle() {
-        resetAutoTrap();
+        bestTarget = null;
+        step = 0;
         timer.reset();
     }
 

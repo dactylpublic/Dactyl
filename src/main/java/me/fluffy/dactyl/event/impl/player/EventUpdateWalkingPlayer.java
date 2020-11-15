@@ -4,6 +4,7 @@ import me.fluffy.dactyl.event.ForgeEvent;
 
 public class EventUpdateWalkingPlayer extends ForgeEvent {
     private float yaw, pitch;
+    public boolean rotationUsed;
     public EventUpdateWalkingPlayer(Stage stage, float yaw, float pitch) {
         this.setStage(stage);
         this.yaw = yaw;

@@ -5,7 +5,6 @@ import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
-import me.fluffy.dactyl.util.RotationUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -102,56 +101,46 @@ public class Killaura extends Module {
 
     @SubscribeEvent
     public void onUpdateWalkingPlayer(EventUpdateWalkingPlayer event) {
-        if (mc.world == null || mc.player == null) {
+        if (mc.world == null || mc.player == null)
             return;
-        }
-        if(event.getStage() == ForgeEvent.Stage.PRE) {
-            RotationUtil.updateRotations();
-            doAuraPre();
-        } else if(event.getStage() == ForgeEvent.Stage.POST) {
-            doAuraPost();
-            RotationUtil.restoreRotations();
-        }
-    }
-
-
-    private void doAuraPre() {
-        target = findTarget();
-        if (target != null) {
-            if(autoSwitch.getValue()) {
-                equipBestWeapon();
-            }
-            if(rotate.getValue()) {
-                final float[] rots = getRotationsToward(target);
-                float sens = getSensitivityMultiplier();
-                float yawGCD = (Math.round(rots[0] / sens) * sens);
-                float pitchGCD = (Math.round(rots[1] / sens) * sens);
-                RotationUtil.setPlayerRotations(yawGCD, pitchGCD);
-            }
-        }
-    }
-
-    private void doAuraPost() {
-        if(target == null) {
-            this.setModuleInfo("");
-            return;
-        }
-        if(target instanceof EntityPlayer) {
-            this.setModuleInfo(target.getName());
-        }
-        if(hitDelay.getValue()) {
-            final float ticks = 20.0f - Dactyl.INSTANCE.getTickRateManager().getTickRate();
-            final boolean canAttack = mc.player.getCooledAttackStrength(-ticks) >= 1;
-            if (canAttack) {
-                attackEntity(target);
+        if (event.getStage() == ForgeEvent.Stage.PRE) {
+            target = findTarget();
+            if (target != null) {
+                if(autoSwitch.getValue()) {
+                    equipBestWeapon();
+                }
+                if(rotate.getValue()) {
+                    final float[] rots = getRotationsToward(target);
+                    float sens = getSensitivityMultiplier();
+                    float yawGCD = (Math.round(rots[0] / sens) * sens);
+                    float pitchGCD = (Math.round(rots[1] / sens) * sens);
+                    event.setYaw(yawGCD);
+                    event.setPitch(pitchGCD);
+                    event.rotationUsed = true;
+                }
             }
         } else {
             if(target == null) {
+                this.setModuleInfo("");
                 return;
             }
-            if (System.nanoTime() / 1000000L - this.lastHit >=  attackSpeed.getValue() * 50) {
-                if(target != null) {
+            if(target instanceof EntityPlayer) {
+                this.setModuleInfo(target.getName());
+            }
+            if(hitDelay.getValue()) {
+                final float ticks = 20.0f - Dactyl.INSTANCE.getTickRateManager().getTickRate();
+                final boolean canAttack = mc.player.getCooledAttackStrength(-ticks) >= 1;
+                if (canAttack) {
                     attackEntity(target);
+                }
+            } else {
+                if(target == null) {
+                    return;
+                }
+                if (System.nanoTime() / 1000000L - this.lastHit >=  attackSpeed.getValue() * 50) {
+                    if(target != null) {
+                        attackEntity(target);
+                    }
                 }
             }
         }
