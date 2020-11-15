@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 import java.util.UUID;
 
 public class FakePlayer extends Module {
-    Setting<String> username = new Setting<String>("Name", "DactylClient");
+    Setting<String> username = new Setting<String>("Name", "Boner");
     public FakePlayer() {
         super("FakePlayer", Category.MISC);
     }

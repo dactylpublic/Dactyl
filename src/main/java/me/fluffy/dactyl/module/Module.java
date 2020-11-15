@@ -29,8 +29,7 @@ public class Module {
         this.displayName = name;
         this.seen = true;
         this.alwaysListening = false;
-        this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
-        this.register(new Setting<Boolean>("Hidden", false));
+        setupSettings();
     }
 
     public Module(String name, Category category) {
@@ -41,8 +40,7 @@ public class Module {
         this.displayName = name;
         this.seen = true;
         this.alwaysListening = false;
-        this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
-        this.register(new Setting<Boolean>("Hidden", false));
+        setupSettings();
     }
 
     public Module(String name, Category category, String desc, boolean alwaysListening) {
@@ -53,8 +51,7 @@ public class Module {
         this.displayName = name;
         this.seen = true;
         this.alwaysListening = alwaysListening;
-        this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
-        this.register(new Setting<Boolean>("Hidden", false));
+        setupSettings();
     }
 
     public Module(String name, Category category, boolean alwaysListening) {
@@ -65,6 +62,10 @@ public class Module {
         this.displayName = name;
         this.seen = true;
         this.alwaysListening = alwaysListening;
+        setupSettings();
+    }
+
+    private void setupSettings() {
         this.register(new Setting<Bind>("Bind", new Bind(Keyboard.KEY_NONE)));
         this.register(new Setting<Boolean>("Hidden", false));
     }

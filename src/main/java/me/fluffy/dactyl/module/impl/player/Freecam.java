@@ -122,11 +122,11 @@ public class Freecam extends Module {
         }
         mc.player.setSprinting(false);
         if (mc.gameSettings.keyBindJump.isKeyDown()) {
-            mc.player.motionY += 0.8D;
+            mc.player.motionY += speed.getValue();
         }
 
         if (mc.gameSettings.keyBindSneak.isKeyDown()) {
-            mc.player.motionY -= 0.8D;
+            mc.player.motionY -= speed.getValue();
         }
     }
 

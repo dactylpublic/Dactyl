@@ -182,11 +182,6 @@ public class AutoTrap extends Module {
     }
 
 
-    private boolean isBlockEmpty(Vec3d vec3d, EntityPlayer player) {
-        BlockPos placementPosition = new BlockPos(player.getPositionVector()).down().add(vec3d.x, vec3d.y, vec3d.z);
-        return CombatUtil.checkCanPlace(placementPosition);
-    }
-
     private void findBestTarget() {
         bestTarget = null;
         for (EntityPlayer target : mc.world.playerEntities) {

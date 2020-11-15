@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PingSpoof extends Module {
-    Setting<Integer> delay = new Setting<Integer>("Delay", 120, 10, 14000);
+    Setting<Integer> delay = new Setting<Integer>("Delay", 120, 10, 1400);
     public PingSpoof() {
         super("PingSpoof", Category.PLAYER);
     }

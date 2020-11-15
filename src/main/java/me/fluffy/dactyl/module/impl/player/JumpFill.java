@@ -81,7 +81,6 @@ public class JumpFill extends Module {
             return;
         }
         if(timer.hasPassed(timerDelay.getValue().longValue())) {
-            BlockPos offsetPos = new BlockPos(0, -1, 0);
             BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, -1, 0);
             boolean placedBlock = CombatUtil.placeBlock(targetPos, false, rotate.getValue(), true, false, false, 0);
             if(placedBlock) {
