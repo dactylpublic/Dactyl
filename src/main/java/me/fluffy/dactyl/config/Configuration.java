@@ -26,42 +26,46 @@ public class Configuration {
 
     public static void load(String configName, boolean isMainConfig) throws IOException, IllegalAccessException {
         for(Module mod : Dactyl.moduleManager.getModules()) {
-            File loadingModuleDir = (isMainConfig) ? ConfigUtil.makeClientDirFile("config"+sep +"Loaded Config"+sep+mod.getCategory().toString()+sep+mod.getName()+".yml") : ConfigUtil.makeClientDirFile("config" +sep+configName+sep+mod.getCategory().toString()+sep+mod.getName()+".yml");
-            InputStream fileInputStream = new FileInputStream(loadingModuleDir);
-            Map<String, Map<String, Object>> yamlObj = new Yaml().load(fileInputStream);
-            if(yamlObj != null) {
-                for (Map.Entry<String, Map<String, Object>> pathEntry : yamlObj.entrySet()) {
-                    if(mod.getSetting(pathEntry.getKey()) != null) {
-                        Setting setting = mod.getSetting(pathEntry.getKey());
-                        if (setting.getValue() instanceof Bind) {
-                            Bind ymlBind = new Bind((int) pathEntry.getValue().get("value"));
-                            mod.getSetting(pathEntry.getKey()).setValue(ymlBind);
-                        } else if (setting.getValue() instanceof Enum) {
-                            Enum enumClass = (Enum) setting.getValue();
-                            for (Field field : enumClass.getClass().getDeclaredFields()) {
-                                if (Enum.class.isAssignableFrom(field.getType())) {
-                                    if (!field.isAccessible()) {
-                                        field.setAccessible(true);
-                                    }
-                                    Enum enumValue = (Enum) field.get(enumClass);
-                                    if (enumValue.name().equalsIgnoreCase(String.valueOf(pathEntry.getValue()))) {
-                                        mod.getSetting(pathEntry.getKey()).setValue(enumValue);
+            try {
+                File loadingModuleDir = (isMainConfig) ? ConfigUtil.makeClientDirFile("config" + sep + "Loaded Config" + sep + mod.getCategory().toString() + sep + mod.getName() + ".yml") : ConfigUtil.makeClientDirFile("config" + sep + configName + sep + mod.getCategory().toString() + sep + mod.getName() + ".yml");
+                InputStream fileInputStream = new FileInputStream(loadingModuleDir);
+                Map<String, Map<String, Object>> yamlObj = new Yaml().load(fileInputStream);
+                if (yamlObj != null) {
+                    for (Map.Entry<String, Map<String, Object>> pathEntry : yamlObj.entrySet()) {
+                        if (mod.getSetting(pathEntry.getKey()) != null) {
+                            Setting setting = mod.getSetting(pathEntry.getKey());
+                            if (setting.getValue() instanceof Bind) {
+                                Bind ymlBind = new Bind((int) pathEntry.getValue().get("value"));
+                                mod.getSetting(pathEntry.getKey()).setValue(ymlBind);
+                            } else if (setting.getValue() instanceof Enum) {
+                                Enum enumClass = (Enum) setting.getValue();
+                                for (Field field : enumClass.getClass().getDeclaredFields()) {
+                                    if (Enum.class.isAssignableFrom(field.getType())) {
+                                        if (!field.isAccessible()) {
+                                            field.setAccessible(true);
+                                        }
+                                        Enum enumValue = (Enum) field.get(enumClass);
+                                        if (enumValue.name().equalsIgnoreCase(String.valueOf(pathEntry.getValue()))) {
+                                            mod.getSetting(pathEntry.getKey()).setValue(enumValue);
+                                        }
                                     }
                                 }
+                            } else {
+                                mod.getSetting(pathEntry.getKey()).setValue(pathEntry.getValue());
                             }
-                        } else {
-                            mod.getSetting(pathEntry.getKey()).setValue(pathEntry.getValue());
                         }
-                    }
-                    if(pathEntry.getKey().equalsIgnoreCase("Enabled")) {
-                        if (mod.isEnabled() != Boolean.parseBoolean(String.valueOf(pathEntry.getValue()))) {
-                            mod.toggle();
-                        }
-                        if(!mod.isEnabled() && mod.isAlwaysListening()) {
-                            mod.toggle();
+                        if (pathEntry.getKey().equalsIgnoreCase("Enabled")) {
+                            if (mod.isEnabled() != Boolean.parseBoolean(String.valueOf(pathEntry.getValue()))) {
+                                mod.toggle();
+                            }
+                            if (!mod.isEnabled() && mod.isAlwaysListening()) {
+                                mod.toggle();
+                            }
                         }
                     }
                 }
+            } catch(FileNotFoundException exception) {
+                Dactyl.logger.info("Could not find module path for " + mod.getName() + "... skipping");
             }
         }
     }
