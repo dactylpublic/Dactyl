@@ -2,10 +2,7 @@ package me.fluffy.dactyl.managers;
 
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.module.Module;
-import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
-import me.fluffy.dactyl.module.impl.client.Colors;
-import me.fluffy.dactyl.module.impl.client.Components;
-import me.fluffy.dactyl.module.impl.client.HUD;
+import me.fluffy.dactyl.module.impl.client.*;
 import me.fluffy.dactyl.module.impl.combat.*;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
 import me.fluffy.dactyl.module.impl.misc.MCF;
@@ -41,6 +38,7 @@ public class ModuleManager {
         modules.add(new PortalGodMode());
         modules.add(new XCarry());
         modules.add(new JumpFill());
+        modules.add(new PingSpoof());
 
         // misc
         modules.add(new FakePlayer());
@@ -68,6 +66,7 @@ public class ModuleManager {
         modules.add(new HUD());
         modules.add(new Colors());
         modules.add(new Components());
+        modules.add(new Media());
 
         setup();
     }

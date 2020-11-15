@@ -8,6 +8,7 @@
     "InjEntityPlayer",
     "InjEntityPlayerSP",
     "InjEntityRenderer",
+    "InjFontRenderer",
     "InjGuiIngame",
     "InjItemRenderer",
     "InjLayerArmorBase",

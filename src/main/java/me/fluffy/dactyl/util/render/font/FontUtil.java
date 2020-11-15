@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.util.render.font;
 
 import me.fluffy.dactyl.module.impl.client.HUD;
+import me.fluffy.dactyl.module.impl.client.Media;
 import net.minecraft.client.Minecraft;
 
 import java.awt.*;
@@ -35,6 +36,7 @@ public class FontUtil {
     }
 
     public void drawString(String text, int x, int y, int color) {
+        Media.INSTANCE.onRenderString(text);
         if (HUD.INSTANCE.customFont.getValue()) {
             font.drawString(text, x, y, color, false);
         } else {
@@ -43,6 +45,7 @@ public class FontUtil {
     }
 
     public void drawStringWithShadow(String text, int x, int y, int color) {
+        Media.INSTANCE.onRenderString(text);
         if (HUD.INSTANCE.customFont.getValue()) {
             font.drawStringWithShadow(text, x, y, color);
         } else {
@@ -52,18 +55,6 @@ public class FontUtil {
 
     public boolean isCustomFont() {
         return HUD.INSTANCE.customFont.getValue();
-    }
-
-    public void drawString(String text, float textScale, int x, int y, int color, boolean shadow) {
-        GL11.glScaled(textScale, textScale,0);
-        drawString(text, x, y, color, shadow);
-        GL11.glScaled(1 / textScale, 1 / textScale,0);
-    }
-
-    public void drawString(String text, float textScale, int x, int y, int color) {
-        GL11.glScaled(textScale, textScale,0);
-        drawString(text, x, y, color, false);
-        GL11.glScaled(1 / textScale, 1 / textScale,0);
     }
 
     public float getFontHeight() {
