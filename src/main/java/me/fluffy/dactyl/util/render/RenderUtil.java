@@ -1,7 +1,11 @@
 package me.fluffy.dactyl.util.render;
 
 import me.fluffy.dactyl.Dactyl;
+import me.fluffy.dactyl.injection.inj.access.IRenderManager;
 import me.fluffy.dactyl.module.impl.client.Colors;
+import me.fluffy.dactyl.util.EntityUtil;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -10,15 +14,20 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.Timer;
 
 public class RenderUtil {
     public static ICamera camera = new Frustum();
@@ -155,6 +164,97 @@ public class RenderUtil {
         GlStateManager.resetColor();
         GL11.glPopAttrib();
         GL11.glPopMatrix();
+    }
+
+    public static void drawEntityESP(Entity entity, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {
+        AxisAlignedBB bb = new AxisAlignedBB(entity.posX - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, entity.posY - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, entity.posZ - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, (entity.posX + entity.getEntityBoundingBox().maxX) - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, (entity.posY + entity.getEntityBoundingBox().maxY) - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, (entity.posZ + entity.getEntityBoundingBox().maxZ) - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ);
+        camera.setPosition(((Entity) Objects.requireNonNull(Minecraft.getMinecraft().getRenderViewEntity())).posX, (Minecraft.getMinecraft().getRenderViewEntity()).posY, (Minecraft.getMinecraft().getRenderViewEntity()).posZ);
+        if (camera.isBoundingBoxInFrustum(new AxisAlignedBB(bb.minX + (Minecraft.getMinecraft().getRenderManager()).viewerPosX, bb.minY +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosY, bb.minZ +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, bb.maxX +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosX, bb.maxY +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosY, bb.maxZ +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosZ))) {
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            GlStateManager.disableDepth();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
+            GlStateManager.disableTexture2D();
+            GlStateManager.depthMask(false);
+            GL11.glEnable(2848);
+            GL11.glHint(3154, 4354);
+            GL11.glLineWidth(lineWidth);
+            if (box) {
+                RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
+            }
+            if (outline) {
+                RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+            }
+            GL11.glDisable(2848);
+            GlStateManager.depthMask(true);
+            GlStateManager.enableDepth();
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+        }
+    }
+
+    public static void drawBlockOutline(final BlockPos pos, final Color color, final float linewidth, final boolean air) {
+        final IBlockState iblockstate = Minecraft.getMinecraft().world.getBlockState(pos);
+        if ((air || iblockstate.getMaterial() != Material.AIR) && Minecraft.getMinecraft().world.getWorldBorder().contains(pos)) {
+            final Vec3d interp = EntityUtil.interpolateEntity(Minecraft.getMinecraft().player, Minecraft.getMinecraft().getRenderPartialTicks());
+            drawBlockOutline(iblockstate.getSelectedBoundingBox(Minecraft.getMinecraft().world, pos).grow(0.0020000000949949026).offset(-interp.x, -interp.y, -interp.z), color, linewidth);
+        }
+    }
+
+    public static void drawBlockOutline(final BlockPos pos, final Color color, final float linewidth, final boolean air, final double height) {
+        final IBlockState iblockstate = Minecraft.getMinecraft().world.getBlockState(pos);
+        if ((air || iblockstate.getMaterial() != Material.AIR) && Minecraft.getMinecraft().world.getWorldBorder().contains(pos)) {
+            final AxisAlignedBB blockAxis = new AxisAlignedBB(pos.getX() - Minecraft.getMinecraft().getRenderManager().viewerPosX, pos.getY() - Minecraft.getMinecraft().getRenderManager().viewerPosY, pos.getZ() - Minecraft.getMinecraft().getRenderManager().viewerPosZ, pos.getX() + 1 - Minecraft.getMinecraft().getRenderManager().viewerPosX, pos.getY() + 1 - Minecraft.getMinecraft().getRenderManager().viewerPosY + height, pos.getZ() + 1 - Minecraft.getMinecraft().getRenderManager().viewerPosZ);
+            drawBlockOutline(blockAxis.grow(0.0020000000949949026), color, linewidth);
+        }
+    }
+
+    public static void drawBlockOutline(final AxisAlignedBB bb, final Color color, final float linewidth) {
+        final float red = color.getRed() / 255.0f;
+        final float green = color.getGreen() / 255.0f;
+        final float blue = color.getBlue() / 255.0f;
+        final float alpha = color.getAlpha() / 255.0f;
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.disableDepth();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+        GL11.glEnable(2848);
+        GL11.glHint(3154, 4354);
+        GL11.glLineWidth(linewidth);
+        final Tessellator tessellator = Tessellator.getInstance();
+        final BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        tessellator.draw();
+        GL11.glDisable(2848);
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
     }
 
     public static void drawBoxESP(BlockPos pos, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {

@@ -55,7 +55,7 @@ public abstract class InjRenderEnderCrystal {
             return;
         }
         if(ESP.INSTANCE.isEnabled() && ESP.INSTANCE.crystals.getValue()) {
-            if(ESP.INSTANCE.espModeSetting.getValue() == ESP.ESPMode.OUTLINE) {
+            if(ESP.INSTANCE.crystalESPMode.getValue() == ESP.ESPMode.OUTLINE) {
                 final float f3 = entity.innerRotation + partialTicks;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(x, y, z);
@@ -93,7 +93,7 @@ public abstract class InjRenderEnderCrystal {
                 }
                 OutlineUtils.renderFive();
                 GlStateManager.popMatrix();
-            } else if(ESP.INSTANCE.espModeSetting.getValue() == ESP.ESPMode.WIREFRAME) {
+            } else if(ESP.INSTANCE.crystalESPMode.getValue() == ESP.ESPMode.WIREFRAME) {
                 final float f3 = entity.innerRotation + partialTicks;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(x, y, z);

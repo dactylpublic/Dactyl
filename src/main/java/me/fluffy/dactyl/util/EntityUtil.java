@@ -9,6 +9,7 @@ import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.Vec3d;
 
 public class EntityUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -74,5 +75,33 @@ public class EntityUtil {
             return (((EntityIronGolem)entity).getRevengeTarget() == null);
         }
         return false;
+    }
+
+    public static Vec3d interpolateEntity(final Entity entity, final float time) {
+        return new Vec3d(entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * time, entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * time, entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * time);
+    }
+
+    public static Vec3d getInterpolatedPos(final Entity entity, final float partialTicks) {
+        return new Vec3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ).add(getInterpolatedAmount(entity, partialTicks));
+    }
+
+    public static Vec3d getInterpolatedRenderPos(final Entity entity, final float partialTicks) {
+        return getInterpolatedPos(entity, partialTicks).subtract(EntityUtil.mc.getRenderManager().viewerPosX, EntityUtil.mc.getRenderManager().viewerPosY, EntityUtil.mc.getRenderManager().viewerPosZ);
+    }
+
+    public static Vec3d getInterpolatedRenderPos(final Vec3d vec) {
+        return new Vec3d(vec.x, vec.y, vec.z).subtract(EntityUtil.mc.getRenderManager().viewerPosX, EntityUtil.mc.getRenderManager().viewerPosY, EntityUtil.mc.getRenderManager().viewerPosZ);
+    }
+
+    public static Vec3d getInterpolatedAmount(final Entity entity, final double x, final double y, final double z) {
+        return new Vec3d((entity.posX - entity.lastTickPosX) * x, (entity.posY - entity.lastTickPosY) * y, (entity.posZ - entity.lastTickPosZ) * z);
+    }
+
+    public static Vec3d getInterpolatedAmount(final Entity entity, final Vec3d vec) {
+        return getInterpolatedAmount(entity, vec.x, vec.y, vec.z);
+    }
+
+    public static Vec3d getInterpolatedAmount(final Entity entity, final float partialTicks) {
+        return getInterpolatedAmount(entity, partialTicks, partialTicks, partialTicks);
     }
 }
