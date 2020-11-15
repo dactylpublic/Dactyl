@@ -1,6 +1,13 @@
 package me.fluffy.dactyl.util;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.passive.EntityAmbientCreature;
+import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class EntityUtil {
@@ -54,5 +61,18 @@ public class EntityUtil {
                 break;
         }
         return directionLabel;
+    }
+
+    public static boolean isPassiveEntity(Entity entity) {
+        if(entity instanceof EntityWolf) {
+            return !((EntityWolf)entity).isAngry();
+        }
+        if(entity instanceof EntityAgeable || entity instanceof EntityTameable || entity instanceof EntityAmbientCreature || entity instanceof EntitySquid) {
+            return true;
+        }
+        if(entity instanceof EntityIronGolem) {
+            return (((EntityIronGolem)entity).getRevengeTarget() == null);
+        }
+        return false;
     }
 }

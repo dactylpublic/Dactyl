@@ -60,6 +60,7 @@ public class ModuleManager {
         modules.add(new Fullbright());
         modules.add(new NoRender());
         modules.add(new ViewModel());
+        modules.add(new ESP());
 
         // client
         modules.add(new ClickGuiModule());
