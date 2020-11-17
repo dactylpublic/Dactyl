@@ -46,6 +46,8 @@ public class AutoTrap extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
+        timer.reset();
+        resetAutoTrap();
         if(disableSwap.getValue()) {
             if(swapModeSetting.getValue() == SwapMode.NORMAL) {
                 mc.player.inventory.currentItem = recordedSlot;
@@ -54,13 +56,6 @@ public class AutoTrap extends Module {
             }
             recordedSlot = 0;
         }
-    }
-
-    @Override
-    public void onToggle() {
-        bestTarget = null;
-        step = 0;
-        timer.reset();
     }
 
     @Override

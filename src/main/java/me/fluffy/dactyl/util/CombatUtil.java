@@ -469,9 +469,6 @@ public class CombatUtil {
             if(targetDamage <= 2.0) {
                 continue;
             }
-            if (targetDamage < minDamage) {
-                continue;
-            }
             satisfiedTarget = (EntityPlayer) entity;
         }
 
