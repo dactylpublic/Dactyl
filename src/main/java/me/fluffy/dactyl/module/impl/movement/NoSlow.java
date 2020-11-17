@@ -5,6 +5,7 @@ import me.fluffy.dactyl.event.impl.action.KeyboardMoveEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import net.minecraft.client.gui.GuiChat;
@@ -35,7 +36,7 @@ public class NoSlow extends Module {
     // webs
     Setting<Boolean> webs = new Setting<Boolean>("Webs", true, v->page.getValue() == SettingPage.WEB);
 
-    Setting<Boolean> webXZ = new Setting<Boolean>("Webs", true, v->page.getValue() == SettingPage.WEB);
+    Setting<Boolean> webXZ = new Setting<Boolean>("WebXZ", true, v->page.getValue() == SettingPage.WEB);
     Setting<Double> webXZSpeed = new Setting<Double>("WebXZSpeed", 3.5D, 0.1D, 8.0D, v->webXZ.getValue() && page.getValue() == SettingPage.WEB);
 
     Setting<Boolean> webY = new Setting<Boolean>("WebY", true, v->page.getValue() == SettingPage.WEB);
@@ -109,7 +110,7 @@ public class NoSlow extends Module {
     }
 
     private void handleSoulSandSlowdown(MoveEvent event) {
-        if(mc.currentScreen == Dactyl.clickGUI) {
+        if(mc.currentScreen == Dactyl.clickGUI || Freecam.INSTANCE.isEnabled()) {
             return;
         }
         if(noSoulSand.getValue()) {
@@ -129,7 +130,7 @@ public class NoSlow extends Module {
     }
 
     private void handleWebXZMovement(MoveEvent event) {
-        if(!webs.getValue()) {
+        if(!webs.getValue() || Freecam.INSTANCE.isEnabled()) {
             return;
         }
         if(mc.currentScreen == Dactyl.clickGUI) {
@@ -156,7 +157,7 @@ public class NoSlow extends Module {
     }
 
     private void handleWebYMovement() {
-        if(!webs.getValue()) {
+        if(!webs.getValue() || Freecam.INSTANCE.isEnabled()) {
             return;
         }
         if(mc.currentScreen == Dactyl.clickGUI) {

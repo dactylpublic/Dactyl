@@ -3,6 +3,7 @@ package me.fluffy.dactyl.module.impl.movement;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.player.Freecam;
+import me.fluffy.dactyl.module.impl.player.JumpFill;
 import me.fluffy.dactyl.setting.Setting;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -28,7 +29,7 @@ public class ReverseStep extends Module {
 
     @Override
     public void onClientUpdate() {
-        if (mc.world == null || mc.player == null || (Strafe.INSTANCE.isEnabled() || Freecam.INSTANCE.isEnabled())) {
+        if (mc.world == null || mc.player == null || (Strafe.INSTANCE.isEnabled() || Freecam.INSTANCE.isEnabled() || JumpFill.INSTANCE.isEnabled())) {
             return;
         }
         this.setModuleInfo(stepModeSetting.getValue() == StepMode.ALL ? "All" : "Holes");

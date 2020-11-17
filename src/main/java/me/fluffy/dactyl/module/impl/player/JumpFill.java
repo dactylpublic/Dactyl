@@ -17,8 +17,10 @@ public class JumpFill extends Module {
     Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", true);
     Setting<Integer> timerDelay = new Setting<Integer>("Delay", 300, 25, 1000);
     Setting<Boolean> rotate = new Setting<Boolean>("Rotate", false);
+    public static JumpFill INSTANCE;
     public JumpFill() {
         super("ReverseFill", Category.PLAYER);
+        INSTANCE = this;
     }
 
     private final TimeUtil timer = new TimeUtil();
