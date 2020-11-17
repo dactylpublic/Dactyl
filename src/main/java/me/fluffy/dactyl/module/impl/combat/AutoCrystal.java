@@ -60,6 +60,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> placeRange = new Setting<Double>("PlaceRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
+    Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
 
@@ -119,6 +120,7 @@ public class AutoCrystal extends Module {
     private float oldYaw, oldPitch;
     private static boolean togglePitch = false;
     private static BlockPos crystalRender = null;
+    private static BlockPos oldPlacePos = null;
     private static double damage = 0.0d;
     private EntityEnderCrystal currentAttacking = null;
 
@@ -212,7 +214,7 @@ public class AutoCrystal extends Module {
     }
 
 
-    public void doAutoCrystal(EventUpdateWalkingPlayer eventUpdateWalkingPlayer, UpdateStage updateStage) {
+    public void doAutoCrystal(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
         if(antiStuckTimer.hasPassed(1000)) {
             attackedCrystals.clear();
         }
@@ -220,15 +222,15 @@ public class AutoCrystal extends Module {
             placedCrystals.clear();
         }
         if(auraOrder.getValue() == AuraLogic.BREAKPLACE) {
-            doBreak(updateStage);
-            doPlace(updateStage);
+            doBreak(eventUpdateWalkingPlayer);
+            doPlace(eventUpdateWalkingPlayer);
         } else {
-            doPlace(updateStage);
-            doBreak(updateStage);
+            doPlace(eventUpdateWalkingPlayer);
+            doBreak(eventUpdateWalkingPlayer);
         }
     }
 
-    private void doBreak(UpdateStage updateStage) {
+    private void doBreak(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
         if(!doCaBreak.getValue()) {
             return;
         }
@@ -261,14 +263,18 @@ public class AutoCrystal extends Module {
             return;
         }
         if(updateLogic.getValue() == UpdateLogic.WALKING) {
-            if (breakRotate.getValue()) {
-                double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
-                RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
-                //mc.player.rotationYaw = (float) rots[0];
-                //mc.player.rotationPitch = (float) rots[1];
+            if(eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
+                if (breakRotate.getValue()) {
+                    double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
+                    eventUpdateWalkingPlayer.setYaw((float) rots[0]);
+                    eventUpdateWalkingPlayer.setPitch((float) rots[1]);
+                    eventUpdateWalkingPlayer.rotationUsed = true;
+                }
             }
-            currentAttacking = crystal;
-            attackCrystal(crystal);
+            if(eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.POST) {
+                currentAttacking = crystal;
+                attackCrystal(crystal);
+            }
         } else {
             if(breakRotate.getValue()) {
                 //float[] rots = CombatUtil.calcAngle(mc.player.getPositionEyes(mc.getRenderPartialTicks()), crystal.getPositionVector());
@@ -285,7 +291,7 @@ public class AutoCrystal extends Module {
         return !(attackedCrystals.containsKey(entity) && attackedCrystals.get(entity) > (hitAttempts.getValue()) && antiStuck.getValue());
     }
 
-    private void doPlace(UpdateStage updateStage) {
+    private void doPlace(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
         if(!doCaPlace.getValue()) {
             this.setModuleInfo("");
             resetRots();
@@ -303,7 +309,25 @@ public class AutoCrystal extends Module {
         if(!checkTimer.hasPassed(125L)) {
             return;
         }
-        BlockPos placePosition = CombatUtil.getBestPlacePosition(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+        boolean doRecalc = true;
+        if(antiRecalc.getValue()) {
+            doRecalc = false;
+            if(oldPlacePos == null) {
+                doRecalc = true;
+            } else {
+                if(CombatUtil.placePosStillSatisfies(oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), placeRange.getValue())) {
+                    doRecalc = false;
+                } else {
+                    doRecalc = true;
+                }
+            }
+        }
+        BlockPos placePosition = CombatUtil.getBestPlacePosition(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+
+        if(oldPlacePos != null && !doRecalc) {
+            placePosition = oldPlacePos;
+        }
+
 
         EnumHand placeHand = null;
 
@@ -324,17 +348,22 @@ public class AutoCrystal extends Module {
                 return;
             }
             crystalRender = placePosition;
+            oldPlacePos = placePosition;
             damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] rots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
             if(placeRotate.getValue()) {
-                if(updateLogic.getValue() == UpdateLogic.WALKING) {
+                if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                     if(constRotate.getValue()) {
                         double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
-                        RotationUtil.setPlayerRotations((float) constRots[0], (float) constRots[1]);
+                        eventUpdateWalkingPlayer.setYaw((float) constRots[0]);
+                        eventUpdateWalkingPlayer.setPitch((float) constRots[1]);
+                        eventUpdateWalkingPlayer.rotationUsed = true;
                     } else {
-                        RotationUtil.setPlayerRotations((float) rots[0], (float) rots[1]);
+                        eventUpdateWalkingPlayer.setYaw((float) rots[0]);
+                        eventUpdateWalkingPlayer.setPitch((float) rots[1]);
+                        eventUpdateWalkingPlayer.rotationUsed = true;
                     }
-                } else {
+                } else if(updateLogic.getValue() == UpdateLogic.PACKET){
                     setRotations(rots[0], rots[1]);
                 }
             }
@@ -361,17 +390,23 @@ public class AutoCrystal extends Module {
                 }
             }
             if(placeTimer.hasPassed(placeDelay.getValue())) {
-                if(placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
-                    this.setModuleInfo("");
-                    resetRots();
-                    return;
+                boolean finalizePlace = true;
+                if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer.getStage() != ForgeEvent.Stage.POST) {
+                    finalizePlace = false;
                 }
-                if(africanMode.getValue()) {
-                    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
+                if(finalizePlace) {
+                    if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
+                        this.setModuleInfo("");
+                        resetRots();
+                        return;
+                    }
+                    if (africanMode.getValue()) {
+                        mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
+                    }
+                    placedCrystals.add(placePosition);
+                    mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
+                    placeTimer.reset();
                 }
-                placedCrystals.add(placePosition);
-                mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float)rayTraceResult.hitVec.x, (float)rayTraceResult.hitVec.y, (float)rayTraceResult.hitVec.z));
-                placeTimer.reset();
             }
             if (isRotating) {
                 if (togglePitch) {
@@ -512,12 +547,7 @@ public class AutoCrystal extends Module {
     @SubscribeEvent
     public void onUpdateWalking(EventUpdateWalkingPlayer event) {
         if(updateLogic.getValue() == UpdateLogic.WALKING) {
-            if (event.getStage() == ForgeEvent.Stage.PRE) {
-                RotationUtil.updateRotations();
-                doAutoCrystal(event, UpdateStage.PRE);
-            } else if (event.getStage() == ForgeEvent.Stage.POST) {
-                RotationUtil.restoreRotations();
-            }
+            doAutoCrystal(event);
         }
     }
 
@@ -527,7 +557,7 @@ public class AutoCrystal extends Module {
             return;
         }
         if(updateLogic.getValue() == UpdateLogic.PACKET) {
-            doAutoCrystal(null, UpdateStage.NONE);
+            doAutoCrystal(null);
         }
     }
 
@@ -547,6 +577,7 @@ public class AutoCrystal extends Module {
         placedCrystals.clear();
         attackedCrystals.clear();
         crystalRender = null;
+        oldPlacePos = null;
         currentAttacking = null;
         damage = 0.0d;
         resetRots();

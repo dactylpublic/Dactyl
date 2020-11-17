@@ -445,6 +445,67 @@ public class CombatUtil {
         return (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL || mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL);
     }
 
+    public static boolean placePosStillSatisfies(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, double placeRange) {
+        final List<Entity> playerEntities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        EntityPlayer satisfiedTarget = null;
+        for (Entity entity : playerEntities) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            if(entity.getDistanceSq(blockPos) > 56.2) {
+                continue;
+            }
+            double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+            float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+            if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                continue;
+            }
+            if(targetDamage <= 2.0) {
+                continue;
+            }
+            if (targetDamage < minDamage) {
+                continue;
+            }
+            satisfiedTarget = (EntityPlayer) entity;
+        }
+
+        if(doPlaceTrace) {
+            if(!canSeeBlock(blockPos)) {
+                if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                    return false;
+                }
+            }
+        }
+
+        if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+            return false;
+        }
+
+        double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+        float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+        if(antiSuicide) {
+            if(selfDamage > maxSelfDmg) {
+                return false;
+            }
+            if((selfDamage >= playerHealth)) {
+                return false;
+            }
+        }
+
+        if(satisfiedTarget == null) {
+            return false;
+        }
+
+        return true;
+    }
+
+
     public static BlockPos getBestPlacePosition(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
         BlockPos placePosition = null;
         final List<BlockPos> placePositions = findPossiblePlacePoses(oneBlockCA, placeRange);
