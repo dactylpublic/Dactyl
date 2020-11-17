@@ -93,10 +93,12 @@ public class JumpFill extends Module {
 
     @Override
     public void onDisable() {
-        if(packetSwitch.getValue()) {
-            mc.player.connection.sendPacket(new CPacketHeldItemChange(oldSlot));
-        } else {
-            mc.player.inventory.currentItem = oldSlot;
+        if(oldSlot != -1) {
+            if (packetSwitch.getValue()) {
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(oldSlot));
+            } else {
+                mc.player.inventory.currentItem = oldSlot;
+            }
         }
         blockSlot = -1;
         oldSlot = -1;
