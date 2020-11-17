@@ -445,7 +445,7 @@ public class CombatUtil {
         return (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL || mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL);
     }
 
-    public static boolean placePosStillSatisfies(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, double placeRange) {
+    public static boolean placePosStillSatisfies(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
         final List<Entity> playerEntities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         EntityPlayer satisfiedTarget = null;
         for (Entity entity : playerEntities) {
@@ -473,6 +473,10 @@ public class CombatUtil {
                 continue;
             }
             satisfiedTarget = (EntityPlayer) entity;
+        }
+
+        if(!isValidPlacePos(onepointthirteen, blockPos)) {
+            return false;
         }
 
         if(doPlaceTrace) {
@@ -726,6 +730,30 @@ public class CombatUtil {
         }
         return placePosition;
     }
+
+    public static double getHighestDMGWorld(double enemyRange, BlockPos blockPos) {
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        EntityPlayer player = null;
+        double bestDMG = 1.3d;
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+            if(targetDamage > bestDMG) {
+                bestDMG = targetDamage;
+                player = (EntityPlayer) entity;
+            }
+        }
+        return bestDMG;
+    }
+
 
     public static EntityPlayer getGreatestDamageOnPlayer(double enemyRange, BlockPos blockPos) {
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));

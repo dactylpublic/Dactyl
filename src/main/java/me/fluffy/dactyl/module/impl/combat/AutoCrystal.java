@@ -315,7 +315,7 @@ public class AutoCrystal extends Module {
             if(oldPlacePos == null) {
                 doRecalc = true;
             } else {
-                if(CombatUtil.placePosStillSatisfies(oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), placeRange.getValue())) {
+                if(CombatUtil.placePosStillSatisfies(oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                     doRecalc = false;
                 } else {
                     doRecalc = true;
