@@ -28,20 +28,4 @@ public class InjNetworkManager {
         if(e.isCanceled())
             ci.cancel();
     }
-
-    @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("RETURN"))
-    private void onSendPacketPost(Packet<?> packet, CallbackInfo ci) {
-        PacketEvent e = new PacketEvent(ForgeEvent.Stage.POST, packet, PacketEvent.PacketType.OUTGOING);
-        MinecraftForge.EVENT_BUS.post(e);
-        if(e.isCanceled())
-            ci.cancel();
-    }
-
-    @Inject(method = "channelRead0", at = @At("RETURN"))
-    private void onChannelReadPost(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
-        PacketEvent e = new PacketEvent(ForgeEvent.Stage.POST, packet, PacketEvent.PacketType.INCOMING);
-        MinecraftForge.EVENT_BUS.post(e);
-        if(e.isCanceled())
-            ci.cancel();
-    }
 }
