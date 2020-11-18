@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.module.impl.player;
 
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
+import me.fluffy.dactyl.injection.inj.access.ICPacketCloseWindow;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import net.minecraft.item.ItemAir;
@@ -17,13 +18,14 @@ public class XCarry extends Module {
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
         if(event.getPacket() instanceof CPacketCloseWindow) {
+            CPacketCloseWindow packetCloseWindow = (CPacketCloseWindow)event.getPacket();
             if(forceCancel.getValue()) {
                 event.setCanceled(true);
             } else {
                 if(isAir(1) && isAir(2) && isAir(3) && isAir(4)) {
                     return;
                 }
-                event.setCanceled(true);
+                event.setCanceled((((ICPacketCloseWindow)packetCloseWindow).getWindowId() == 0));
             }
         }
     }

@@ -20,6 +20,7 @@
     "InjRenderPlayer",
     "InjVisGraph",
     "InjWorld",
+    "access.ICPacketCloseWindow",
     "access.ICPacketPlayer",
     "access.ICPacketUseEntity",
     "access.IItemRenderer",
