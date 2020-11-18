@@ -52,7 +52,6 @@ public class ModuleManager {
         modules.add(new ReverseStep());
         modules.add(new LongJump());
         modules.add(new Sprint());
-        modules.add(new PacketFly());
 
         // render
         modules.add(new HoleESP());
