@@ -52,6 +52,7 @@ public class HUD extends Module {
 
     public Setting<WatermarkType> watermarkTypeSetting = new Setting<WatermarkType>("Logo", WatermarkType.DACTYL_IE, v->renderHud.getValue());
     public Setting<String> customWatermark = new Setting<String>("CustomWatermark", "Trollgod.cc", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
+    public Setting<Integer> waterMarkOffset = new Setting<Integer>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
     public Setting<Boolean> gradientLogo = new Setting<Boolean>("LogoGradient", false, v->renderHud.getValue());
 
     public Setting<Boolean> shadow = new Setting<Boolean>("Shadow", false, v->renderHud.getValue());
@@ -460,22 +461,23 @@ public class HUD extends Module {
                     drawingWatermark = customWatermark.getValue().replace("<v>", Dactyl.VERSION);
                     break;
             }
+            int offset = 1+waterMarkOffset.getValue();
             if(gradientLogo.getValue()) {
                 char[] characters = drawingWatermark.toCharArray();
                 int currentX = 1;
                 for(char ch : characters) {
                     if(shadow.getValue()) {
-                        Dactyl.fontUtil.drawStringWithShadow(String.valueOf(ch), currentX, 1, Colors.INSTANCE.getColor(currentX, true));
+                        Dactyl.fontUtil.drawStringWithShadow(String.valueOf(ch), currentX, offset, Colors.INSTANCE.getColor(currentX, true));
                     } else {
-                        Dactyl.fontUtil.drawString(String.valueOf(ch), currentX, 1, Colors.INSTANCE.getColor(currentX, true));
+                        Dactyl.fontUtil.drawString(String.valueOf(ch), currentX, offset, Colors.INSTANCE.getColor(currentX, true));
                     }
                     currentX+=Dactyl.fontUtil.getStringWidth(String.valueOf(ch));
                 }
             } else {
                 if(shadow.getValue()) {
-                    Dactyl.fontUtil.drawStringWithShadow(drawingWatermark, 1, 1, Colors.INSTANCE.getColor(1, false));
+                    Dactyl.fontUtil.drawStringWithShadow(drawingWatermark, 1, offset, Colors.INSTANCE.getColor(1, false));
                 } else {
-                    Dactyl.fontUtil.drawString(drawingWatermark, 1, 1, Colors.INSTANCE.getColor(1, false));
+                    Dactyl.fontUtil.drawString(drawingWatermark, 1, offset, Colors.INSTANCE.getColor(1, false));
                 }
             }
         }
