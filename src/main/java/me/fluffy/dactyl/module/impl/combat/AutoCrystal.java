@@ -84,7 +84,7 @@ public class AutoCrystal extends Module {
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", true, vis->settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
+    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", true, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
@@ -352,9 +352,9 @@ public class AutoCrystal extends Module {
             damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), facePlaceStart.getValue(), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] rots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
             if(placeRotate.getValue()) {
+                double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
                 if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                     if(constRotate.getValue()) {
-                        double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
                         eventUpdateWalkingPlayer.setYaw((float) constRots[0]);
                         eventUpdateWalkingPlayer.setPitch((float) constRots[1]);
                         eventUpdateWalkingPlayer.rotationUsed = true;
@@ -364,7 +364,11 @@ public class AutoCrystal extends Module {
                         eventUpdateWalkingPlayer.rotationUsed = true;
                     }
                 } else if(updateLogic.getValue() == UpdateLogic.PACKET){
-                    setRotations(rots[0], rots[1]);
+                    if(constRotate.getValue()) {
+                        setRotations(constRots[0], constRots[1]);
+                    } else {
+                        setRotations(rots[0], rots[1]);
+                    }
                 }
             }
             RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX+0.5, mc.player.posY + 1.0, mc.player.posZ+0.5), new Vec3d(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5));
