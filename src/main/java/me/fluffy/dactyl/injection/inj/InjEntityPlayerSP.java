@@ -50,20 +50,12 @@ public class InjEntityPlayerSP extends AbstractClientPlayer {
 
     @Redirect(method = "onUpdateWalkingPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/entity/EntityPlayerSP;rotationYaw:F"))
     private float onUpdateWalkingPlayerRotationYaw(EntityPlayerSP player) {
-        if(eventUpdateWalkingPlayer.rotationUsed) {
-            return eventUpdateWalkingPlayer.getYaw();
-        } else {
-            return Minecraft.getMinecraft().player.rotationYaw;
-        }
+        return eventUpdateWalkingPlayer.getYaw();
     }
 
     @Redirect(method = "onUpdateWalkingPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/entity/EntityPlayerSP;rotationPitch:F"))
     private float onUpdateWalkingPlayerRotationPitch(EntityPlayerSP player) {
-        if(eventUpdateWalkingPlayer.rotationUsed) {
-            return eventUpdateWalkingPlayer.getPitch();
-        } else {
-            return Minecraft.getMinecraft().player.rotationPitch;
-        }
+        return eventUpdateWalkingPlayer.getPitch();
     }
 
     @Inject(method = "onUpdateWalkingPlayer", at = @At("RETURN"))
