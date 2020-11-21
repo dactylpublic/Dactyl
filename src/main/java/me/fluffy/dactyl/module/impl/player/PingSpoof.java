@@ -27,7 +27,7 @@ public class PingSpoof extends Module {
 
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        if((event.getPacket() instanceof CPacketKeepAlive || event.getPacket() instanceof CPacketClientStatus) && !this.packetsMap.keySet().contains(event.getPacket())) {
+        if((event.getPacket() instanceof CPacketKeepAlive) && !this.packetsMap.keySet().contains(event.getPacket())) {
             event.setCanceled(true);
             synchronized (this.packetsMap) {
                 this.packetsMap.put((Packet<?>)event.getPacket(), System.currentTimeMillis() + delay.getValue().longValue());
@@ -45,7 +45,7 @@ public class PingSpoof extends Module {
                 final Iterator<Map.Entry<Packet<?>, Long>> iterator = this.packetsMap.entrySet().iterator();
                 while (iterator.hasNext()) {
                     final Map.Entry<Packet<?>, Long> entry = iterator.next();
-                    if(entry.getValue() < System.currentTimeMillis()) {
+                    if(entry.getValue() <= System.currentTimeMillis()) {
                         mc.player.connection.sendPacket(entry.getKey());
                         iterator.remove();
                     }
