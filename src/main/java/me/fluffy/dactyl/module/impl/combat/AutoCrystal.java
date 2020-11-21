@@ -84,7 +84,7 @@ public class AutoCrystal extends Module {
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", true, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
