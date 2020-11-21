@@ -1,4 +1,4 @@
-package me.fluffy.dactyl.module.impl.player;
+package me.fluffy.dactyl.module.impl.misc;
 
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.module.Module;
@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class PortalGodMode extends Module {
     public PortalGodMode() {
-        super("PortalGodMode", Category.PLAYER);
+        super("PortalGodMode", Category.MISC);
     }
 
     @SubscribeEvent

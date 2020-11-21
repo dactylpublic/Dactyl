@@ -1,4 +1,4 @@
-package me.fluffy.dactyl.module.impl.player;
+package me.fluffy.dactyl.module.impl.misc;
 
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.module.Module;
@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class PingSpoof extends Module {
     Setting<Integer> delay = new Setting<Integer>("Delay", 120, 10, 1400);
     public PingSpoof() {
-        super("PingSpoof", Category.PLAYER);
+        super("PingSpoof", Category.MISC);
     }
 
     private final HashMap<Packet<?>, Long> packetsMap = new HashMap<>();

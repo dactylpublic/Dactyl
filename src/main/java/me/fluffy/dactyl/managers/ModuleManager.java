@@ -6,6 +6,8 @@ import me.fluffy.dactyl.module.impl.client.*;
 import me.fluffy.dactyl.module.impl.combat.*;
 import me.fluffy.dactyl.module.impl.misc.FakePlayer;
 import me.fluffy.dactyl.module.impl.misc.MCF;
+import me.fluffy.dactyl.module.impl.misc.PingSpoof;
+import me.fluffy.dactyl.module.impl.misc.PortalGodMode;
 import me.fluffy.dactyl.module.impl.player.*;
 import me.fluffy.dactyl.module.impl.movement.*;
 import me.fluffy.dactyl.module.impl.render.*;
@@ -29,7 +31,6 @@ public class ModuleManager {
         modules.add(new Criticals());
         modules.add(new AutoTrap());
         modules.add(new Surround());
-        modules.add(new AutoLog());
         modules.add(new SelfTrap());
 
         // player
@@ -37,14 +38,14 @@ public class ModuleManager {
         modules.add(new FastItem());
         modules.add(new NoHitbox());
         modules.add(new Scaffold());
-        modules.add(new PortalGodMode());
         modules.add(new XCarry());
         modules.add(new JumpFill());
-        modules.add(new PingSpoof());
 
         // misc
         modules.add(new FakePlayer());
         modules.add(new MCF());
+        modules.add(new PortalGodMode());
+        modules.add(new PingSpoof());
 
         // movement
         modules.add(new Strafe());
