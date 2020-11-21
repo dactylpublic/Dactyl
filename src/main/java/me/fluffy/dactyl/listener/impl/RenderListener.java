@@ -24,6 +24,7 @@ public class RenderListener extends Listener {
             for (Module module : Dactyl.moduleManager.getModules()) {
                 if(module.isEnabled() || module.isAlwaysListening()) {
                     module.onScreen();
+                    module.onScreen2D(event.getPartialTicks());
                 }
             }
             GL11.glPushMatrix();

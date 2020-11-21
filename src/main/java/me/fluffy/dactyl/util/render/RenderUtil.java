@@ -3,6 +3,7 @@ package me.fluffy.dactyl.util.render;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.injection.inj.access.IRenderManager;
 import me.fluffy.dactyl.module.impl.client.Colors;
+import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
 import me.fluffy.dactyl.util.EntityUtil;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -23,14 +24,23 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 import java.awt.*;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.Objects;
 import java.util.Timer;
 
 public class RenderUtil {
     public static ICamera camera = new Frustum();
+    private static final FloatBuffer screenCoords = BufferUtils.createFloatBuffer(3);
+    private static final IntBuffer viewport = BufferUtils.createIntBuffer(16);
+    private static final FloatBuffer modelView = BufferUtils.createFloatBuffer(16);;
+    private static final FloatBuffer projection = BufferUtils.createFloatBuffer(16);
 
     public static void drawGradientRect(int left, int top, int right, int bottom, int startColor, int endColor) {
         float f = (float)(startColor >> 24 & 255) / 255.0F;
@@ -116,6 +126,19 @@ public class RenderUtil {
         GlStateManager.enableTexture2D();
     }
 
+    public static boolean isInView(Entity entity) {
+        camera.setPosition(Minecraft.getMinecraft().getRenderViewEntity().posX, Minecraft.getMinecraft().getRenderViewEntity().posY, Minecraft.getMinecraft().getRenderViewEntity().posZ);
+
+        AxisAlignedBB bb = entity.getEntityBoundingBox();
+
+        bb = bb.expand(0.15f, 0.1f, 0.15f);
+
+        if (!camera.isBoundingBoxInFrustum(bb)) {
+            return false;
+        }
+        return true;
+    }
+
     public static void drawText(final BlockPos pos, final String text) {
         if (pos == null || text == null) {
             return;
@@ -199,6 +222,48 @@ public class RenderUtil {
         }
     }
 
+    public static void drawTracerPointer(final float x, final float y, final float size, final float widthDiv, final float heightDiv, final boolean outline, final float outlineWidth, final int color, float alpha) {
+        final boolean blend = GL11.glIsEnabled(3042);
+        GL11.glEnable(3042);
+        GL11.glDisable(3553);
+        GL11.glBlendFunc(770, 771);
+        GL11.glEnable(2848);
+        GL11.glPushMatrix();
+        hexColor(color);
+        GL11.glBegin(7);
+        GL11.glVertex2d((double)x, (double)y);
+        GL11.glVertex2d((double)(x - size / widthDiv), (double)(y + size));
+        GL11.glVertex2d((double)x, (double)(y + size / heightDiv));
+        GL11.glVertex2d((double)(x + size / widthDiv), (double)(y + size));
+        GL11.glVertex2d((double)x, (double)y);
+        GL11.glEnd();
+        if (outline) {
+            GL11.glLineWidth(outlineWidth);
+            GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha);
+            GL11.glBegin(2);
+            GL11.glVertex2d((double)x, (double)y);
+            GL11.glVertex2d((double)(x - size / widthDiv), (double)(y + size));
+            GL11.glVertex2d((double)x, (double)(y + size / heightDiv));
+            GL11.glVertex2d((double)(x + size / widthDiv), (double)(y + size));
+            GL11.glVertex2d((double)x, (double)y);
+            GL11.glEnd();
+        }
+        GL11.glPopMatrix();
+        GL11.glEnable(3553);
+        if (!blend) {
+            GL11.glDisable(3042);
+        }
+        GL11.glDisable(2848);
+    }
+
+    public static void hexColor(final int hexColor) {
+        final float red = (hexColor >> 16 & 0xFF) / 255.0f;
+        final float green = (hexColor >> 8 & 0xFF) / 255.0f;
+        final float blue = (hexColor & 0xFF) / 255.0f;
+        final float alpha = (hexColor >> 24 & 0xFF) / 255.0f;
+        GL11.glColor4f(red, green, blue, alpha);
+    }
+
     public static void drawBlockOutline(final BlockPos pos, final Color color, final float linewidth, final boolean air) {
         final IBlockState iblockstate = Minecraft.getMinecraft().world.getBlockState(pos);
         if ((air || iblockstate.getMaterial() != Material.AIR) && Minecraft.getMinecraft().world.getWorldBorder().contains(pos)) {
@@ -213,6 +278,34 @@ public class RenderUtil {
             final AxisAlignedBB blockAxis = new AxisAlignedBB(pos.getX() - Minecraft.getMinecraft().getRenderManager().viewerPosX, pos.getY() - Minecraft.getMinecraft().getRenderManager().viewerPosY, pos.getZ() - Minecraft.getMinecraft().getRenderManager().viewerPosZ, pos.getX() + 1 - Minecraft.getMinecraft().getRenderManager().viewerPosX, pos.getY() + 1 - Minecraft.getMinecraft().getRenderManager().viewerPosY + height, pos.getZ() + 1 - Minecraft.getMinecraft().getRenderManager().viewerPosZ);
             drawBlockOutline(blockAxis.grow(0.0020000000949949026), color, linewidth);
         }
+    }
+    private static final boolean crystalCheck = false;
+
+    public static float[] distanceToColor(Entity entity) {
+        if (entity instanceof EntityPlayer && Dactyl.friendManager.isFriend(entity.getName())) {
+            return new float[] { 0.0f, 0.5f, 1.0f, 1.0f };
+        }
+        final Color col = new Color(Color.HSBtoRGB((float) (Math.max(0.0F, Math.min(Minecraft.getMinecraft().player.getDistanceSq(entity), crystalCheck ? AutoCrystal.INSTANCE.placeRange.getValue() * AutoCrystal.INSTANCE.placeRange.getValue() : 2500) / (crystalCheck ? AutoCrystal.INSTANCE.placeRange.getValue() * AutoCrystal.INSTANCE.placeRange.getValue() : 2500)) / 3.0F), 1.0F, 0.8f) | 0xFF000000);
+        return new float[] { col.getRed() / 255.0f, col.getGreen() / 255.0f, col.getBlue() / 255.0f, 1.0f };
+    }
+
+    public static Color distToColor(Entity entity) {
+        if (entity instanceof EntityPlayer && Dactyl.friendManager.isFriend(entity.getName())) {
+            return new Color(85, 255, 255, 255);
+        }
+        final Color col = new Color(Color.HSBtoRGB((float) (Math.max(0.0F, Math.min(Minecraft.getMinecraft().player.getDistanceSq(entity), crystalCheck ? AutoCrystal.INSTANCE.placeRange.getValue() * AutoCrystal.INSTANCE.placeRange.getValue() : 2500) / (crystalCheck ? AutoCrystal.INSTANCE.placeRange.getValue() * AutoCrystal.INSTANCE.placeRange.getValue() : 2500)) / 3.0F), 1.0F, 0.8f) | 0xFF000000);
+        return col;
+    }
+
+    public static Vec3d to2D(final double x, final double y, final double z) {
+        GL11.glGetFloat(2982, RenderUtil.modelView);
+        GL11.glGetFloat(2983, RenderUtil.projection);
+        GL11.glGetInteger(2978, RenderUtil.viewport);
+        final boolean result = GLU.gluProject((float)x, (float)y, (float)z, RenderUtil.modelView, RenderUtil.projection, RenderUtil.viewport, RenderUtil.screenCoords);
+        if (result) {
+            return new Vec3d((double)RenderUtil.screenCoords.get(0), (double)(Display.getHeight() - RenderUtil.screenCoords.get(1)), (double)RenderUtil.screenCoords.get(2));
+        }
+        return null;
     }
 
     public static void drawBlockOutline(final AxisAlignedBB bb, final Color color, final float linewidth) {

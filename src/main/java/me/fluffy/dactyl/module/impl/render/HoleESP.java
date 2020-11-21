@@ -2,6 +2,7 @@ package me.fluffy.dactyl.module.impl.render;
 
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
@@ -28,12 +29,14 @@ public class HoleESP extends Module {
     Setting<Double> yExtrude = new Setting<Double>("ExtrudeY", 1.0d, 0.0d, 3.0d);
     Setting<Boolean> obsidianHoles = new Setting<Boolean>("ObiHoles", true);
     Setting<Boolean> bedrockHoles = new Setting<Boolean>("BedrockHoles", true);
-    Setting<Integer> obiRed = new Setting<Integer>("ObiRed", 5, 1, 255, v->obsidianHoles.getValue());
-    Setting<Integer> obiGreen = new Setting<Integer>("ObiGreen", 175, 1, 255, v->obsidianHoles.getValue());
-    Setting<Integer> obiBlue = new Setting<Integer>("ObiBlue", 255, 1, 255, v->obsidianHoles.getValue());
-    Setting<Integer> bedrockRed = new Setting<Integer>("B Red", 5, 1, 255, v->bedrockHoles.getValue());
-    Setting<Integer> bedrockGreen = new Setting<Integer>("B Green", 5, 1, 255, v->bedrockHoles.getValue());
-    Setting<Integer> bedrockBlue = new Setting<Integer>("B Blue", 5, 1, 255, v->bedrockHoles.getValue());
+    Setting<Boolean> obiSync = new Setting<Boolean>("ObiSync", false);
+    Setting<Integer> obiRed = new Setting<Integer>("ObiRed", 5, 1, 255, v->obsidianHoles.getValue()&&!obiSync.getValue());
+    Setting<Integer> obiGreen = new Setting<Integer>("ObiGreen", 175, 1, 255, v->obsidianHoles.getValue()&&!obiSync.getValue());
+    Setting<Integer> obiBlue = new Setting<Integer>("ObiBlue", 255, 1, 255, v->obsidianHoles.getValue()&&!obiSync.getValue());
+    Setting<Boolean> bedrockSync = new Setting<Boolean>("BedrockSync", false);
+    Setting<Integer> bedrockRed = new Setting<Integer>("B Red", 5, 1, 255, v->bedrockHoles.getValue()&&!bedrockSync.getValue());
+    Setting<Integer> bedrockGreen = new Setting<Integer>("B Green", 5, 1, 255, v->bedrockHoles.getValue()&&!bedrockSync.getValue());
+    Setting<Integer> bedrockBlue = new Setting<Integer>("B Blue", 5, 1, 255, v->bedrockHoles.getValue()&&!bedrockSync.getValue());
     public HoleESP() {
         super("HoleESP", Category.RENDER);
     }
@@ -54,9 +57,9 @@ public class HoleESP extends Module {
             double transY = negativeTranslate.getValue() ? (-yTranslate.getValue()) : yTranslate.getValue();
             double extY = negativeExtrude.getValue() ? (-yExtrude.getValue()) : yExtrude.getValue();
             if(isBedrock) {
-                RenderUtil.drawOffsetBox(pos, transY, extY, new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
+                RenderUtil.drawOffsetBox(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
             } else {
-                RenderUtil.drawOffsetBox(pos, transY, extY, new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
+                RenderUtil.drawOffsetBox(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
             }
         });
     }

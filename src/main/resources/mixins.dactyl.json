@@ -23,6 +23,7 @@
     "access.ICPacketCloseWindow",
     "access.ICPacketPlayer",
     "access.ICPacketUseEntity",
+    "access.IEntityRenderer",
     "access.IItemRenderer",
     "access.IMinecraft",
     "access.IRenderManager",

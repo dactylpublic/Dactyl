@@ -14,6 +14,10 @@ public class MathUtil {
         return new BigDecimal(value).setScale(places, RoundingMode.HALF_UP).doubleValue();
     }
 
+    public static double square(double a) {
+        return a * a;
+    }
+
     public static double[] directionSpeed(double speed)
     {
         final Minecraft mc = Minecraft.getMinecraft();

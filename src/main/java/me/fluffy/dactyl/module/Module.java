@@ -95,6 +95,7 @@ public class Module {
     public void onDisable() {}
     public void onClientUpdate() {}
     public void onScreen() {}
+    public void onScreen2D(float partialTicks) {}
     public void onRender3D(Render3DEvent event) {}
 
     public String getName() {

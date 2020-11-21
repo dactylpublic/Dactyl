@@ -61,6 +61,7 @@ public class ModuleManager {
         modules.add(new NoRender());
         modules.add(new ViewModel());
         modules.add(new ESP());
+        modules.add(new Tracers());
 
         // client
         modules.add(new ClickGuiModule());
