@@ -29,6 +29,8 @@ public class ModuleManager {
         modules.add(new Criticals());
         modules.add(new AutoTrap());
         modules.add(new Surround());
+        modules.add(new AutoLog());
+        modules.add(new SelfTrap());
 
         // player
         modules.add(new Freecam());
@@ -62,6 +64,7 @@ public class ModuleManager {
         modules.add(new ViewModel());
         modules.add(new ESP());
         modules.add(new Tracers());
+        modules.add(new StorageESP());
 
         // client
         modules.add(new ClickGuiModule());
