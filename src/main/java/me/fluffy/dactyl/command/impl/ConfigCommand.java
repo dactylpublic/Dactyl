@@ -50,7 +50,7 @@ public class ConfigCommand extends Command {
             Configuration.load(args[2], false);
         } catch(Exception exception) {
             exception.printStackTrace();
-            ChatUtil.printMsg("&cConfiguration " + args[2] + " failed to load...", true, true);
+            ChatUtil.printMsg("&cConfiguration " + args[2] + " does not exist.", true, true);
             return;
         }
         ChatUtil.printMsg("&aConfiguration " + args[2] + " loaded!", true, true);
