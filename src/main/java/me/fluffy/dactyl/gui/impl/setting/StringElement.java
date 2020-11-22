@@ -73,7 +73,7 @@ public class StringElement extends SettingElement {
             }
             if(key != Keyboard.KEY_RETURN && key != Keyboard.KEY_ESCAPE && key != Keyboard.KEY_BACK) {
                 if(key != Keyboard.KEY_LSHIFT) {
-                    if(key != 0) {
+                    if(key != 0 && eventChar != 0) {
                         typedSoFar += Character.toString(eventChar);
                     }
                 }
