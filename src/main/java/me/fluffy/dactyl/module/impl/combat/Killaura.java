@@ -5,6 +5,7 @@ import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.RotationUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -32,12 +33,14 @@ public class Killaura extends Module {
     Setting<AttackMode> attackLogic = new Setting<AttackMode>("HoldLogic", AttackMode.SWORD);
     Setting<Boolean> hitDelay = new Setting<Boolean>("HitDelay", true);
     Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
+    Setting<Boolean> rotateInWebs = new Setting<Boolean>("WebRotate", false, v->rotate.getValue());
     Setting<Boolean> players = new Setting<Boolean>("Players", true);
     Setting<Boolean> mobs = new Setting<Boolean>("Mobs", false);
     Setting<Boolean> animals = new Setting<Boolean>("Animals", false);
     Setting<Boolean> vehicles = new Setting<Boolean>("Vehicles", true);
     Setting<Boolean> autoSwitch = new Setting<Boolean>("AutoSwitch", false);
     Setting<Integer> attackSpeed = new Setting<Integer>("AttackSpeed", 12, 1, 20, v->!hitDelay.getValue());
+    Setting<RotationMode> rotationModeSetting = new Setting<RotationMode>("Rots", RotationMode.UNIVERSAL, v->rotate.getValue());
     Setting<Double> range = new Setting<Double>("Range", 4.5D, 1.0D, 6.0D);
 
     public static Killaura INSTANCE;
@@ -104,6 +107,9 @@ public class Killaura extends Module {
         if (mc.world == null || mc.player == null)
             return;
         if (event.getStage() == ForgeEvent.Stage.PRE) {
+            if(rotationModeSetting.getValue() == RotationMode.UNIVERSAL) {
+                RotationUtil.updateRotations();
+            }
             target = findTarget();
             if (target != null) {
                 if(autoSwitch.getValue()) {
@@ -114,9 +120,21 @@ public class Killaura extends Module {
                     float sens = getSensitivityMultiplier();
                     float yawGCD = (Math.round(rots[0] / sens) * sens);
                     float pitchGCD = (Math.round(rots[1] / sens) * sens);
-                    event.setYaw(yawGCD);
-                    event.setPitch(pitchGCD);
-                    event.rotationUsed = true;
+                    boolean doRotate = true;
+                    if(mc.player.isInWeb) {
+                        if(!rotateInWebs.getValue()) {
+                            doRotate = false;
+                        }
+                    }
+                    if(doRotate) {
+                        if(rotationModeSetting.getValue() == RotationMode.CLIENT) {
+                            event.setYaw(yawGCD);
+                            event.setPitch(pitchGCD);
+                            event.rotationUsed = true;
+                        } else if(rotationModeSetting.getValue() == RotationMode.UNIVERSAL) {
+                            RotationUtil.setPlayerRotations(yawGCD, pitchGCD);
+                        }
+                    }
                 }
             }
         } else {
@@ -143,6 +161,7 @@ public class Killaura extends Module {
                     }
                 }
             }
+            RotationUtil.restoreRotations();
         }
     }
 
@@ -227,6 +246,11 @@ public class Killaura extends Module {
 
     private static void equip(int slot) {
         mc.player.inventory.currentItem = slot;
+    }
+
+    public enum RotationMode {
+        UNIVERSAL,
+        CLIENT
     }
 
 

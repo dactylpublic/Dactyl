@@ -18,6 +18,7 @@ public class Surround extends Module {
     public Setting<Integer> quota = new Setting<Integer>("Quota", 4, 1, 10);
     public Setting<Integer> delay = new Setting<Integer>("Delay", 50, 0, 150);
     public Setting<Boolean> allowEating = new Setting<Boolean>("AllowEating", true, "Slower surround if turned on, faster surround if turned off");
+    public Setting<Boolean> echestPriority = new Setting<Boolean>("EChestPrio", true);
     public Setting<Boolean> autoCenter = new Setting<Boolean>("AutoCenter", true);
     public Setting<Boolean> jumpDisable = new Setting<Boolean>("JumpDisable", true);
     public Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", false);
@@ -84,7 +85,7 @@ public class Surround extends Module {
                 endLoop();
                 return;
             }
-            int obi = CombatUtil.findBlockInHotbar(Blocks.OBSIDIAN);
+            int obi = CombatUtil.findSurroundBlock(echestPriority.getValue());
             if(obi == -1) {
                 mc.player.connection.sendPacket(new CPacketHeldItemChange(this.playerHotbarSlot));
                 this.toggle();

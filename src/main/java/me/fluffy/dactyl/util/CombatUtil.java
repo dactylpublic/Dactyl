@@ -163,6 +163,36 @@ public class CombatUtil {
         return new Vec3d(entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * mc.getRenderPartialTicks(), entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * mc.getRenderPartialTicks(), entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * mc.getRenderPartialTicks());
     }
 
+    public static int findSurroundBlock(boolean ehcestPriority) {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack != ItemStack.EMPTY && stack.getItem() instanceof ItemBlock) {
+                Block block = ((ItemBlock)stack.getItem()).getBlock();
+                if(ehcestPriority) {
+                    if (block == Blocks.ENDER_CHEST) {
+                        slot = i;
+                        break;
+                    }
+                    if(block == Blocks.OBSIDIAN) {
+                        slot = i;
+                        break;
+                    }
+                } else {
+                    if(block == Blocks.OBSIDIAN) {
+                        slot = i;
+                        break;
+                    }
+                    if (block == Blocks.ENDER_CHEST) {
+                        slot = i;
+                        break;
+                    }
+                }
+            }
+        }
+        return slot;
+    }
+
     public static int findBlockInHotbar(Block bc) {
         int slot = -1;
         for (int i = 0; i < 9; i++) {
