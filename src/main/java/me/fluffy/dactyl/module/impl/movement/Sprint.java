@@ -12,6 +12,10 @@ public class Sprint extends Module {
 
     @Override
     public void onClientUpdate() {
+        if(sprintModeSetting.getValue() == null) {
+            return;
+        }
+        this.setModuleInfo(sprintModeSetting.getValue() == SprintMode.LEGIT ? "Legit" : "Rage");
         if(mc.player == null || mc.world == null) {
             return;
         }
