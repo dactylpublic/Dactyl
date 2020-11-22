@@ -30,7 +30,7 @@ public class NoSlow extends Module {
     Setting<Boolean> inventoryMove = new Setting<Boolean>("InvMove", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSlowItem = new Setting<Boolean>("Items", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSoulSand = new Setting<Boolean>("SoulSand", true, v->page.getValue() == SettingPage.COMMON);
-    Setting<Boolean> sneakBypass = new Setting<Boolean>("SneakBypass", false, v->page.getValue() == SettingPage.COMMON);
+    Setting<Boolean> sneakBypass = new Setting<Boolean>("2bBypass", false, v->page.getValue() == SettingPage.COMMON);
     Setting<Double> soulSandSpeed = new Setting<Double>("SoulSpeed", 1.5D, 0.1D, 6.0D);
 
     // webs
