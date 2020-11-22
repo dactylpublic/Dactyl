@@ -25,7 +25,7 @@ public class HoleESP extends Module {
     Setting<Double> renderRange = new Setting<Double>("RenderRange", 8.0d, 1.0d, 20.0d);
     Setting<Boolean> negativeTranslate = new Setting<Boolean>("NegTrans", false);
     Setting<Double> yTranslate = new Setting<Double>("TranslateY", 1.0d, 0.0d, 3.0d);
-    Setting<Boolean> negativeExtrude = new Setting<Boolean>("NegExtrude", false);
+    Setting<Boolean> negativeExtrude = new Setting<Boolean>("NegExtrude", true);
     Setting<Double> yExtrude = new Setting<Double>("ExtrudeY", 1.0d, 0.0d, 3.0d);
     Setting<Boolean> obsidianHoles = new Setting<Boolean>("ObiHoles", true);
     Setting<Boolean> bedrockHoles = new Setting<Boolean>("BedrockHoles", true);
