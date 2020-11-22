@@ -40,6 +40,7 @@ public class ModuleManager {
         modules.add(new Scaffold());
         modules.add(new XCarry());
         modules.add(new JumpFill());
+        modules.add(new AntiInteract());
 
         // misc
         modules.add(new FakePlayer());
