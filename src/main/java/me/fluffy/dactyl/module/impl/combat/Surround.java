@@ -19,6 +19,7 @@ public class Surround extends Module {
     public Setting<Integer> delay = new Setting<Integer>("Delay", 50, 0, 150);
     public Setting<Boolean> allowEating = new Setting<Boolean>("AllowEating", true, "Slower surround if turned on, faster surround if turned off");
     public Setting<Boolean> autoCenter = new Setting<Boolean>("AutoCenter", true);
+    public Setting<Boolean> jumpDisable = new Setting<Boolean>("JumpDisable", true);
     public Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", false);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
@@ -64,6 +65,12 @@ public class Surround extends Module {
         }
 
         this.setModuleInfo(HoleUtil.isInHole() ? TextFormatting.GREEN + "Safe" : TextFormatting.RED + "Unsafe");
+
+        if(jumpDisable.getValue()) {
+            if(mc.player.movementInput.jump) {
+                this.toggle();
+            }
+        }
 
         if(this.offsetStep == 0) {
             this.basePos = (new BlockPos(mc.player.getPositionVector())).down();

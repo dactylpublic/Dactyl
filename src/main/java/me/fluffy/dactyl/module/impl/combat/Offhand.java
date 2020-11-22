@@ -4,10 +4,7 @@ import me.fluffy.dactyl.event.impl.action.EventKeyPress;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
-import me.fluffy.dactyl.util.Bind;
-import me.fluffy.dactyl.util.CombatUtil;
-import me.fluffy.dactyl.util.HoleUtil;
-import me.fluffy.dactyl.util.TimeUtil;
+import me.fluffy.dactyl.util.*;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.inventory.GuiInventory;
@@ -44,6 +41,7 @@ public class Offhand extends Module {
 
     // other
     Setting<Integer> modeUpdates = new Setting<Integer>("Updates", 2, 1, 2);
+    Setting<EmergencyMode> emergencyMode = new Setting<EmergencyMode>("ZeroKey", EmergencyMode.EGAP);
     Setting<Boolean> deathCheck = new Setting<Boolean>("DangerCheck", true);
     Setting<Double> dangerDistance = new Setting<Double>("DangerDist", 10.0, 1.0D, 13.5D, vis->deathCheck.getValue());
     Setting<Boolean> soft = new Setting<Boolean>("Soft", false);
@@ -209,7 +207,7 @@ public class Offhand extends Module {
             nextOffhand = OffhandMode.OBI;
         }
         if(mc.player.getHeldItemOffhand().getItem() == targetToSwitch) {
-            nextOffhand = OffhandMode.TOTEM;
+            nextOffhand = (CombatUtil.getItemCount(Items.TOTEM_OF_UNDYING) == 0) ? emergencyToOffhand(emergencyMode.getValue()) : OffhandMode.TOTEM;
         }
         float playerHealth = mc.player.getHealth()+mc.player.getAbsorptionAmount();
         if(playerHealth < requiredSwitchHealth) {
@@ -219,6 +217,19 @@ public class Offhand extends Module {
         if(nextOffhand != null) {
             offhandMode = nextOffhand;
         }
+    }
+
+    private OffhandMode emergencyToOffhand(EmergencyMode mode) {
+        if(mode == EmergencyMode.CRAPPLE) {
+            return OffhandMode.CRAPPLE;
+        } else if(mode == EmergencyMode.EGAP) {
+            return OffhandMode.GAPPLE;
+        } else if(mode == EmergencyMode.CRYSTAL) {
+            return OffhandMode.CRYSTAL;
+        } else if(mode == EmergencyMode.OBI) {
+            return OffhandMode.OBI;
+        }
+        return OffhandMode.GAPPLE;
     }
 
     private boolean hasTotemsAvailable() {
@@ -328,6 +339,24 @@ public class Offhand extends Module {
         }
         if(modeUpdates.getValue() == 2) {
             doOffhand();
+        }
+    }
+
+    public enum EmergencyMode {
+        EGAP("EGap"),
+        CRAPPLE("Crapple"),
+        CRYSTAL("Crystal"),
+        OBI("Obi");
+
+        private final String name;
+
+        private EmergencyMode(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
         }
     }
 
