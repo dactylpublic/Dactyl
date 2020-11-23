@@ -46,10 +46,15 @@ public class ConfigCommand extends Command {
     }
 
     private void handleLoadConfig(String[] args) {
+        boolean loader = false;
         try {
-            Configuration.load(args[2], false);
+            loader = Configuration.load(args[2], false);
         } catch(Exception exception) {
-            exception.printStackTrace();
+            //exception.printStackTrace();
+            ChatUtil.printMsg("&cConfiguration " + args[2] + " does not exist.", true, true);
+            return;
+        }
+        if(!loader) {
             ChatUtil.printMsg("&cConfiguration " + args[2] + " does not exist.", true, true);
             return;
         }
