@@ -4,6 +4,7 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.listener.Listener;
+import me.fluffy.dactyl.module.impl.movement.Strafe;
 import me.fluffy.dactyl.util.ChatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.client.Minecraft;

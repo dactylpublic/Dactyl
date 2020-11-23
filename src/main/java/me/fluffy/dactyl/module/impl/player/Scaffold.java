@@ -26,7 +26,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Scaffold extends Module {
     public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d);
-    public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", true);
+    public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", false);
 
     public static Scaffold INSTANCE;
     public Scaffold() {

@@ -41,7 +41,7 @@ public class Criticals extends Module {
         if(event.getType() == PacketEvent.PacketType.OUTGOING) {
             if(event.getPacket() instanceof CPacketUseEntity) {
                 if(((CPacketUseEntity)event.getPacket()).getAction() == CPacketUseEntity.Action.ATTACK) {
-                    if(mc.player.onGround && !mc.gameSettings.keyBindJump.isKeyDown() && ((CPacketUseEntity)event.getPacket()).getEntityFromWorld(mc.world) instanceof EntityLivingBase) {
+                    if(!mc.player.isInWeb && mc.player.onGround && !mc.gameSettings.keyBindJump.isKeyDown() && ((CPacketUseEntity)event.getPacket()).getEntityFromWorld(mc.world) instanceof EntityLivingBase) {
                         if(!ignoring) {
                             switch ((CritMode)critModeSetting.getValue()) {
                                 case JUMP:
