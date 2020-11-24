@@ -90,6 +90,7 @@ public class Module {
         onToggle();
     }
 
+    public void onLogout() {}
     public void onToggle() {}
     public void onEnable() {}
     public void onDisable() {}

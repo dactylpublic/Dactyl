@@ -67,6 +67,7 @@ public class ModuleManager {
         modules.add(new ESP());
         modules.add(new Tracers());
         modules.add(new StorageESP());
+        modules.add(new LogoutSpots());
 
         // client
         modules.add(new ClickGuiModule());
@@ -94,6 +95,10 @@ public class ModuleManager {
 
     public List<Module> getEnabledModules() {
         return this.modules.stream().filter(mod -> !mod.isEnabled()).collect(Collectors.toList());
+    }
+
+    public void onLogout() {
+        getModules().stream().filter(Module::isEnabled).forEach(module -> module.onLogout());
     }
 
     public void onRender(Render3DEvent event) {

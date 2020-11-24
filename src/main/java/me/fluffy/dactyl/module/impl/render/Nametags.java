@@ -45,6 +45,7 @@ public class Nametags extends Module {
     Setting<Boolean> totemPops = new Setting<Boolean>("TotemPops", true);
     Setting<Integer> scaling = new Setting<Integer>("Scaling", 3, 1, 5);
     Setting<Boolean> border = new Setting<Boolean>("Border", true);
+    Setting<Double> borderWidth = new Setting<Double>("BorderWidth", 1.0d, 0.1d, 3.0d, v->border.getValue());
 
     public static Nametags INSTANCE;
     public Nametags() {
@@ -108,9 +109,9 @@ public class Nametags extends Module {
         GL11.glDisable(2929);
         GlStateManager.enableBlend();
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 0.75F, 0.75F, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 0.75F, 0.75F, 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
@@ -220,16 +221,12 @@ public class Nametags extends Module {
         return 0;
     }
 
-    public void drawBorderedRect(double x, double y, double x1, double y1, double width, double borderWidth, int internalColor, int borderColor) {
+    public void drawBorderedRect(double x, double y, double x1, double y1, double width, float borderWidth, int internalColor, int borderColor) {
         GL11.glPushMatrix();
         enableGL2D();
         RenderUtil.drawRect(x + width, y + width, x1 - width, y1 - width, internalColor);
         if(border.getValue()) {
-            RenderUtil.drawBetterColoredRect(x + borderWidth, y + borderWidth, x1 - borderWidth, y1 - borderWidth, borderColor);
-            //RenderUtil.drawBetterColoredRect(x + borderWidth, y, x1 - borderWidth, y + borderWidth, borderColor);
-            //RenderUtil.drawBetterColoredRect(x, y, x + borderWidth, y1, borderColor);
-            //RenderUtil.drawBetterColoredRect(x1 - borderWidth, y, x1, y1, borderColor);
-            //RenderUtil.drawBetterColoredRect(x + borderWidth, y1 - borderWidth, x1 - borderWidth, y1, borderColor);
+            RenderUtil.drawBetterColoredRect(x + borderWidth, y + borderWidth, x1 - borderWidth, y1 - borderWidth, borderWidth, borderColor);
         }
         disableGL2D();
         GL11.glPopMatrix();

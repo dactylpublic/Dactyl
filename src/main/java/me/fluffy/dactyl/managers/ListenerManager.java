@@ -17,6 +17,7 @@ public class ListenerManager {
         listeners.add(new TotemListener());
         listeners.add(new PlayerChatListener());
         listeners.add(new CommandSendListener());
+        listeners.add(new ConnectionListener());
         registerListeners();
     }
 

@@ -736,7 +736,7 @@ public class RenderUtil {
         GlStateManager.disableBlend();
     }
 
-    public static void drawBetterColoredRect(double left, double top, double right, double bottom, int color) {
+    public static void drawBetterColoredRect(double left, double top, double right, double bottom, float width, int color) {
         if (left < right)
         {
             double i = left;
@@ -760,6 +760,7 @@ public class RenderUtil {
         GlStateManager.enableBlend();
         GlStateManager.disableTexture2D();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.glLineWidth(width);
         bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
         bufferbuilder.pos(left, bottom, 0.0).color(f, f1, f2, f3).endVertex();
         bufferbuilder.pos(right, bottom, 0.0).color(f, f1, f2, f3).endVertex();
