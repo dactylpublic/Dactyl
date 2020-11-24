@@ -128,11 +128,10 @@ public class LogoutSpots extends Module {
 
     @SubscribeEvent
     public void onConnection(ConnectionEvent event) {
-        if(event == null || event.getUUID() == null || event.getName() == null || event.getConnectionType() == null) {
+        if(event == null || event.getUUID() == null || event.getName() == null || event.getConnectionType() == null || mc.world.getPlayerEntityByUUID(event.getUUID()) == null) {
             return;
         }
         if(event.getConnectionType() == ConnectionEvent.ConnectionType.LOGOUT) {
-            final EntityPlayer entity = mc.world.getPlayerEntityByUUID(event.getUUID());
             this.spots.removeIf(pos -> pos.getName().equalsIgnoreCase(event.getName()));
         } else {
             final EntityPlayer entity2 = mc.world.getPlayerEntityByUUID(event.getUUID());
