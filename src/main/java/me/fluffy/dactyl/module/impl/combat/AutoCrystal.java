@@ -33,6 +33,7 @@ import net.minecraft.network.play.server.SPacketSpawnObject;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -117,6 +118,7 @@ public class AutoCrystal extends Module {
     private final TimeUtil checkTimer = new TimeUtil();
     private final TimeUtil antiStuckTimer = new TimeUtil();
     private final TimeUtil placeResetTimer = new TimeUtil();
+    private final TimeUtil modInfoTimer = new TimeUtil();
     private final TimeUtil novolaTimer = new TimeUtil();
 
     private static float yaw;
@@ -408,7 +410,7 @@ public class AutoCrystal extends Module {
                 return;
             } else {
                 if(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition) != null) {
-                    this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition).getName() + (faceplaceKeyOn ? TextFormatting.GREEN + " | FP" : ""));
+                    this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition).getName() + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
                 }
             }
             if(placeTimer.hasPassed(placeDelay.getValue())) {
@@ -478,7 +480,7 @@ public class AutoCrystal extends Module {
         }
         BlockPos brokenPos = new BlockPos(entity.posX, entity.posY, entity.posZ);
         if(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos) != null) {
-            this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName()  + (faceplaceKeyOn ? TextFormatting.GREEN + " | FP" : ""));
+            this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName()  + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
         }
         Criticals.INSTANCE.ignoring = false;
         breakTimer.reset();
@@ -578,6 +580,12 @@ public class AutoCrystal extends Module {
         if(mc.player == null || mc.world == null) {
             return;
         }
+        if(modInfoTimer.hasPassed(100)) {
+            if(StringUtils.stripControlCodes(this.getModuleInfo()).contains(" | FP") && !faceplaceKeyOn) {
+                this.setModuleInfo(StringUtils.stripControlCodes(this.getModuleInfo()).replace(" | FP", ""));
+            }
+            modInfoTimer.reset();
+        }
         if(updateLogic.getValue() == UpdateLogic.PACKET) {
             doAutoCrystal(null);
         }
@@ -594,6 +602,7 @@ public class AutoCrystal extends Module {
         breakTimer.reset();
         checkTimer.reset();
         placeResetTimer.reset();
+        modInfoTimer.reset();
         novolaTimer.reset();
         antiStuckTimer.reset();
         placedCrystals.clear();
