@@ -128,7 +128,7 @@ public class LogoutSpots extends Module {
 
     @SubscribeEvent
     public void onConnection(ConnectionEvent event) {
-        if(event == null || event.getUUID() == null || event.getName() == null || event.getConnectionType() == null || mc.world.getPlayerEntityByUUID(event.getUUID()) == null) {
+        if(mc.world == null || mc.player == null || event == null || event.getUUID() == null || event.getName() == null || event.getConnectionType() == null || mc.world.getPlayerEntityByUUID(event.getUUID()) == null) {
             return;
         }
         if(event.getConnectionType() == ConnectionEvent.ConnectionType.LOGOUT) {
