@@ -42,6 +42,7 @@ public class ModuleManager {
         modules.add(new JumpFill());
         modules.add(new AntiInteract());
         modules.add(new Vanish());
+        modules.add(new PacketFly());
 
         // misc
         modules.add(new FakePlayer());
@@ -57,6 +58,7 @@ public class ModuleManager {
         modules.add(new ReverseStep());
         modules.add(new LongJump());
         modules.add(new Sprint());
+        modules.add(new BoatFly());
 
         // render
         modules.add(new HoleESP());

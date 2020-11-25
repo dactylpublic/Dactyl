@@ -136,7 +136,9 @@ public class LogoutSpots extends Module {
         } else {
             final EntityPlayer entity2 = mc.world.getPlayerEntityByUUID(event.getUUID());
             if (event.getName() != null && entity2 != null && event.getUUID() != null) {
-                this.spots.add(new LogoutPos(event.getName(), event.getUUID(), entity2));
+                if(!event.getName().equalsIgnoreCase(mc.session.getUsername())) {
+                    this.spots.add(new LogoutPos(event.getName(), event.getUUID(), entity2));
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ package me.fluffy.dactyl.injection.inj;
 
 import io.netty.channel.ChannelHandlerContext;
 import me.fluffy.dactyl.event.ForgeEvent;
+import me.fluffy.dactyl.event.impl.network.NetworkExceptionEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -27,5 +28,13 @@ public class InjNetworkManager {
         MinecraftForge.EVENT_BUS.post(e);
         if(e.isCanceled())
             ci.cancel();
+    }
+
+    @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
+    public void exception(ChannelHandlerContext p_exceptionCaught_1_, Throwable p_exceptionCaught_2_, CallbackInfo ci) {
+        NetworkExceptionEvent exceptionEvent = new NetworkExceptionEvent();
+        if(exceptionEvent.isCanceled()) {
+            ci.cancel();
+        }
     }
 }
