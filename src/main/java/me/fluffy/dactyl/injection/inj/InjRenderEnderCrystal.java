@@ -3,6 +3,7 @@ package me.fluffy.dactyl.injection.inj;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.render.ESP;
 import me.fluffy.dactyl.util.render.OutlineUtils;
+import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;
@@ -51,7 +52,7 @@ public abstract class InjRenderEnderCrystal {
 
     @Inject(method = { "doRender(Lnet/minecraft/entity/item/EntityEnderCrystal;DDDFF)V" }, at = { @At("RETURN") }, cancellable = true)
     public void doRenderFinal(final EntityEnderCrystal entity, final double x, final double y, final double z, final float entityYaw, final float partialTicks, final CallbackInfo callbackInfo) {
-        if (ESP.INSTANCE == null ) {
+        if (ESP.INSTANCE == null || (!RenderUtil.isInView(entity))) {
             return;
         }
         if(ESP.INSTANCE.isEnabled() && ESP.INSTANCE.crystals.getValue()) {

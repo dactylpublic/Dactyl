@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.injection.inj;
 
 import me.fluffy.dactyl.event.impl.world.SetOpaqueCubeEvent;
+import me.fluffy.dactyl.module.impl.render.XRay;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
@@ -18,5 +19,13 @@ public class InjVisGraph {
         if(setOpaqueCubeEvent.isCanceled()) {
             callbackInfo.cancel();
         }
+        try {
+            if (XRay.INSTACE.isEnabled()) {
+                if(!setOpaqueCubeEvent.isCanceled() && !callbackInfo.isCancelled()) {
+                    callbackInfo.cancel();
+                }
+            }
+        }
+        catch (Exception ex) {}
     }
 }

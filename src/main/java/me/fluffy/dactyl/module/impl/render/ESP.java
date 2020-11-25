@@ -122,6 +122,9 @@ public class ESP extends Module {
         if(!passesSettingsCheck(entityIn)) {
             return false;
         }
+        if(!RenderUtil.isInView(entityIn)) {
+            return false;
+        }
         boolean fancyGraphics = mc.gameSettings.fancyGraphics;
         mc.gameSettings.fancyGraphics = false;
         if(renderEntity.getValue()) {

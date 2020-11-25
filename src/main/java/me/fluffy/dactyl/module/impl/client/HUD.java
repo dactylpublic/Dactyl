@@ -504,7 +504,9 @@ public class HUD extends Module {
 
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        serverLastUpdated = System.currentTimeMillis();
+        if (event.getType() == PacketEvent.PacketType.INCOMING) {
+            serverLastUpdated = System.currentTimeMillis();
+        }
     }
 
     private double timeDifference() {

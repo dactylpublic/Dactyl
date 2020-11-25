@@ -4,6 +4,8 @@
   "package": "me.fluffy.dactyl.injection.inj",
   "refmap": "mixins.dactyl.refmap.json",
   "mixins": [
+    "InjBlock",
+    "InjBlockModelRenderer",
     "InjEntity",
     "InjEntityPlayer",
     "InjEntityPlayerSP",

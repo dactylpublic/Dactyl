@@ -69,6 +69,7 @@ public class ModuleManager {
         modules.add(new Tracers());
         modules.add(new StorageESP());
         modules.add(new LogoutSpots());
+        modules.add(new XRay());
 
         // client
         modules.add(new ClickGuiModule());
