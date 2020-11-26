@@ -3,12 +3,16 @@ package me.fluffy.dactyl.injection.inj;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.event.impl.action.EventKeyPress;
 import me.fluffy.dactyl.module.impl.misc.MCF;
+import me.fluffy.dactyl.module.impl.misc.MultiTask;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -37,6 +41,16 @@ public class InjMinecraft {
     @Inject(method = "shutdown", at = @At("HEAD"))
     public void shutdown(CallbackInfo callbackInfo) {
         Dactyl.INSTANCE.save();
+    }
+
+    @Redirect(method = { "sendClickBlockToController" }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/EntityPlayerSP;isHandActive()Z"))
+    private boolean isHandActiveWrapper(final EntityPlayerSP playerSP) {
+        return !MultiTask.INSTANCE.isEnabled() && playerSP.isHandActive();
+    }
+
+    @Redirect(method = { "rightClickMouse" }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;getIsHittingBlock()Z", ordinal = 0), require = 1)
+    private boolean isHittingBlockHook(final PlayerControllerMP playerControllerMP) {
+        return !MultiTask.INSTANCE.isEnabled() && playerControllerMP.getIsHittingBlock();
     }
 
 }
