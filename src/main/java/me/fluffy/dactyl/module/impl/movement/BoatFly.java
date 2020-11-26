@@ -21,13 +21,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BoatFly extends Module {
-    private final Setting<Double> speed = new Setting<Double>("Speed", 0.9D, 0.01D, 12.0D);
-    private final Setting<Double> fallSpeed = new Setting<Double>("Fall Speed", 0d, 0d, 2d);
-    private final Setting<Boolean> bypass = new Setting<Boolean>("Bypass", true);
-    private final Setting<Integer> interval = new Setting<Integer>("BypassQuota", 2, 1, 10, v->bypass.getValue());
+    public final Setting<Double> speed = new Setting<Double>("Speed", 0.9D, 0.01D, 12.0D);
+    public final Setting<Double> fallSpeed = new Setting<Double>("Fall Speed", 0d, 0d, 2d);
+    public final Setting<Double> boatOpacity = new Setting<Double>("BoatOpacity", 0.5d, 0.1d, 1.0d);
+    public final Setting<Boolean> bypass = new Setting<Boolean>("Bypass", true);
+    public final Setting<Integer> interval = new Setting<Integer>("BypassQuota", 2, 1, 10, v->bypass.getValue());
 
+    public static BoatFly INSTANCE;
     public BoatFly() {
         super("BoatFly", Category.MOVEMENT);
+        INSTANCE = this;
     }
 
     private final List<CPacketVehicleMove> packets = new ArrayList<>();
