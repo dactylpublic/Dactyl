@@ -27,6 +27,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Scaffold extends Module {
     public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d);
     public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", false);
+    public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
     public static Scaffold INSTANCE;
     public Scaffold() {
@@ -65,7 +66,6 @@ public class Scaffold extends Module {
             return;
         }
         if(event.getStage() == ForgeEvent.Stage.PRE) {
-            RotationUtil.updateRotations();
             int downDistance = 1;
             if (this.keepY) {
                 if ((!((mc.player.moveForward != 0.0F || mc.player.moveStrafing != 0.0F)) && mc.gameSettings.keyBindJump.isKeyDown()) || mc.player.collidedVertically || mc.player.onGround)
@@ -96,7 +96,10 @@ public class Scaffold extends Module {
                 if (this.blockData != null) {
                     float yaw1 = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[0];
                     float pitch = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[1];
-                    RotationUtil.setPlayerRotations(yaw1, pitch);
+                    if(rotate.getValue()) {
+                        event.setYaw(yaw1);
+                        event.setPitch(pitch);
+                    }
                 }
             }
         } else if (this.blockData != null) {
@@ -143,7 +146,6 @@ public class Scaffold extends Module {
             } else {
                 mc.player.inventory.currentItem = heldItem;
             }
-            RotationUtil.restoreRotations();
         }
     }
 
