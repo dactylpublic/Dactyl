@@ -21,12 +21,10 @@ public class AntiVoid extends Module {
                     mc.player.motionY += 0.07D;
                     break;
                 case VCLIP:
-                    mc.player.moveVertical = 5.0f;
-                    mc.player.jump();
+                    mc.player.posY += 5.0d;
                     break;
                 case SPRING:
-                    mc.player.moveVertical = 10.0f;
-                    mc.player.jump();
+                    mc.player.motionY += 1D;
                     break;
             }
         }
