@@ -19,7 +19,8 @@ public class NoRender extends Module {
     public Setting<Boolean> nausea = new Setting<Boolean>("Nausea", true);
     public Setting<Boolean> hurtCam = new Setting<Boolean>("NoHurtcam", true);
     public Setting<Boolean> noBoss = new Setting<Boolean>("NoBoss", false);
-    public Setting<Boolean> noSkylight = new Setting<Boolean>("Skylight", true);
+    public boolean noSkylight = false;
+    //public Setting<Boolean> noSkylight = new Setting<Boolean>("Skylight", false);
     public Setting<Boolean> noArmor = new Setting<Boolean>("NoArmor", false);
     public Setting<Boolean> noWeather = new Setting<Boolean>("NoWeather", true);
     public Setting<Boolean> liquidVision = new Setting<Boolean>("LiquidVision", true);
