@@ -29,7 +29,7 @@ public class BoatFly extends Module {
 
     public static BoatFly INSTANCE;
     public BoatFly() {
-        super("BoatFly", Category.MOVEMENT);
+        super("BoatFly", Category.MOVEMENT, "Smoothest BoatFly in the wild west");
         INSTANCE = this;
     }
 
