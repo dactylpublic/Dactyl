@@ -24,7 +24,7 @@ public class BoatFly extends Module {
     private final Setting<Double> speed = new Setting<Double>("Speed", 0.9D, 0.01D, 12.0D);
     private final Setting<Double> fallSpeed = new Setting<Double>("Fall Speed", 0d, 0d, 2d);
     private final Setting<Boolean> bypass = new Setting<Boolean>("Bypass", true);
-    private final Setting<Integer> interval = new Setting<Integer>("Bypass Interval", 2, 1, 10, v->bypass.getValue());
+    private final Setting<Integer> interval = new Setting<Integer>("BypassQuota", 2, 1, 10, v->bypass.getValue());
 
     public BoatFly() {
         super("BoatFly", Category.MOVEMENT);
