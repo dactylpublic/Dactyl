@@ -57,6 +57,7 @@ public class ModuleManager {
         modules.add(new LongJump());
         modules.add(new Sprint());
         modules.add(new BoatFly());
+        modules.add(new Jesus());
 
         // render
         modules.add(new HoleESP());

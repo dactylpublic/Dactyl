@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.util;
 
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -9,6 +10,8 @@ import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class EntityUtil {
@@ -62,6 +65,42 @@ public class EntityUtil {
                 break;
         }
         return directionLabel;
+    }
+
+    public static boolean isInWater(final Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        final double y = entity.posY + 0.01;
+        for (int x = MathHelper.floor(entity.posX); x < MathHelper.ceil(entity.posX); ++x) {
+            for (int z = MathHelper.floor(entity.posZ); z < MathHelper.ceil(entity.posZ); ++z) {
+                final BlockPos pos = new BlockPos(x, (int)y, z);
+                if (mc.world.getBlockState(pos).getBlock() instanceof BlockLiquid) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isAboveWater(final Entity entity) {
+        return isAboveWater(entity, false);
+    }
+
+    public static boolean isAboveWater(final Entity entity, final boolean packet) {
+        if (entity == null) {
+            return false;
+        }
+        final double y = entity.posY - (packet ? 0.03 : ((entity instanceof EntityPlayer) ? 0.2 : 0.5));
+        for (int x = MathHelper.floor(entity.posX); x < MathHelper.ceil(entity.posX); ++x) {
+            for (int z = MathHelper.floor(entity.posZ); z < MathHelper.ceil(entity.posZ); ++z) {
+                final BlockPos pos = new BlockPos(x, MathHelper.floor(y), z);
+                if (mc.world.getBlockState(pos).getBlock() instanceof BlockLiquid) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static boolean isPassiveEntity(Entity entity) {
