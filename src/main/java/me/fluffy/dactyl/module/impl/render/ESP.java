@@ -6,6 +6,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.EntityUtil;
+import me.fluffy.dactyl.util.StringUtil;
 import me.fluffy.dactyl.util.render.OutlineUtils;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.model.ModelBase;
@@ -16,7 +17,10 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.item.EntityExpBottle;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.AbstractHorse;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
@@ -30,6 +34,7 @@ public class ESP extends Module {
     public Setting<Boolean> animals = new Setting<Boolean>("Animals", false);
     public Setting<Boolean> invisibles = new Setting<Boolean>("Invisibles", true);
     public Setting<Boolean> selfESP = new Setting<Boolean>("Self", false);
+    public Setting<Boolean> mobOwner = new Setting<Boolean>("MobOwner", true);
     public Setting<Boolean> renderEntity = new Setting<Boolean>("RenderEntity", true);
     public Setting<Boolean> itemESP = new Setting<Boolean>("Items", true);
     public Setting<Boolean> itemESPFill = new Setting<Boolean>("ItemFill", false, v->itemESP.getValue());
@@ -50,6 +55,21 @@ public class ESP extends Module {
     }
 
     @Override
+    public void onDisable() {
+        if(mc.world == null) {
+            return;
+        }
+        for(Entity entity: mc.world.loadedEntityList) {
+            if(entity instanceof EntityTameable || entity instanceof AbstractHorse || entity instanceof EntityItem) {
+                try {
+                    entity.setAlwaysRenderNameTag(false);
+                } catch(Exception ignored) {
+                }
+            }
+        }
+    }
+
+    @Override
     public void onRender3D(Render3DEvent event) {
         if(mc.world == null || mc.player == null) {
             return;
@@ -59,6 +79,23 @@ public class ESP extends Module {
             for(Entity entity : mc.world.loadedEntityList) {
                 if (entity instanceof EntityItem && ESP.mc.player.getDistanceSq(entity) < 2500.0) {
                     doRenderEntityOutlineFill(entity, itemESPFill.getValue());
+                    if (++i >= 50) {
+                        break;
+                    }
+                    continue;
+                }
+            }
+        }
+
+        if(mobOwner.getValue()) {
+            int i = 0;
+            for(Entity entity : mc.world.loadedEntityList) {
+                if (entity instanceof EntityTameable && ESP.mc.player.getDistanceSq(entity) < 2500.0) {
+                    EntityTameable tameable = (EntityTameable) entity;
+                    if(tameable.isTamed() && tameable.getOwner() != null) {
+                        tameable.setAlwaysRenderNameTag(true);
+                        tameable.setCustomNameTag("Owner: " + tameable.getOwner().getDisplayName().getFormattedText());
+                    }
                     if (++i >= 50) {
                         break;
                     }
