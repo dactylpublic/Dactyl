@@ -1,9 +1,11 @@
 package me.fluffy.dactyl.module.impl.movement;
 
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
+import me.fluffy.dactyl.event.impl.player.PlayerMotionEvent;
 import me.fluffy.dactyl.event.impl.world.AddedCollisionBoxEvent;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.player.Freecam;
+import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.EntityUtil;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.entity.Entity;
@@ -15,18 +17,18 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Jesus extends Module {
-    private static final AxisAlignedBB WATER_WALK_AA = new AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 0.99, 1.0);
     public Jesus() {
         super("Jesus", Category.MOVEMENT);
-        this.setModuleInfo("Flat");
     }
+
+    private static final AxisAlignedBB WATER_WALK_AA = new AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 0.99, 1.0);
 
     @Override
     public void onClientUpdate() {
         if(mc.player == null || mc.world == null) {
             return;
         }
-        if (!Freecam.INSTANCE.isEnabled() && EntityUtil.isInWater((Entity)Jesus.mc.player) && !Jesus.mc.player.isSneaking()) {
+        if (!Freecam.INSTANCE.isEnabled() && EntityUtil.isInWater((Entity) Jesus.mc.player) && !Jesus.mc.player.isSneaking()) {
             Jesus.mc.player.motionY = 0.1;
             if (Jesus.mc.player.getRidingEntity() != null && !(Jesus.mc.player.getRidingEntity() instanceof EntityBoat)) {
                 Jesus.mc.player.getRidingEntity().motionY = 0.3;
@@ -37,7 +39,7 @@ public class Jesus extends Module {
 
     @SubscribeEvent
     public void onCollision(AddedCollisionBoxEvent event) {
-        if (Jesus.mc.player != null && event.getBlock() instanceof BlockLiquid && ((event.getEntity() != null && event.getEntity().equals(mc.player.getRidingEntity())) || event.getEntity() == Jesus.mc.player) && !(event.getEntity() instanceof EntityBoat) && !Jesus.mc.player.isSneaking() && Jesus.mc.player.fallDistance < 3.0f && !EntityUtil.isInWater((Entity)Jesus.mc.player) && (EntityUtil.isAboveWater((Entity)Jesus.mc.player, false) || EntityUtil.isAboveWater(Jesus.mc.player.getRidingEntity(), false)) && isAboveBlock((Entity)Jesus.mc.player, event.getPos())) {
+        if (Jesus.mc.player != null && event.getBlock() instanceof BlockLiquid && ((event.getEntity() != null && event.getEntity().equals(mc.player.getRidingEntity())) || event.getEntity() == Jesus.mc.player) && !(event.getEntity() instanceof EntityBoat) && !Jesus.mc.player.isSneaking() && Jesus.mc.player.fallDistance < 3.0f && !EntityUtil.isInWater((Entity) Jesus.mc.player) && (EntityUtil.isAboveWater((Entity) Jesus.mc.player, false) || EntityUtil.isAboveWater(Jesus.mc.player.getRidingEntity(), false)) && isAboveBlock((Entity) Jesus.mc.player, event.getPos())) {
             final AxisAlignedBB axisalignedbb = Jesus.WATER_WALK_AA.offset(event.getPos());
             if (event.getEntityBox().intersects(axisalignedbb)) {
                 event.getCollidingBoxes().add(axisalignedbb);
@@ -48,10 +50,10 @@ public class Jesus extends Module {
 
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        if (event.getPacket() instanceof CPacketPlayer && EntityUtil.isAboveWater((Entity)Jesus.mc.player, true) && !EntityUtil.isInWater((Entity)Jesus.mc.player) && !isAboveLand((Entity)Jesus.mc.player)) {
+        if (event.getPacket() instanceof CPacketPlayer && EntityUtil.isAboveWater((Entity) Jesus.mc.player, true) && !EntityUtil.isInWater((Entity) Jesus.mc.player) && !isAboveLand((Entity) Jesus.mc.player)) {
             final int ticks = Jesus.mc.player.ticksExisted % 2;
             if (ticks == 0) {
-                final CPacketPlayer cPacketPlayer = (CPacketPlayer)event.getPacket();
+                final CPacketPlayer cPacketPlayer = (CPacketPlayer) event.getPacket();
                 cPacketPlayer.y += 0.02;
             }
         }

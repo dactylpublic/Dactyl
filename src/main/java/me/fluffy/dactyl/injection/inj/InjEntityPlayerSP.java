@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
+import me.fluffy.dactyl.event.impl.player.PlayerMotionEvent;
 import me.fluffy.dactyl.event.impl.world.BlockPushEvent;
 import me.fluffy.dactyl.module.impl.render.NoRender;
 import net.minecraft.client.Minecraft;
@@ -62,6 +63,11 @@ public class InjEntityPlayerSP extends AbstractClientPlayer {
     private void onUpdateWalkingPlayerPost(CallbackInfo callbackInfo) {
         EventUpdateWalkingPlayer event = new EventUpdateWalkingPlayer(ForgeEvent.Stage.POST);
         MinecraftForge.EVENT_BUS.post(event);
+    }
+
+    @Inject(method = "move", at = @At(value = "HEAD"))
+    public void onMotion(CallbackInfo callbackInfo) {
+        MinecraftForge.EVENT_BUS.post(new PlayerMotionEvent());
     }
 
     @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/AbstractClientPlayer;move(Lnet/minecraft/entity/MoverType;DDD)V"))

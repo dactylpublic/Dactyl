@@ -103,6 +103,22 @@ public class EntityUtil {
         return false;
     }
 
+    public static boolean isCloseToAboveWater(final Entity entity, final boolean packet) {
+        if (entity == null) {
+            return false;
+        }
+        final double y = entity.posY - (packet ? 0.1 : ((entity instanceof EntityPlayer) ? 0.2 : 0.5));
+        for (int x = MathHelper.floor(entity.posX); x < MathHelper.ceil(entity.posX); ++x) {
+            for (int z = MathHelper.floor(entity.posZ); z < MathHelper.ceil(entity.posZ); ++z) {
+                final BlockPos pos = new BlockPos(x, MathHelper.floor(y), z);
+                if (mc.world.getBlockState(pos).getBlock() instanceof BlockLiquid) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static boolean isPassiveEntity(Entity entity) {
         if(entity instanceof EntityWolf) {
             return !((EntityWolf)entity).isAngry();
