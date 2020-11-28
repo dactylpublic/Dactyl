@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class Step extends Module {
     public Setting<StepMode> stepModeSetting = new Setting<StepMode>("Mode", StepMode.AAC);
-    public Setting<Double> height = new Setting<Double>("Height", 2.0D, 0.5D, 2.0D);
+    public Setting<Double> height = new Setting<Double>("Height", 2.0D, 0.5D, 10.0D);
 
 
     public static Step INSTANCE;

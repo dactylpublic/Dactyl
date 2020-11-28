@@ -64,6 +64,7 @@ public class ModuleManager {
         modules.add(new Jesus());
         modules.add(new AntiVoid());
         modules.add(new AltSpeed());
+        modules.add(new EntitySpeed());
 
         // render
         modules.add(new HoleESP());
