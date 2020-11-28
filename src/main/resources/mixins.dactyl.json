@@ -29,6 +29,7 @@
     "access.ICPacketPlayer",
     "access.ICPacketUseEntity",
     "access.IEntityRenderer",
+    "access.IGuiDisconnected",
     "access.IItemRenderer",
     "access.IMinecraft",
     "access.IRenderManager",
