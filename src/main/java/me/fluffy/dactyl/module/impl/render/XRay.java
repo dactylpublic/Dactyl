@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.module.impl.render;
 
+import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import net.minecraft.block.Block;
@@ -20,9 +21,6 @@ public class XRay extends Module {
     }
 
     public boolean shouldRender(Block block) {
-        if(block instanceof BlockObsidian) {
-            return true;
-        }
-        return false;
+        return Dactyl.xRayManager.hasBlock(block);
     }
 }

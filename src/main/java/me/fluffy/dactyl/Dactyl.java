@@ -1,6 +1,7 @@
 package me.fluffy.dactyl;
 
 import me.fluffy.dactyl.config.Configuration;
+import me.fluffy.dactyl.config.XRayManager;
 import me.fluffy.dactyl.config.friends.FriendManager;
 import me.fluffy.dactyl.gui.ClickGUI;
 import me.fluffy.dactyl.managers.*;
@@ -31,6 +32,7 @@ public class Dactyl {
     public static FriendManager friendManager;
     public static TickRateManager tickRateManager;
     public static TotemManager totemManager;
+    public static XRayManager xRayManager;
 
     @Mod.EventHandler
     public void preInitialization(FMLPreInitializationEvent event) {
@@ -48,6 +50,7 @@ public class Dactyl {
         friendManager = new FriendManager();
         tickRateManager = new TickRateManager();
         totemManager = new TotemManager();
+        xRayManager = new XRayManager();
     }
 
     @Mod.EventHandler
@@ -58,6 +61,7 @@ public class Dactyl {
     public void save() {
         try {
             friendManager.save();
+            xRayManager.save();
             Configuration.save("", true);
         } catch(Exception exception) {
             exception.printStackTrace();

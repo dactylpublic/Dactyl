@@ -16,6 +16,8 @@ import java.util.Objects;
 public class Strafe extends Module {
     Setting<Boolean> useTimer = new Setting<Boolean>("UseTimer", true);
     Setting<Boolean> autoSprint = new Setting<Boolean>("AutoSprint", true);
+    Setting<Boolean> addSpeed = new Setting<Boolean>("Custom", false);
+    Setting<String> speedAddition = new Setting<String>("SpeedAddition", "0.272", v->addSpeed.getValue());
     Setting<Boolean> extraSpeed = new Setting<Boolean>("Extra", false);
     Setting<Double> vanillaSpeed = new Setting<Double>("VanillaSpeed", 6.0d, 0.1d, 10.0d, vis->extraSpeed.getValue());
     Setting<SkipMode> skipModeSetting = new Setting<SkipMode>("Skips", SkipMode.TICK);
@@ -166,7 +168,16 @@ public class Strafe extends Module {
     }
 
     public double getBaseMoveSpeed() {
-        double baseSpeed = 0.272;
+        double baseSpeed = 0.0d;
+        if(addSpeed.getValue()) {
+            try{
+                baseSpeed = Double.valueOf(speedAddition.getValue());
+            } catch(Exception e) {
+                baseSpeed = 0.272;
+            }
+        } else {
+            baseSpeed = 0.272;
+        }
         if (mc.player.isPotionActive(MobEffects.SPEED)) {
             final int amplifier = Objects.requireNonNull(mc.player.getActivePotionEffect(MobEffects.SPEED)).getAmplifier();
             baseSpeed *= 1.0 + (0.2 * (amplifier+1));

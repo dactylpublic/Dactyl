@@ -4,6 +4,7 @@ import me.fluffy.dactyl.command.Command;
 import me.fluffy.dactyl.command.impl.ConfigCommand;
 import me.fluffy.dactyl.command.impl.FriendCommand;
 import me.fluffy.dactyl.command.impl.HelpCommand;
+import me.fluffy.dactyl.command.impl.XRayCommand;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.util.ChatUtil;
 
@@ -18,6 +19,7 @@ public class CommandManager {
         commandList.add(new FriendCommand());
         commandList.add(new HelpCommand());
         commandList.add(new ConfigCommand());
+        commandList.add(new XRayCommand());
     }
 
     public List<Command> getCommandList() {
