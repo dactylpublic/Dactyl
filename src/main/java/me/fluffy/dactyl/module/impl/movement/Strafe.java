@@ -142,11 +142,15 @@ public class Strafe extends Module {
         }
         if(mc.player.isInWater()) {
             event.setX(event.getX()*fastSwimXZWater.getValue());
-            event.setY(event.getY()*fastSwimYWater.getValue());
+            if(!Jesus.INSTANCE.isEnabled()) {
+                event.setY(event.getY() * fastSwimYWater.getValue());
+            }
             event.setZ(event.getZ()*fastSwimXZWater.getValue());
         } else if(mc.player.isInLava()) {
             event.setX(event.getX()*fastSwimXZLava.getValue());
-            event.setY(event.getY()*fastSwimYLava.getValue());
+            if(!Jesus.INSTANCE.isEnabled()) {
+                event.setY(event.getY() * fastSwimYLava.getValue());
+            }
             event.setZ(event.getZ()*fastSwimXZLava.getValue());
         }
     }

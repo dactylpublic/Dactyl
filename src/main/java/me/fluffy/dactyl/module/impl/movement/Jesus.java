@@ -17,8 +17,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Jesus extends Module {
+
+    public static Jesus INSTANCE;
     public Jesus() {
         super("Jesus", Category.MOVEMENT);
+        INSTANCE = this;
     }
 
     private static final AxisAlignedBB WATER_WALK_AA = new AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 0.99, 1.0);
