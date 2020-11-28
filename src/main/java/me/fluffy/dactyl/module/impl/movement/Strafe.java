@@ -118,18 +118,14 @@ public class Strafe extends Module {
         }
         event.setX((forward * moveSpeed * -Math.sin(Math.toRadians(yaw)) + strafe * moveSpeed * Math.cos(Math.toRadians(yaw))) * 0.99D);
         event.setZ((forward * moveSpeed * Math.cos(Math.toRadians(yaw)) - strafe * moveSpeed * -Math.sin(Math.toRadians(yaw))) * 0.99D);
-        ++stage;
-        cooldown = 0;
-        timer.reset();
-    }
-
-    @SubscribeEvent
-    public void onMoveExtra(MoveEvent event) {
         if(extraSpeed.getValue()) {
             double[] vanillaCalc = MathUtil.directionSpeed(vanillaSpeed.getValue()/10);
             event.setX(vanillaCalc[0]);
             event.setZ(vanillaCalc[1]);
         }
+        ++stage;
+        cooldown = 0;
+        timer.reset();
     }
 
     @SubscribeEvent
