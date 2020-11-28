@@ -1,40 +1,65 @@
 package me.fluffy.dactyl.module.impl.player;
 
+import io.netty.util.internal.ConcurrentSet;
+import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
+import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.event.impl.world.BlockPushEvent;
+import me.fluffy.dactyl.injection.inj.access.ISPacketPlayerPosLook;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.EntityUtil;
+import me.fluffy.dactyl.util.TimeUtil;
+import net.minecraft.client.gui.GuiDownloadTerrain;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.server.SPacketCloseWindow;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+/*
+ * @author 3arthqu4ke
+ * narrowed down phobos packetfly (credit)
+ */
 
 public class PacketFly extends Module {
-    enum Mode { SETBACK, FAST }
-    enum Bounds { DOWN, GROUND, UP }
-    private final Setting<Mode> mode = new Setting<Mode>("Mode", Mode.SETBACK);
-    private final Setting<Bounds> bounds = new Setting<Bounds>("Bounds", Bounds.DOWN);
-    private final Setting<Double> speed = new Setting<Double>("Speed", 0.2, 0.01, 0.5);
-    private final Setting<Double> upSpeed = new Setting<Double>("UpSpeed", 0.05, 0.01, 0.2);
-    private final Setting<Boolean> noPacketKick = new Setting<Boolean>("No Kick", true);
-    private final Setting<Boolean> smooth = new Setting<Boolean>("Smooth", true);
-    private final Setting<Boolean> extraPacket = new Setting<Boolean>("Extra Packets", true);
 
-    private final List<CPacketPlayer> packets = new ArrayList<>();
-    private double serverX = 0;
-    private double serverY = 0;
-    private double serverZ = 0;
-    private int tpId = 0;
-    private float pitch = 0;
-    private float yaw = 0;
+    public boolean flight = true;
+    public int flightMode = 0;
+    public boolean doAntiFactor = true;
+    public double antiFactor = 2.5d;
+    public double extraFactor = 1d;
+    public boolean strafeFactor = true;
+    public int loops = 1;
+    public boolean clearTeleMap = true;
+    public int mapTime = 30;
+    public boolean clearIDs = true;
+    public boolean setYaw = true;
+    public boolean setID = true;
+    public boolean setMove = false;
+    public boolean nocliperino = false;
+    public boolean sendTeleport = true;
+    public boolean resetID = true;
+    public boolean setPos = false;
+    public boolean invalidPacket = true;
+
+    private final Set<CPacketPlayer> packets = (Set<CPacketPlayer>)new ConcurrentSet();
+    private final Map<Integer, IDtime> teleportmap = new ConcurrentHashMap<Integer, IDtime>();
+
+    private int flightCounter = 0;
+    private int teleportID = 0;
 
 
     public PacketFly() {
@@ -42,142 +67,193 @@ public class PacketFly extends Module {
     }
 
     @Override
-    public void onEnable() {
-        pitch = mc.player.rotationPitch;
-        yaw = mc.player.rotationYaw;
-
-        serverX = mc.player.posX;
-        serverY = mc.player.posY;
-        serverZ = mc.player.posZ;
+    public void onClientUpdate() {
+        this.teleportmap.entrySet().removeIf(idTime -> this.clearTeleMap && idTime.getValue().getTimer().hasPassed(this.mapTime));
     }
 
-    @Override
-    public void onDisable() {
-        tpId = 0;
-        packets.clear();
-    }
-
-    private double getFallSpeed() {
-        return mode.getValue() == Mode.SETBACK ? 0.003 : 0.03;
+    @SubscribeEvent
+    public void onUpdateWalkingPlayer(EventUpdateWalkingPlayer event) {
+        if (event.getStage() == ForgeEvent.Stage.POST) {
+            return;
+        }
+        this.setModuleInfo("Fast");
+        mc.player.setVelocity(0.0, 0.0, 0.0);
+        double speed = 0.0;
+        final boolean checkCollisionBoxes = this.checkHitBoxes();
+        if (mc.player.movementInput.jump && (checkCollisionBoxes || !(mc.player.moveForward != 0.0 || mc.player.moveStrafing != 0.0))) {
+            if (this.flight && !checkCollisionBoxes) {
+                if (this.flightMode == 0) {
+                    speed = (this.resetCounter(10) ? -0.032 : 0.062);
+                }
+                else {
+                    speed = (this.resetCounter(20) ? -0.032 : 0.062);
+                }
+            }
+            else {
+                speed = 0.062;
+            }
+        }
+        else if (mc.player.movementInput.sneak) {
+            speed = -0.062;
+        }
+        else if (!checkCollisionBoxes) {
+            speed = (this.resetCounter(4) ? (this.flight ? -0.04 : 0.0) : 0.0);
+        }
+        else {
+            speed = 0.0;
+        }
+        if (this.doAntiFactor && checkCollisionBoxes && (mc.player.moveForward != 0.0 || mc.player.moveStrafing != 0.0) && speed != 0.0) {
+            speed /= this.antiFactor;
+        }
+        final double[] strafing = this.getMotion((this.strafeFactor && checkCollisionBoxes) ? 0.031 : 0.26);
+        for (int i = 1; i < this.loops + 1; ++i) {
+            mc.player.motionX = strafing[0] * i * this.extraFactor;
+            mc.player.motionY = speed * i;
+            mc.player.motionZ = strafing[1] * i * this.extraFactor;
+            this.sendPackets(mc.player.motionX, mc.player.motionY, mc.player.motionZ, this.sendTeleport);
+        }
     }
 
     @SubscribeEvent
     public void onMove(MoveEvent event) {
-        boolean keyPressed = mc.gameSettings.keyBindForward.isKeyDown() ||
-                mc.gameSettings.keyBindBack.isKeyDown() ||
-                mc.gameSettings.keyBindLeft.isKeyDown() ||
-                mc.gameSettings.keyBindRight.isKeyDown();
-
-        // calculate movement velocities
-        double x = mc.player.posX;
-        double y = mc.player.posY + (mc.gameSettings.keyBindJump.isKeyDown() ? upSpeed.getValue() : (!keyPressed ? 0 : -getFallSpeed()));
-        double z = mc.player.posZ;
-
-        if(keyPressed) {
-            float yaw = mc.player.rotationYaw;
-            float forward = 1;
-
-            if(mc.player.moveForward < 0) {
-                yaw += 180;
-                forward = -0.5f;
-            } else if(mc.player.moveForward > 0) forward = 0.5f;
-
-            if(mc.player.moveStrafing > 0) yaw -= 90 * forward;
-            if(mc.player.moveStrafing < 0) yaw += 90 * forward;
-
-            yaw = (float) Math.toRadians(yaw);
-            x += -Math.sin(yaw) * speed.getValue();
-            z += Math.cos(yaw) * speed.getValue();
+        if (this.setMove && this.flightCounter != 0) {
+            event.setX(mc.player.motionX);
+            event.setY(mc.player.motionY);
+            event.setZ(mc.player.motionZ);
+            if (this.nocliperino && this.checkHitBoxes()) {
+                mc.player.noClip = true;
+            }
+        }
+    }
+    @SubscribeEvent
+    public void onPacketSend(PacketEvent event) {
+        if (event.getPacket() instanceof CPacketPlayer) {
+            final CPacketPlayer packet = (CPacketPlayer) event.getPacket();
+            if (this.packets.contains(packet)) {
+                this.packets.remove(packet);
+            }
+            else {
+                event.setCanceled(true);
+            }
         }
 
-        // calculate rotation
-        float yaw = smooth.getValue() ? this.yaw : mc.player.rotationYaw;
-        float pitch = smooth.getValue() ? this.pitch : mc.player.rotationPitch;
-
-        // send move packets and keep player and the position the server thinks its at
-        if(mode.getValue() == Mode.SETBACK) setbackMove(x, y, z, yaw, pitch);
-        else fastMove(x, y, z, yaw, pitch);
-        mc.player.setPosition(serverX, serverY, serverZ);
-        mc.player.setVelocity(0, 0, 0);
-        event.setMotion(0, 0, 0);
-    }
-
-    private void fastMove(double x, double y, double z, float yaw, float pitch) {
-        // send new position and confirm with predicted id
-        mc.player.connection.sendPacket(add(new CPacketPlayer.PositionRotation(x, y, z, yaw, pitch, mc.player.onGround)));
-        mc.player.connection.sendPacket(new CPacketConfirmTeleport(++tpId));
-
-        // send out of bounds packet and confirm with predicted id
-        mc.player.connection.sendPacket(add(new CPacketPlayer.PositionRotation(mc.player.posX, getBounds(), mc.player.posZ, yaw, pitch, mc.player.onGround)));
-        mc.player.connection.sendPacket(new CPacketConfirmTeleport(++tpId));
-
-        // send new position and confirm again
-        mc.player.connection.sendPacket(add(new CPacketPlayer.PositionRotation(x, y, z, yaw, pitch, mc.player.onGround)));
-        if(extraPacket.getValue()) mc.player.connection.sendPacket(new CPacketConfirmTeleport(tpId - 1));
-        mc.player.connection.sendPacket(new CPacketConfirmTeleport(tpId));
-        if(extraPacket.getValue()) mc.player.connection.sendPacket(new CPacketConfirmTeleport(tpId + 1));
-    }
-
-    private void setbackMove(double x, double y, double z, float yaw, float pitch) {
-        // send out of bounds packet and confirm with predicted id
-        mc.player.connection.sendPacket(add(new CPacketPlayer.PositionRotation(mc.player.posX, getBounds(), mc.player.posZ, yaw, pitch, mc.player.onGround)));
-        mc.player.connection.sendPacket(new CPacketConfirmTeleport(++tpId));
-
-        // send new position and confirm again
-        mc.player.connection.sendPacket(add(new CPacketPlayer.PositionRotation(x, y, z, yaw, pitch, mc.player.onGround)));
-        if(extraPacket.getValue()) mc.player.connection.sendPacket(new CPacketConfirmTeleport(tpId - 1));
-        mc.player.connection.sendPacket(new CPacketConfirmTeleport(tpId));
-        if(extraPacket.getValue()) mc.player.connection.sendPacket(new CPacketConfirmTeleport(tpId + 1));
-    }
-
-    private double getBounds() {
-        return (bounds.getValue() == Bounds.DOWN ? mc.player.posY - 1850 : (bounds.getValue() == Bounds.UP ? mc.player.posY + 1850 : getGround()));
-    }
-
-    private double getGround() {
-        BlockPos pos = mc.player.getPosition();
-        while(mc.world.getBlockState((pos = pos.down())).getBlock() == Blocks.AIR) {  }
-        return pos.getY();
-    }
-
-    @SubscribeEvent
-    public void onPacket(PacketEvent event) {
-        if(event.getType() == PacketEvent.PacketType.INCOMING) {
-            if(event.getPacket() instanceof SPacketPlayerPosLook) {
-                SPacketPlayerPosLook packet = (SPacketPlayerPosLook) event.getPacket();
-
-                serverX = packet.getX();
-                serverY = packet.getY();
-                serverZ = packet.getZ();
-                tpId = packet.getTeleportId();
-
-                if(smooth.getValue()) {
-                    ReflectionHelper.setPrivateValue(SPacketPlayerPosLook.class, (SPacketPlayerPosLook) event.getPacket(), mc.player.rotationPitch, "pitch", "field_148937_e");
-                    ReflectionHelper.setPrivateValue(SPacketPlayerPosLook.class, (SPacketPlayerPosLook) event.getPacket(), mc.player.rotationYaw, "yaw", "field_148936_d");
+        if (event.getPacket() instanceof SPacketPlayerPosLook && !(mc.player == null || mc.world == null)) {
+            final SPacketPlayerPosLook packet = (SPacketPlayerPosLook) event.getPacket();
+            if (mc.player.isEntityAlive()) {
+                final BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
+                if (mc.world.isBlockLoaded(pos, false) && !(mc.currentScreen instanceof GuiDownloadTerrain) && this.clearIDs) {
+                    this.teleportmap.remove(packet.getTeleportId());
                 }
             }
-
-            if(noPacketKick.getValue() && event.getPacket() instanceof SPacketCloseWindow) event.setCanceled(true);
-        } else if(event.getType() == PacketEvent.PacketType.OUTGOING) {
-            if(event.getPacket() instanceof CPacketPlayer) {
-                if(packets.contains((CPacketPlayer) event.getPacket())) packets.remove((CPacketPlayer) event.getPacket());
-                else event.setCanceled(true);
-                if(!event.isCanceled() && smooth.getValue()) {
-                    ReflectionHelper.setPrivateValue(CPacketPlayer.class, (CPacketPlayer) event.getPacket(), pitch, "pitch", "field_149473_f");
-                    ReflectionHelper.setPrivateValue(CPacketPlayer.class, (CPacketPlayer) event.getPacket(), yaw, "yaw", "field_149476_e");
-                }
+            if (this.setYaw) {
+                ((ISPacketPlayerPosLook)packet).setYaw(mc.player.rotationYaw);
+                ((ISPacketPlayerPosLook)packet).setPitch(mc.player.rotationPitch);
+            }
+            if (this.setID) {
+                this.teleportID = packet.getTeleportId();
             }
         }
     }
 
     @SubscribeEvent
-    public void onPush(BlockPushEvent event) {
+    public void onPushOutOfBlocks(final BlockPushEvent event) {
         event.setCanceled(true);
     }
 
-    private <T extends CPacketPlayer> T add(T packet) {
-        packets.add(packet);
-        return packet;
+
+    private boolean checkHitBoxes() {
+        return !mc.world.getCollisionBoxes(mc.player, mc.player.getEntityBoundingBox().expand(-0.0625, -0.0625, -0.0625)).isEmpty();
+    }
+
+    private boolean resetCounter(final int counter) {
+        if (++this.flightCounter >= counter) {
+            this.flightCounter = 0;
+            return true;
+        }
+        return false;
+    }
+
+    private double[] getMotion(final double speed) {
+        float moveForward = mc.player.movementInput.moveForward;
+        float moveStrafe = mc.player.movementInput.moveStrafe;
+        float rotationYaw = mc.player.prevRotationYaw + (mc.player.rotationYaw - mc.player.prevRotationYaw) * mc.getRenderPartialTicks();
+        if (moveForward != 0.0f) {
+            if (moveStrafe > 0.0f) {
+                rotationYaw += ((moveForward > 0.0f) ? -45 : 45);
+            }
+            else if (moveStrafe < 0.0f) {
+                rotationYaw += ((moveForward > 0.0f) ? 45 : -45);
+            }
+            moveStrafe = 0.0f;
+            if (moveForward > 0.0f) {
+                moveForward = 1.0f;
+            }
+            else if (moveForward < 0.0f) {
+                moveForward = -1.0f;
+            }
+        }
+        final double posX = moveForward * speed * -Math.sin(Math.toRadians(rotationYaw)) + moveStrafe * speed * Math.cos(Math.toRadians(rotationYaw));
+        final double posZ = moveForward * speed * Math.cos(Math.toRadians(rotationYaw)) - moveStrafe * speed * -Math.sin(Math.toRadians(rotationYaw));
+        return new double[] { posX, posZ };
+    }
+
+    private void sendPackets(final double x, final double y, final double z, final boolean teleport) {
+        final Vec3d vec = new Vec3d(x, y, z);
+        final Vec3d position = mc.player.getPositionVector().add(vec);
+        final Vec3d outOfBoundsVec = this.outOfBoundsVec(vec, position);
+        this.packetSender((CPacketPlayer)new CPacketPlayer.Position(position.x, position.y, position.z, mc.player.onGround));
+        if (this.invalidPacket) {
+            this.packetSender((CPacketPlayer)new CPacketPlayer.Position(outOfBoundsVec.x, outOfBoundsVec.y, outOfBoundsVec.z, mc.player.onGround));
+        }
+        if (this.setPos) {
+            mc.player.setPosition(position.x, position.y, position.z);
+        }
+        this.teleportPacket(position, teleport);
+    }
+
+    private void teleportPacket(final Vec3d pos, final boolean shouldTeleport) {
+        if (shouldTeleport) {
+            mc.player.connection.sendPacket((Packet)new CPacketConfirmTeleport(++this.teleportID));
+            this.teleportmap.put(this.teleportID, new IDtime(pos, new TimeUtil()));
+        }
+    }
+
+    private Vec3d outOfBoundsVec(final Vec3d offset, final Vec3d position) {
+        return position.add(0.0, 1337.0, 0.0);
+    }
+
+    private void packetSender(final CPacketPlayer packet) {
+        this.packets.add(packet);
+        mc.player.connection.sendPacket((Packet)packet);
+    }
+
+    private void clean() {
+        this.teleportmap.clear();
+        this.flightCounter = 0;
+        if (this.resetID) {
+            this.teleportID = 0;
+        }
+        this.packets.clear();
+    }
+
+
+    public static class IDtime
+    {
+        private final Vec3d pos;
+        private final TimeUtil timer;
+
+        public IDtime(final Vec3d pos, final TimeUtil timer) {
+            this.pos = pos;
+            (this.timer = timer).reset();
+        }
+
+        public Vec3d getPos() {
+            return this.pos;
+        }
+
+        public TimeUtil getTimer() {
+            return this.timer;
+        }
     }
 
 }

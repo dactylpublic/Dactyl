@@ -32,6 +32,7 @@
     "access.IItemRenderer",
     "access.IMinecraft",
     "access.IRenderManager",
+    "access.ISPacketPlayerPosLook",
     "access.ITimer",
     "access.IVec3i"
   ]
