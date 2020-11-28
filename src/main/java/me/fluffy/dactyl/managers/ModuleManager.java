@@ -66,6 +66,7 @@ public class ModuleManager {
         modules.add(new AltSpeed());
         modules.add(new EntitySpeed());
         modules.add(new EntityControl());
+        modules.add(new IceSpeed());
 
         // render
         modules.add(new HoleESP());

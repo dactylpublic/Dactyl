@@ -15,6 +15,7 @@
     "InjEntityRenderer",
     "InjFontRenderer",
     "InjGuiIngame",
+    "InjGuiScreen",
     "InjItemRenderer",
     "InjLayerArmorBase",
     "InjMinecraft",

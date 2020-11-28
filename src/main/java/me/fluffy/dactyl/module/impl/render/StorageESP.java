@@ -12,14 +12,17 @@ import net.minecraft.tileentity.*;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public class StorageESP extends Module {
+    public Setting<Boolean> shulkerViewer = new Setting<Boolean>("ShulkerViewer", true);
     public Setting<Boolean> chests = new Setting<Boolean>("Chests", true);
     public Setting<Boolean> enderchests = new Setting<Boolean>("EChests", true);
     public Setting<Boolean> shulkers = new Setting<Boolean>("Shulkers", true);
     public Setting<Boolean> hoppers = new Setting<Boolean>("Hoppers", false);
     public Setting<Double> lineWidth = new Setting<Double>("Width", 1.0d, 0.1d, 1.5d);
 
+    public static StorageESP INSTANCE;
     public StorageESP() {
         super("StorageESP", Category.RENDER);
+        INSTANCE = this;
     }
 
     @Override
