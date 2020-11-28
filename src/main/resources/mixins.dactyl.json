@@ -19,6 +19,7 @@
     "InjModelBoat",
     "InjMovementInputFromOptions",
     "InjNetworkManager",
+    "InjPlayerControllerMP",
     "InjRenderEnderCrystal",
     "InjRenderLivingBase",
     "InjRenderPlayer",

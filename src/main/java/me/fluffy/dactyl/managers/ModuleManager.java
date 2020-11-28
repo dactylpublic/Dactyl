@@ -50,6 +50,7 @@ public class ModuleManager {
         modules.add(new PingSpoof());
         modules.add(new MultiTask());
         modules.add(new AutoReconnect());
+        modules.add(new MiningTweaks());
 
         // movement
         modules.add(new Strafe());
