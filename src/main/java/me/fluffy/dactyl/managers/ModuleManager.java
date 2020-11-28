@@ -59,6 +59,7 @@ public class ModuleManager {
         modules.add(new BoatFly());
         modules.add(new Jesus());
         modules.add(new AntiVoid());
+        modules.add(new AltSpeed());
 
         // render
         modules.add(new HoleESP());
