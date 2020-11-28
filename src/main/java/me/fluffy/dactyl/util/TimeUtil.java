@@ -19,6 +19,8 @@ public class TimeUtil {
         lastRecorded = (lastRecorded + time);
     }
 
+    public long getPassedTime() { return ((System.nanoTime() / 1000000) - lastRecorded); }
+
     public long getLastRecorded() { return this.lastRecorded; }
 
     public boolean sleep(long time) {

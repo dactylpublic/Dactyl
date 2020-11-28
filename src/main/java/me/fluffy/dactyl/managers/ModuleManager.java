@@ -5,6 +5,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.*;
 import me.fluffy.dactyl.module.impl.combat.*;
 import me.fluffy.dactyl.module.impl.misc.*;
+import me.fluffy.dactyl.module.impl.misc.Blink;
 import me.fluffy.dactyl.module.impl.player.*;
 import me.fluffy.dactyl.module.impl.movement.*;
 import me.fluffy.dactyl.module.impl.render.*;
@@ -40,6 +41,7 @@ public class ModuleManager {
         modules.add(new AntiInteract());
         modules.add(new Vanish());
         modules.add(new PacketFly());
+        modules.add(new Blink());
 
         // misc
         modules.add(new FakePlayer());
