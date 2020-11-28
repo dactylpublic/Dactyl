@@ -22,10 +22,10 @@ public class InjWorld {
         MinecraftForge.EVENT_BUS.post(new EntityRemovedEvent(entity));
     }
 
-    /*@Inject(method = {"checkLightFor"}, at = {@At("HEAD")}, cancellable = true)
+    @Inject(method = {"checkLightFor"}, at = {@At("HEAD")}, cancellable = true)
     private void checkLightFor(EnumSkyBlock enumSkyBlock, BlockPos blockPos, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if(NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.noSkylight) {
+        if(NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.noSkylight.getValue()) {
             callbackInfoReturnable.setReturnValue(Boolean.valueOf(false));
         }
-    }*/
+    }
 }

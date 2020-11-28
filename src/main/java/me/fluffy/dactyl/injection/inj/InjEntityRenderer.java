@@ -3,6 +3,7 @@ package me.fluffy.dactyl.injection.inj;
 import com.google.common.base.Predicate;
 import me.fluffy.dactyl.module.impl.player.NoHitbox;
 import me.fluffy.dactyl.module.impl.render.NoRender;
+import me.fluffy.dactyl.module.impl.render.ViewClip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -52,5 +54,15 @@ public abstract class InjEntityRenderer {
         if (this.itemActivationItem != null && NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.totemPops.getValue() && this.itemActivationItem.getItem() == Items.TOTEM_OF_UNDYING) {
             info.cancel();
         }
+    }
+
+    @ModifyVariable(method = { "orientCamera" }, ordinal = 3, at = @At(value = "STORE", ordinal = 0), require = 1)
+    public double changeCameraDistanceHook(final double range) {
+        return (ViewClip.INSTANCE.isEnabled()) ? ViewClip.INSTANCE.distance.getValue() : range;
+    }
+
+    @ModifyVariable(method = { "orientCamera" }, ordinal = 7, at = @At(value = "STORE", ordinal = 0), require = 1)
+    public double orientCameraHook(final double range) {
+        return (ViewClip.INSTANCE.isEnabled()) ? ViewClip.INSTANCE.distance.getValue() : range;
     }
 }

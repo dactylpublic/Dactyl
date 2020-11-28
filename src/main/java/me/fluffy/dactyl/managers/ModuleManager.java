@@ -77,6 +77,7 @@ public class ModuleManager {
         modules.add(new LogoutSpots());
         modules.add(new XRay());
         modules.add(new VoidESP());
+        modules.add(new ViewClip());
 
         // client
         modules.add(new ClickGuiModule());
