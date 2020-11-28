@@ -40,6 +40,9 @@ public class AltSpeed extends Module {
         if(mc.player == null || mc.world == null) {
             return;
         }
+        if(ElytraFly.INSTANCE.isEnabled()) {
+            return;
+        }
         if(mc.player.isElytraFlying()) {
             return;
         }

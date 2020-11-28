@@ -32,6 +32,9 @@ public class ReverseStep extends Module {
         if (mc.world == null || mc.player == null || (Strafe.INSTANCE.isEnabled() || Freecam.INSTANCE.isEnabled() || JumpFill.INSTANCE.isEnabled())) {
             return;
         }
+        if(ElytraFly.INSTANCE.isEnabled()) {
+            return;
+        }
         this.setModuleInfo(stepModeSetting.getValue() == StepMode.ALL ? "All" : "Holes");
         boolean doSwitch = false;
         if(allWhenStep.getValue() && Step.INSTANCE.isEnabled()) {

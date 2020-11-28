@@ -61,7 +61,7 @@ public class Strafe extends Module {
         if(LongJump.INSTANCE.isEnabled()) {
             return;
         }
-        if(mc.player.isElytraFlying() || mc.player.isInLava() || mc.player.isInWater()) {
+        if(mc.player.isElytraFlying() || mc.player.isInLava() || mc.player.isInWater() || ElytraFly.INSTANCE.isEnabled()) {
             return;
         }
         //if(mc.player.isInWeb) {
@@ -136,6 +136,9 @@ public class Strafe extends Module {
             return;
         }
         if(!fastSwim.getValue()) {
+            return;
+        }
+        if(ElytraFly.INSTANCE.isEnabled()) {
             return;
         }
         if(mc.player.isInWater()) {
