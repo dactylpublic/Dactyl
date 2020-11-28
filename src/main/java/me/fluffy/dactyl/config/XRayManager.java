@@ -39,7 +39,7 @@ public class XRayManager {
         Map<String, Map<String, Object>> yamlObj = new Yaml().load(friendStream);
         if(yamlObj != null) {
             for (Map.Entry<String, Map<String, Object>> pathEntry : yamlObj.entrySet()) {
-                xrayList.add(Block.getBlockFromName(pathEntry.getKey().replace("*", " ")));
+                xrayList.add(Block.getBlockFromName(pathEntry.getKey()));
             }
         }
     }
