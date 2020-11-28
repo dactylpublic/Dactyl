@@ -39,7 +39,7 @@ public class XRayManager {
         Map<String, Map<String, Object>> yamlObj = new Yaml().load(friendStream);
         if(yamlObj != null) {
             for (Map.Entry<String, Map<String, Object>> pathEntry : yamlObj.entrySet()) {
-                xrayList.add(Block.getBlockFromName(pathEntry.getKey()));
+                xrayList.add(Block.getBlockFromName(pathEntry.getKey().replace("*", " ")));
             }
         }
     }
@@ -58,7 +58,10 @@ public class XRayManager {
         ConfigUtil.clearFile(dactylXRay);
         Map<String, Object> yamlData = new HashMap<String, Object>();
         for (Block block : xrayList) {
-            yamlData.put(block.getLocalizedName(), "");
+            if(block.getLocalizedName() != null) {
+                String name = block.getLocalizedName().replaceAll("\\s+","_");
+                yamlData.put(name, "");
+            }
         }
         Yaml yaml = new Yaml();
         BufferedWriter bufferedWriter = ConfigUtil.makeWriter(dactylXRay, false);
