@@ -20,6 +20,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
+import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
@@ -36,6 +37,7 @@ import java.awt.*;
 public class MiningTweaks extends Module {
     public Setting<Boolean> noBreakAnimation = new Setting<Boolean>("NoBreakAnim", true);
     public Setting<MiningMode> modeSetting = new Setting<MiningMode>("Mode", MiningMode.PACKET);
+    public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v->modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> reset = new Setting<Boolean>("Reset", true);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v->modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
@@ -127,6 +129,9 @@ public class MiningTweaks extends Module {
             return;
         }
         if (canBreak(event.getPos())) {
+            if(onlyPickaxe.getValue() && !(mc.player.getHeldItemMainhand().getItem() instanceof ItemPickaxe)) {
+                return;
+            }
             if (this.reset.getValue()) {
                 mc.playerController.isHittingBlock = false;
             }
