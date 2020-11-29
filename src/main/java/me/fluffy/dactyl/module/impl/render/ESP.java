@@ -4,6 +4,7 @@ import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.Colors;
+import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.EntityUtil;
 import me.fluffy.dactyl.util.StringUtil;
@@ -37,6 +38,7 @@ public class ESP extends Module {
     public Setting<Boolean> mobOwner = new Setting<Boolean>("MobOwner", true);
     public Setting<Boolean> renderEntity = new Setting<Boolean>("RenderEntity", true);
     public Setting<Boolean> itemESP = new Setting<Boolean>("Items", true);
+    public Setting<Boolean> itemNameTags = new Setting<Boolean>("ItemNameTags", true);
     public Setting<Boolean> itemESPFill = new Setting<Boolean>("ItemFill", false, v->itemESP.getValue());
     public Setting<Boolean> pearls = new Setting<Boolean>("Pearls", true);
     public Setting<Boolean> pearlFill = new Setting<Boolean>("PearlFill", false, v->pearls.getValue());
@@ -87,6 +89,15 @@ public class ESP extends Module {
             }
         }
 
+        if(itemNameTags.getValue()) {
+            for(Entity entity : mc.world.loadedEntityList) {
+                if (entity instanceof EntityItem && ESP.mc.player.getDistanceSq(entity) < 2500.0) {
+                    this.drawText(entity);
+                    continue;
+                }
+            }
+        }
+
         if(mobOwner.getValue()) {
             int i = 0;
             for(Entity entity : mc.world.loadedEntityList) {
@@ -127,6 +138,43 @@ public class ESP extends Module {
                 }
             }
         }
+    }
+
+    private void drawText(final Entity entityIn) {
+        GlStateManager.pushMatrix();
+        final double scale = 1.0;
+        final String name = (entityIn instanceof EntityItem) ? ((EntityItem)entityIn).getItem().getDisplayName() : ((entityIn instanceof EntityEnderPearl) ? "Thrown Ender Pearl" : ((entityIn instanceof EntityExpBottle) ? "Thrown Exp Bottle" : "null"));
+        final Vec3d interp = EntityUtil.getInterpolatedRenderPos(entityIn, mc.getRenderPartialTicks());
+        final float yAdd = entityIn.height / 2.0f + 0.5f;
+        final double x = interp.x;
+        final double y = interp.y + yAdd;
+        final double z = interp.z;
+        final float viewerYaw = mc.getRenderManager().playerViewY;
+        final float viewerPitch = mc.getRenderManager().playerViewX;
+        final boolean isThirdPersonFrontal = mc.getRenderManager().options.thirdPersonView == 2;
+        GlStateManager.translate(x, y, z);
+        GlStateManager.rotate(-viewerYaw, 0.0f, 1.0f, 0.0f);
+        GlStateManager.rotate((isThirdPersonFrontal ? -1 : 1) * viewerPitch, 1.0f, 0.0f, 0.0f);
+        final float f = mc.player.getDistance(entityIn);
+        final float m = f / 8.0f * (float)Math.pow(1.258925437927246, scale);
+        GlStateManager.scale(m, m, m);
+        GlStateManager.scale(-0.025f, -0.025f, 0.025f);
+        final String str = name + ((entityIn instanceof EntityItem) ? (" (" + ((EntityItem)entityIn).getItem().getCount()) + ")" : "");
+        final int i = mc.fontRenderer.getStringWidth(str) / 2;
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.glNormal3f(0.0f, 1.0f, 0.0f);
+        if (HUD.INSTANCE.customFont.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow(str, -i, 9, Color.WHITE.getRGB());
+        } else {
+            GlStateManager.enableTexture2D();
+            mc.fontRenderer.drawStringWithShadow(str, (float)(-i), 9.0f, Color.WHITE.getRGB());
+            GlStateManager.disableTexture2D();
+        }
+        GlStateManager.glNormal3f(0.0f, 0.0f, 0.0f);
+        GlStateManager.popMatrix();
     }
 
     private void doRenderEntityOutlineFill(Entity entity, boolean doFill) {

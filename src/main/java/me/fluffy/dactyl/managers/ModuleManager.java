@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 public class ModuleManager {
     private final ArrayList<Module> modules = new ArrayList<>();
     public ModuleManager() {
-
-
         // combat
         modules.add(new AutoCrystal());
         modules.add(new Offhand());
@@ -30,6 +28,7 @@ public class ModuleManager {
         modules.add(new AutoTrap());
         modules.add(new Surround());
         modules.add(new SelfTrap());
+        modules.add(new AutoArmor());
 
         // player
         modules.add(new Freecam());
