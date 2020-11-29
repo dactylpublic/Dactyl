@@ -51,6 +51,7 @@ public class ModuleManager {
         modules.add(new MultiTask());
         modules.add(new AutoReconnect());
         modules.add(new MiningTweaks());
+        modules.add(new AutoRespawn());
 
         // movement
         modules.add(new Strafe());
