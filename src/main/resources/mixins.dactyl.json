@@ -29,6 +29,7 @@
     "InjStateImplementation",
     "InjVisGraph",
     "InjWorld",
+    "access.ICPacketChatMessage",
     "access.ICPacketCloseWindow",
     "access.ICPacketCustomPayload",
     "access.ICPacketPlayer",
