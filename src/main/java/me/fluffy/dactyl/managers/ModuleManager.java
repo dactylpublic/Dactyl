@@ -84,6 +84,7 @@ public class ModuleManager {
         modules.add(new XRay());
         modules.add(new VoidESP());
         modules.add(new ViewClip());
+        modules.add(new Chams());
 
         // client
         modules.add(new ClickGuiModule());

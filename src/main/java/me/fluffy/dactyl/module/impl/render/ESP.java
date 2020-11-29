@@ -44,10 +44,6 @@ public class ESP extends Module {
     public Setting<Boolean> pearlFill = new Setting<Boolean>("PearlFill", false, v->pearls.getValue());
     public Setting<Boolean> xpBottles = new Setting<Boolean>("XPBottles", true);
     public Setting<Boolean> xpFill = new Setting<Boolean>("XPFill", false, v->xpBottles.getValue());
-    public Setting<ESPMode> crystalESPMode = new Setting<ESPMode>("CMode", ESPMode.WIREFRAME);
-    public Setting<Boolean> crystals = new Setting<Boolean>("Crystals", true);
-    public Setting<Boolean> renderCrystals = new Setting<Boolean>("RenderCrystals", false);
-    public Setting<Boolean> crystalColorSync = new Setting<Boolean>("CrystalCSync", true);
     public Setting<Double> lineWidth = new Setting<Double>("Width", 1.0d, 0.1d, 3.0d);
 
     public static ESP INSTANCE;
