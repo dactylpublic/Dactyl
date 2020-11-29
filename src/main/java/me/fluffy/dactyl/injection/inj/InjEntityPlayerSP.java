@@ -59,16 +59,6 @@ public class InjEntityPlayerSP extends AbstractClientPlayer {
         return eventUpdateWalkingPlayer.getPitch();
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/client/entity/EntityPlayerSP;rotationYaw:F"))
-    private float onUpdateRotationYaw(EntityPlayerSP player) {
-        return eventUpdateWalkingPlayer.getYaw();
-    }
-
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/client/entity/EntityPlayerSP;rotationPitch:F"))
-    private float onUpdateRotationPitch(EntityPlayerSP player) {
-        return eventUpdateWalkingPlayer.getPitch();
-    }
-
     @Inject(method = "onUpdateWalkingPlayer", at = @At("RETURN"))
     private void onUpdateWalkingPlayerPost(CallbackInfo callbackInfo) {
         EventUpdateWalkingPlayer event = new EventUpdateWalkingPlayer(ForgeEvent.Stage.POST);
