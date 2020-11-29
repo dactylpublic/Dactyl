@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Chat extends Module {
     public Setting<Boolean> chatSuffix = new Setting<Boolean>("Suffix", true);
     public Setting<Boolean> fancySuffix = new Setting<Boolean>("FancySuffix", true, v->chatSuffix.getValue());
+    public Setting<String> customChatSuffix = new Setting<String>("CustomSuffix", "Dactyl", v->!fancySuffix.getValue());
     public Setting<Boolean> commands = new Setting<Boolean>("Commands", false, v->chatSuffix.getValue());
     public Chat() {
         super("Chat", Category.MISC);
@@ -33,7 +34,7 @@ public class Chat extends Module {
         if(fancySuffix.getValue()) {
             s = s + " \u23D0 \u1D05\u1D00\u1D04\u1D1B\u028F\u029F";
         } else {
-            s = s+ " | Dactyl";
+            s = s+ " | "+customChatSuffix.getValue();
         }
         if (s.length() >= 256) s = s.substring(0,256);
         ((ICPacketChatMessage)packetChatMessage).setMessage(s);
