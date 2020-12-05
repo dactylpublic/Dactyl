@@ -1,6 +1,8 @@
 package me.fluffy.dactyl.config;
 
+import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.config.friends.Friend;
+import me.fluffy.dactyl.util.ChatUtil;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import org.yaml.snakeyaml.Yaml;
@@ -51,7 +53,7 @@ public class XRayManager {
     }
 
     public void removeBlock(String name) {
-        xrayList.removeIf(block->block.getLocalizedName().equalsIgnoreCase(name));
+        xrayList.removeIf(block->block.getLocalizedName().replaceAll("\\s+","_").equalsIgnoreCase(name));
     }
 
     public void save() throws IOException {

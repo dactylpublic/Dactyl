@@ -39,7 +39,6 @@ public class ModuleManager {
         modules.add(new JumpFill());
         modules.add(new AntiInteract());
         modules.add(new Vanish());
-        modules.add(new PacketFly());
         modules.add(new Blink());
         modules.add(new PacketFly());
 
