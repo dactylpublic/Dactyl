@@ -459,6 +459,31 @@ public class RenderUtil {
     }
 
 
+    public static void drawLine(double startX, double startY, double startZ, double endX, double endY, double endZ, int weight, Color color) {
+        GlStateManager.pushMatrix();
+        GlStateManager.glLineWidth(weight);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+        bufferBuilder.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+        bufferBuilder.pos(startX, startY, startZ).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        bufferBuilder.pos(endX, endY, endZ)    .color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        GlStateManager.color(1, 1, 1, 1);
+        GlStateManager.disableDepth();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.disableAlpha();
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GlStateManager.shadeModel(GL11.GL_SMOOTH);
+        GlStateManager.disableTexture2D();
+        Tessellator.getInstance().draw();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableDepth();
+        GlStateManager.enableTexture2D();
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+        GlStateManager.popMatrix();
+    }
+
     private static final boolean crystalCheck = false;
 
     public static float[] distanceToColor(Entity entity) {
