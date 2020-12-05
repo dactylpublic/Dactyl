@@ -40,7 +40,6 @@ public class Killaura extends Module {
     Setting<Boolean> vehicles = new Setting<Boolean>("Vehicles", true);
     Setting<Boolean> autoSwitch = new Setting<Boolean>("AutoSwitch", false);
     Setting<Integer> attackSpeed = new Setting<Integer>("AttackSpeed", 12, 1, 20, v->!hitDelay.getValue());
-    Setting<RotationMode> rotationModeSetting = new Setting<RotationMode>("Rots", RotationMode.UNIVERSAL, v->rotate.getValue());
     Setting<Double> range = new Setting<Double>("Range", 4.5D, 1.0D, 6.0D);
 
     public static Killaura INSTANCE;
@@ -107,9 +106,6 @@ public class Killaura extends Module {
         if (mc.world == null || mc.player == null)
             return;
         if (event.getStage() == ForgeEvent.Stage.PRE) {
-            if(rotationModeSetting.getValue() == RotationMode.UNIVERSAL) {
-                RotationUtil.updateRotations();
-            }
             target = findTarget();
             if (target != null) {
                 if(autoSwitch.getValue()) {
@@ -127,13 +123,9 @@ public class Killaura extends Module {
                         }
                     }
                     if(doRotate) {
-                        if(rotationModeSetting.getValue() == RotationMode.CLIENT) {
-                            event.setYaw(yawGCD);
-                            event.setPitch(pitchGCD);
-                            event.rotationUsed = true;
-                        } else if(rotationModeSetting.getValue() == RotationMode.UNIVERSAL) {
-                            RotationUtil.setPlayerRotations(yawGCD, pitchGCD);
-                        }
+                        event.setYaw(yawGCD);
+                        event.setPitch(pitchGCD);
+                        event.rotationUsed = true;
                     }
                 }
             }
@@ -161,7 +153,6 @@ public class Killaura extends Module {
                     }
                 }
             }
-            RotationUtil.restoreRotations();
         }
     }
 
