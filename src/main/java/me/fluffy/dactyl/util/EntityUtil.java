@@ -159,4 +159,8 @@ public class EntityUtil {
     public static Vec3d getInterpolatedAmount(final Entity entity, final float partialTicks) {
         return getInterpolatedAmount(entity, partialTicks, partialTicks, partialTicks);
     }
+
+    public static boolean isMoving() {
+        return (double)mc.player.moveForward != 0.0 || (double)mc.player.moveStrafing != 0.0;
+    }
 }

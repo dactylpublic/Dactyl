@@ -41,6 +41,7 @@ public class ModuleManager {
         modules.add(new Vanish());
         modules.add(new PacketFly());
         modules.add(new Blink());
+        modules.add(new PacketFly());
 
         // misc
         modules.add(new FakePlayer());
