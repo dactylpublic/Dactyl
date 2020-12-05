@@ -90,7 +90,7 @@ public class AutoCrystal extends Module {
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", true, vis->settingPage.getValue() == SettingPage.MISC);
+    //Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
@@ -298,9 +298,9 @@ public class AutoCrystal extends Module {
             }
         } else {
             if(breakRotate.getValue()) {
-                if(extraRotPackets.getValue()) {
-                    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
-                }
+                //if(extraRotPackets.getValue()) {
+                //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
+                //}
                 //float[] rots = CombatUtil.calcAngle(mc.player.getPositionEyes(mc.getRenderPartialTicks()), crystal.getPositionVector());
                 double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
                 setRotations(rots[0], rots[1]);
@@ -428,9 +428,9 @@ public class AutoCrystal extends Module {
                         resetRots();
                         return;
                     }
-                    if(extraRotPackets.getValue()) {
-                        mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
-                    }
+                    //if(extraRotPackets.getValue()) {
+                    //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
+                    //}
                     if (africanMode.getValue()) {
                         for(int i = 0; i < 10; i++) {
                             mc.player.connection.sendPacket(new CPacketPlayer(false));

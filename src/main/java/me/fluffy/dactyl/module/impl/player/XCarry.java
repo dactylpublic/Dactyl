@@ -10,8 +10,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class XCarry extends Module {
     Setting<Boolean> forceCancel = new Setting<Boolean>("ForceCancel", false);
+    public static XCarry INSTANCE;
     public XCarry() {
         super("XCarry", Category.PLAYER);
+        INSTANCE = this;
     }
 
 
