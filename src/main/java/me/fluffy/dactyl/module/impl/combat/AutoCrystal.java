@@ -102,6 +102,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, vis->settingPage.getValue() == SettingPage.RENDER);
     Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, vis->settingPage.getValue() == SettingPage.RENDER);
     Setting<Boolean> outline = new Setting<Boolean>("Outline", true, vis->settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> slowerClear = new Setting<Boolean>("SlowerReset", true, vis->settingPage.getValue() == SettingPage.RENDER);
     Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, vis->settingPage.getValue() == SettingPage.RENDER&&outline.getValue());
     Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER);
     Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER&&!colorSync.getValue());
@@ -366,8 +367,18 @@ public class AutoCrystal extends Module {
         }
         if(placePosition != null) {
             if(getCrystalsInRange() >= maxInRange.getValue()) {
-                crystalRender = null;
-                damage = 0.0d;
+                boolean doReset = true;
+                if(slowerClear.getValue()) {
+                    if(crystalRender != null) {
+                        if(CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                            doReset = false;
+                        }
+                    }
+                }
+                if(doReset) {
+                    crystalRender = null;
+                    damage = 0.0d;
+                }
                 //resetRots();
                 return;
             }
@@ -452,8 +463,18 @@ public class AutoCrystal extends Module {
             }
         } else {
             //this.setModuleInfo("");
-            crystalRender = null;
-            damage = 0.0d;
+            boolean doReset = true;
+            if(slowerClear.getValue()) {
+                if(crystalRender != null) {
+                    if(CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                        doReset = false;
+                    }
+                }
+            }
+            if(doReset) {
+                crystalRender = null;
+                damage = 0.0d;
+            }
             resetRots();
         }
     }

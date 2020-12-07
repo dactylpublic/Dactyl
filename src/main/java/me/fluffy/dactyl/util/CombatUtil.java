@@ -540,6 +540,67 @@ public class CombatUtil {
         return true;
     }
 
+    public static boolean renderPosStillSatisfies(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
+        final List<Entity> playerEntities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        EntityPlayer satisfiedTarget = null;
+        for (Entity entity : playerEntities) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            if(entity.getDistanceSq(blockPos) > 56.2) {
+                continue;
+            }
+            double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+            float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+            if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                continue;
+            }
+            if(targetDamage <= 2.0) {
+                continue;
+            }
+            satisfiedTarget = (EntityPlayer) entity;
+        }
+
+        if(!isValidRenderPos(onepointthirteen, blockPos)) {
+            return false;
+        }
+
+        if(doPlaceTrace) {
+            if(!canSeeBlock(blockPos)) {
+                if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                    return false;
+                }
+            }
+        }
+
+        if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+            return false;
+        }
+
+        double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+        float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+        if(antiSuicide) {
+            if(selfDamage > maxSelfDmg) {
+                return false;
+            }
+            if((selfDamage >= playerHealth)) {
+                return false;
+            }
+        }
+
+        if(satisfiedTarget == null) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     public static BlockPos getBestPlacePosition(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
         BlockPos placePosition = null;
@@ -849,6 +910,29 @@ public class CombatUtil {
             }
             if(dmg >= maxSelfDMG) {
                 return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isValidRenderPos(boolean isOnePointThirteen, BlockPos blockPos) {
+        if(!isOnePointThirteen) {
+            final BlockPos boost = blockPos.add(0, 1, 0);
+            final BlockPos boost2 = blockPos.add(0, 2, 0);
+            return (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN) && mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getBlockState(boost2).getBlock() == Blocks.AIR && containsNotCrystals(boost) && containsNotCrystals(boost2);
+        } else {
+            final BlockPos boost = blockPos.add(0, 1, 0);
+            return (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN) && mc.world.getBlockState(boost).getBlock() == Blocks.AIR && containsNotCrystals(boost);
+        }
+    }
+
+    private static boolean containsNotCrystals(BlockPos pos) {
+        if(mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(pos)) != null) {
+            List<Entity> entityList = mc.world.getEntitiesWithinAABB((Class) Entity.class, new AxisAlignedBB(pos));
+            for(Entity entity : entityList) {
+                if(!(entity instanceof EntityEnderCrystal)) {
+                    return false;
+                }
             }
         }
         return true;
