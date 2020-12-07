@@ -9,6 +9,7 @@
     "InjBlockModelRenderer",
     "InjEntity",
     "InjEntityBoat",
+    "InjEntityLivingBase",
     "InjEntityLlama",
     "InjEntityPlayer",
     "InjEntityPlayerSP",
