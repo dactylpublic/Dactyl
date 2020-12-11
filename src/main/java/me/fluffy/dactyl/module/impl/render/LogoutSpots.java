@@ -128,16 +128,16 @@ public class LogoutSpots extends Module {
 
     @SubscribeEvent
     public void onConnection(ConnectionEvent event) {
-        if(mc.world == null || mc.player == null || event == null || event.getUUID() == null || event.getName() == null || event.getConnectionType() == null || mc.world.getPlayerEntityByUUID(event.getUUID()) == null) {
+        if(mc.world == null || mc.player == null || event == null || event.getName() == null || event.getConnectionType() == null || mc.world.getPlayerEntityByName(event.getName()) == null) {
             return;
         }
-        if(event.getConnectionType() == ConnectionEvent.ConnectionType.LOGOUT) {
+        if(event.getConnectionType() == ConnectionEvent.ConnectionType.LOGIN) {
             this.spots.removeIf(pos -> pos.getName().equalsIgnoreCase(event.getName()));
         } else {
-            final EntityPlayer entity2 = mc.world.getPlayerEntityByUUID(event.getUUID());
-            if (event.getName() != null && entity2 != null && event.getUUID() != null) {
+            EntityPlayer entity2 = mc.world.getPlayerEntityByName(event.getName());
+            if (event.getName() != null && entity2 != null) {
                 if(!event.getName().equalsIgnoreCase(mc.session.getUsername())) {
-                    this.spots.add(new LogoutPos(event.getName(), event.getUUID(), entity2));
+                    this.spots.add(new LogoutPos(event.getName(), entity2));
                 }
             }
         }
@@ -195,15 +195,13 @@ public class LogoutSpots extends Module {
     private static class LogoutPos
     {
         private final String name;
-        private final UUID uuid;
         private final EntityPlayer entity;
         private final double x;
         private final double y;
         private final double z;
 
-        public LogoutPos(final String name, final UUID uuid, final EntityPlayer entity) {
+        public LogoutPos(final String name, final EntityPlayer entity) {
             this.name = name;
-            this.uuid = uuid;
             this.entity = entity;
             this.x = entity.posX;
             this.y = entity.posY;
@@ -212,10 +210,6 @@ public class LogoutSpots extends Module {
 
         public String getName() {
             return this.name;
-        }
-
-        public UUID getUuid() {
-            return this.uuid;
         }
 
         public EntityPlayer getEntity() {

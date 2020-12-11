@@ -94,6 +94,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> fasterResetRot = new Setting<Boolean>("FastRReset", false, v->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> africanMode = new Setting<Boolean>("AfricanMode", false, vis->settingPage.getValue() == SettingPage.MISC);
 
@@ -474,8 +475,13 @@ public class AutoCrystal extends Module {
             if(doReset) {
                 crystalRender = null;
                 damage = 0.0d;
+                if(!fasterResetRot.getValue()) {
+                    resetRots();
+                }
             }
-            resetRots();
+            if(fasterResetRot.getValue()) {
+                resetRots();
+            }
         }
     }
 

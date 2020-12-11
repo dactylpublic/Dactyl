@@ -6,12 +6,10 @@ import java.util.UUID;
 
 public class ConnectionEvent extends ForgeEvent {
     private final String name;
-    private final UUID uuid;
     private final ConnectionType connectionType;
-    public ConnectionEvent(String name, UUID uuid, ConnectionType connectionType) {
+    public ConnectionEvent(String name, ConnectionType connectionType) {
         this.setStage(Stage.PRE);
         this.name = name;
-        this.uuid = uuid;
         this.connectionType = connectionType;
     }
 
@@ -22,9 +20,6 @@ public class ConnectionEvent extends ForgeEvent {
         return this.name;
     }
 
-    public UUID getUUID() {
-        return this.uuid;
-    }
 
     public ConnectionType getConnectionType() {
         return this.connectionType;
