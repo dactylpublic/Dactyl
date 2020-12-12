@@ -3,7 +3,7 @@ package me.fluffy.dactyl.injection.inj;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.event.impl.action.EventKeyPress;
 import me.fluffy.dactyl.module.impl.misc.MCF;
-import me.fluffy.dactyl.module.impl.misc.MultiTask;
+import me.fluffy.dactyl.module.impl.player.MultiTask;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;

@@ -42,13 +42,13 @@ public class ModuleManager {
         modules.add(new Blink());
         modules.add(new PacketFly());
         modules.add(new AntiHunger());
+        modules.add(new MultiTask());
 
         // misc
         modules.add(new FakePlayer());
         modules.add(new MCF());
         modules.add(new PortalGodMode());
         modules.add(new PingSpoof());
-        modules.add(new MultiTask());
         modules.add(new AutoReconnect());
         modules.add(new MiningTweaks());
         modules.add(new AutoRespawn());
