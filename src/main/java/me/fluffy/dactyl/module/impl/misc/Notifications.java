@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.module.impl.misc;
 
+import me.fluffy.dactyl.event.impl.network.PlayerDisconnectEvent;
 import me.fluffy.dactyl.event.impl.world.EntityAddedEvent;
 import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.module.Module;
@@ -16,11 +17,21 @@ import java.awt.*;
 public class Notifications extends Module {
     Setting<NotifMode> modeSetting = new Setting<NotifMode>("Mode", NotifMode.CHAT);
     Setting<Boolean> visualRange = new Setting<Boolean>("VisualRange", true);
+    Setting<Boolean> kick = new Setting<Boolean>("Kick", true);
     Setting<Boolean> sound = new Setting<Boolean>("Sound", false);
     Setting<Boolean> watermark = new Setting<Boolean>("Watermark", true, v->modeSetting.getValue() == NotifMode.CHAT);
     Setting<Boolean> unclogged = new Setting<Boolean>("Unclogged", true, v->modeSetting.getValue() == NotifMode.CHAT);
     public Notifications() {
         super("Notifications", Category.MISC);
+    }
+
+    @SubscribeEvent
+    public void onPlayerKick(PlayerDisconnectEvent event) throws AWTException {
+        if(kick.getValue()) {
+            if(modeSetting.getValue() == NotifMode.POPUP) {
+                sendNotification("Kicked from server.", true);
+            }
+        }
     }
 
     @SubscribeEvent

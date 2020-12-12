@@ -22,6 +22,7 @@
     "InjMinecraft",
     "InjModelBoat",
     "InjMovementInputFromOptions",
+    "InjNetHandlerPlayClient",
     "InjNetworkManager",
     "InjPlayerControllerMP",
     "InjRenderEnderCrystal",
