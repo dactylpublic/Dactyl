@@ -1,14 +1,21 @@
 package me.fluffy.dactyl.listener.impl;
 
+import com.google.common.base.Strings;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.event.impl.network.ConnectionEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.listener.Listener;
+import me.fluffy.dactyl.util.ChatUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiNewChat;
+import net.minecraft.client.gui.GuiPlayerTabOverlay;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+
+import java.util.Objects;
 
 public class ConnectionListener extends Listener {
     public ConnectionListener() {
@@ -19,29 +26,34 @@ public class ConnectionListener extends Listener {
 
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        if (event.getType() == PacketEvent.PacketType.INCOMING) {
-            if(event.getPacket() instanceof SPacketPlayerListItem) {
-                SPacketPlayerListItem packet = (SPacketPlayerListItem) event.getPacket();
-                if (packet.getAction() == SPacketPlayerListItem.Action.ADD_PLAYER) {
-                    for (SPacketPlayerListItem.AddPlayerData playerData : packet.getEntries()) {
-                        if (playerData.getProfile().getId() != mc.session.getProfile().getId()) {
-                            if(playerData != null && playerData.getProfile() != null && playerData.getProfile().getName() != null) {
-                                MinecraftForge.EVENT_BUS.post(new ConnectionEvent(playerData.getProfile().getName(), ConnectionEvent.ConnectionType.LOGIN));
-                            }
-                        }
+        try {
+            if (event.getType() == PacketEvent.PacketType.INCOMING) {
+                if (event.getPacket() instanceof SPacketPlayerListItem) {
+                    SPacketPlayerListItem packet = (SPacketPlayerListItem) event.getPacket();
+                    if (!SPacketPlayerListItem.Action.ADD_PLAYER.equals(packet.getAction()) && !SPacketPlayerListItem.Action.REMOVE_PLAYER.equals(packet.getAction())) {
+                        return;
                     }
-                }
-                if (packet.getAction() == SPacketPlayerListItem.Action.REMOVE_PLAYER) {
-                    for (SPacketPlayerListItem.AddPlayerData playerData : packet.getEntries()) {
-                        if (playerData.getProfile().getId() != mc.session.getProfile().getId()) {
-                            if(playerData != null && playerData.getProfile() != null && playerData.getProfile().getName() != null) {
-                                MinecraftForge.EVENT_BUS.post(new ConnectionEvent(playerData.getProfile().getName(), ConnectionEvent.ConnectionType.LOGOUT));
-                            }
+                    packet.getEntries().stream().filter(Objects::nonNull).filter(data -> !Strings.isNullOrEmpty(data.getProfile().getName()) || data.getProfile().getId() != null).forEach(data -> {
+                        switch (packet.getAction()) {
+                            case ADD_PLAYER:
+                                if (data.getProfile().getId() != mc.session.getProfile().getId()) {
+                                    if (data != null && data.getProfile() != null && data.getProfile().getName() != null) {
+                                        MinecraftForge.EVENT_BUS.post(new ConnectionEvent(data.getProfile().getName(), ConnectionEvent.ConnectionType.LOGIN));
+                                    }
+                                }
+                                break;
+                            case REMOVE_PLAYER:
+                                if (data != null && data.getProfile() != null && data.getProfile().getId() != null && data.getProfile().getId() != mc.session.getProfile().getId()) {
+                                    if (data != null && data.getProfile() != null) {
+                                        Entity entity = mc.world.getPlayerEntityByUUID(data.getProfile().getId());
+                                        MinecraftForge.EVENT_BUS.post(new ConnectionEvent((entity != null ? entity.getName() : null), ConnectionEvent.ConnectionType.LOGOUT));
+                                    }
+                                }
                         }
-                    }
+                    });
                 }
             }
-        }
+        } catch(Exception exception) {}
     }
 
     @SubscribeEvent

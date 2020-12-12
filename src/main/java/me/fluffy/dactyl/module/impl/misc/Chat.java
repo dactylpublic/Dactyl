@@ -17,8 +17,8 @@ public class Chat extends Module {
     public Setting<String> customChatSuffix = new Setting<String>("CustomSuffix", "Dactyl", v->!fancySuffix.getValue());
     public Setting<Boolean> commands = new Setting<Boolean>("Commands", false, v->chatSuffix.getValue());
     public Setting<Boolean> connectionMessages = new Setting<Boolean>("ConnMsgs", false);
-    public Setting<Boolean> connectionWatermark = new Setting<Boolean>("ConnLogo", true);
-    public Setting<Boolean> connectionClogged = new Setting<Boolean>("ConnFilled", false);
+    public Setting<Boolean> connectionWatermark = new Setting<Boolean>("ConnLogo", true, v->connectionMessages.getValue());
+    public Setting<Boolean> connectionClogged = new Setting<Boolean>("ConnFilled", false, v->connectionMessages.getValue());
     public Chat() {
         super("Chat", Category.MISC);
     }
@@ -32,7 +32,9 @@ public class Chat extends Module {
         if(connectionMessages.getValue()) {
             if (event.getConnectionType() == ConnectionEvent.ConnectionType.LOGOUT) {
                 if (!event.getName().equalsIgnoreCase(mc.session.getUsername())) {
-                    ChatUtil.printMsg("&7" + event.getName() + " has left the game.", connectionWatermark.getValue(), !connectionClogged.getValue(), 314159);
+                    if(event.getName() != null && !event.getName().equalsIgnoreCase("")) {
+                        ChatUtil.printMsg("&7" + event.getName() + " has left the game.", connectionWatermark.getValue(), !connectionClogged.getValue(), 314159);
+                    }
                 }
             } else {
                 if (!event.getName().equalsIgnoreCase(mc.session.getUsername())) {
