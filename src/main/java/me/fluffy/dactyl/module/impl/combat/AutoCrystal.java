@@ -312,8 +312,7 @@ public class AutoCrystal extends Module {
         } else if(updateLogic.getValue() == UpdateLogic.FIELD){
             if(breakRotate.getValue()) {
                 double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
-                mc.player.rotationYaw = (float)rots[0];
-                mc.player.rotationYaw = (float)rots[1];
+                RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
             }
             currentAttacking = crystal;
             attackCrystal(crystal);
@@ -415,11 +414,9 @@ public class AutoCrystal extends Module {
                     }
                 } else if(updateLogic.getValue() == UpdateLogic.FIELD) {
                     if(constRotate.getValue()) {
-                        mc.player.rotationYaw = (float) constRots[0];
-                        mc.player.rotationPitch = (float) constRots[1];
+                        RotationUtil.setPlayerRotations((float)constRots[0], (float)constRots[1]);
                     } else {
-                        mc.player.rotationYaw = (float) rots[0];
-                        mc.player.rotationPitch = (float) rots[1];
+                        RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
                     }
                 }
             }
