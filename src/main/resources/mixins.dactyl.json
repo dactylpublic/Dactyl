@@ -27,6 +27,7 @@
     "InjRenderEnderCrystal",
     "InjRenderLivingBase",
     "InjRenderPlayer",
+    "InjScoreboard",
     "InjStateImplementation",
     "InjVisGraph",
     "InjWorld",

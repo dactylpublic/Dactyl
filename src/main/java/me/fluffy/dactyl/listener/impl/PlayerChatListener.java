@@ -1,12 +1,15 @@
 package me.fluffy.dactyl.listener.impl;
 
 import me.fluffy.dactyl.Dactyl;
+import me.fluffy.dactyl.command.impl.IgnoreCommand;
 import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.action.CommandSendEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.event.impl.player.PlayerChatEvent;
 import me.fluffy.dactyl.listener.Listener;
 import net.minecraft.network.play.client.CPacketChatMessage;
+import net.minecraft.network.play.server.SPacketChat;
+import net.minecraft.util.text.ChatType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -28,6 +31,18 @@ public class PlayerChatListener extends Listener {
                         Dactyl.commandManager.sendHelp();
                     }
                     event.setCanceled(true);
+                }
+            }
+        } else if(event.getType() == PacketEvent.PacketType.INCOMING) {
+            if(event.getPacket() instanceof SPacketChat) {
+                SPacketChat packet = (SPacketChat)event.getPacket();
+                if(IgnoreCommand.ignoredUsers != null) {
+                    String chatMsg = packet.getChatComponent().getUnformattedText();
+                    for (String ignored : IgnoreCommand.ignoredUsers) {
+                        if(chatMsg.startsWith("<"+ignored) || chatMsg.startsWith(ignored)) {
+                            event.setCanceled(true);
+                        }
+                    }
                 }
             }
         }
