@@ -52,6 +52,7 @@ public class ModuleManager {
         modules.add(new MiningTweaks());
         modules.add(new AutoRespawn());
         modules.add(new Chat());
+        modules.add(new TimerModule());
 
         // movement
         modules.add(new Strafe());

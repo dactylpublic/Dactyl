@@ -12,6 +12,7 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.*;
+import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
@@ -27,6 +28,7 @@ public class NoSlow extends Module {
 
     // common
     Setting<Boolean> strictSlowDown = new Setting<Boolean>("Strict", false, v->page.getValue() == SettingPage.COMMON);
+    Setting<Boolean> strictInventory = new Setting<Boolean>("StrictInventory", false, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> inventoryMove = new Setting<Boolean>("InvMove", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSlowItem = new Setting<Boolean>("Items", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSoulSand = new Setting<Boolean>("SoulSand", true, v->page.getValue() == SettingPage.COMMON);
@@ -82,8 +84,13 @@ public class NoSlow extends Module {
 
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        if(event.getPacket() instanceof CPacketPlayer) {
-            handleStrictPacket();
+        if(event.getType() == PacketEvent.PacketType.OUTGOING) {
+            if (event.getPacket() instanceof CPacketPlayer) {
+                handleStrictPacket();
+            }
+            if(event.getPacket() instanceof CPacketClickWindow) {
+                handleStrictInventory();
+            }
         }
     }
 
@@ -95,6 +102,20 @@ public class NoSlow extends Module {
         if(!sneaking) {
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
             sneaking = true;
+        }
+    }
+
+    private void handleStrictInventory() {
+        if(strictInventory.getValue()) {
+            if (mc.player.isActiveItemStackBlocking()) {
+                mc.playerController.onStoppedUsingItem(mc.player);
+            }
+            if (mc.player.isSneaking()) {
+                mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+            }
+            if (mc.player.isSprinting()) {
+                mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
+            }
         }
     }
 
