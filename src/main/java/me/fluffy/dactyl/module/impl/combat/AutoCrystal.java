@@ -298,7 +298,7 @@ public class AutoCrystal extends Module {
                 currentAttacking = crystal;
                 attackCrystal(crystal);
             }
-        } else {
+        } else if(updateLogic.getValue() == UpdateLogic.PACKET){
             if(breakRotate.getValue()) {
                 //if(extraRotPackets.getValue()) {
                 //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
@@ -306,6 +306,14 @@ public class AutoCrystal extends Module {
                 //float[] rots = CombatUtil.calcAngle(mc.player.getPositionEyes(mc.getRenderPartialTicks()), crystal.getPositionVector());
                 double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
                 setRotations(rots[0], rots[1]);
+            }
+            currentAttacking = crystal;
+            attackCrystal(crystal);
+        } else if(updateLogic.getValue() == UpdateLogic.FIELD){
+            if(breakRotate.getValue()) {
+                double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
+                mc.player.rotationYaw = (float)rots[0];
+                mc.player.rotationYaw = (float)rots[1];
             }
             currentAttacking = crystal;
             attackCrystal(crystal);
@@ -404,6 +412,14 @@ public class AutoCrystal extends Module {
                         setRotations(constRots[0], constRots[1]);
                     } else {
                         setRotations(rots[0], rots[1]);
+                    }
+                } else if(updateLogic.getValue() == UpdateLogic.FIELD) {
+                    if(constRotate.getValue()) {
+                        mc.player.rotationYaw = (float) constRots[0];
+                        mc.player.rotationPitch = (float) constRots[1];
+                    } else {
+                        mc.player.rotationYaw = (float) rots[0];
+                        mc.player.rotationPitch = (float) rots[1];
                     }
                 }
             }
@@ -608,6 +624,13 @@ public class AutoCrystal extends Module {
     public void onUpdateWalking(EventUpdateWalkingPlayer event) {
         if(updateLogic.getValue() == UpdateLogic.WALKING) {
             doAutoCrystal(event);
+        } else if(updateLogic.getValue() == UpdateLogic.FIELD) {
+            if(event.getStage() == ForgeEvent.Stage.PRE) {
+                RotationUtil.updateRotations();
+                doAutoCrystal(event);
+            } else if(event.getStage() == ForgeEvent.Stage.POST) {
+                RotationUtil.restoreRotations();
+            }
         }
     }
 
@@ -673,7 +696,8 @@ public class AutoCrystal extends Module {
 
     private enum UpdateLogic {
         WALKING,
-        PACKET
+        PACKET,
+        FIELD
     }
 
     public enum BreakLogic {
