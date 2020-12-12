@@ -129,6 +129,33 @@ public class CombatUtil {
         return -1;
     }
 
+    public static int amountInInventory(Item item) {
+        int quantity = 0;
+
+        for(int i = 44; i > -1; i--) {
+            ItemStack stackInSlot = mc.player.inventoryContainer.getSlot(i).getStack();
+            if(stackInSlot.getItem() == item) quantity += stackInSlot.getCount();
+        }
+        if(mc.player.getHeldItemOffhand().getItem() == item) quantity += mc.player.getHeldItemOffhand().getCount();
+
+        return quantity;
+    }
+
+    public static int getBlank() {
+        int index = -1;
+        for(int i = 44; i > -1; i--) {
+            if(mc.player.inventory.getStackInSlot(i).isEmpty()) {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+    public static int getSlotIndex(int index) {
+        return index < 9 ? index + 36 : index;
+    }
+
     public static boolean requiredDangerSwitch(double dangerRange) {
         int dangerousCrystals = (int) mc.world.loadedEntityList.stream()
                 .filter(entity -> entity instanceof EntityEnderCrystal)

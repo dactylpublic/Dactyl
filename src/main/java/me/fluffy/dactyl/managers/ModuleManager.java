@@ -43,6 +43,7 @@ public class ModuleManager {
         modules.add(new PacketFly());
         modules.add(new AntiHunger());
         modules.add(new MultiTask());
+        modules.add(new HotbarRefill());
 
         // misc
         modules.add(new FakePlayer());
