@@ -165,7 +165,7 @@ public class LogoutSpots extends Module {
 
 
     public String getDisplayName(String name, double x, double y, double z) {
-        return name + ((locationDisplay.getValue() == LocDisplay.COORDS) ? " XYZ: " + String.format("%.0f", x) + " " + String.format("%.0f", y) + " " + String.format("%.0f", z) : " ("+String.format("%.0f", mc.player.getDistance(x, y, z))+")");
+        return name + ((locationDisplay.getValue() == LocDisplay.COORDS) ? " XYZ: " + String.format("%.0f", x) + " " + String.format("%.0f", y) + " " + String.format("%.0f", z) : " "+String.format("%.0f", mc.player.getDistance(x, y, z))+"m");
     }
 
     public void drawBorderedRect(double x, double y, double x1, double y1, double width, float borderWidth, int internalColor, int borderColor) {
