@@ -75,6 +75,9 @@ public class Notifications extends Module {
             ChatUtil.printMsg(message, watermark.getValue(), unclogged.getValue(), -666);
         }
         if(sound.getValue()) {
+            if(mc.getSoundHandler() == null || mc.player == null) {
+                return;
+            }
             PositionedSoundRecord sound = new PositionedSoundRecord(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1, 1, mc.player.getPosition());
             mc.getSoundHandler().playSound(sound);
         }
