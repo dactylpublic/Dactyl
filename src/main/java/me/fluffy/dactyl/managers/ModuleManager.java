@@ -88,6 +88,7 @@ public class ModuleManager {
         modules.add(new ViewClip());
         modules.add(new Chams());
         modules.add(new Trajectories());
+        modules.add(new BlockHighlight());
 
         // client
         modules.add(new ClickGuiModule());
