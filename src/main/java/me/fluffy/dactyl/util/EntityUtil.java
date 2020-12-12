@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.util;
 
+import me.fluffy.dactyl.Dactyl;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -13,6 +14,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public class EntityUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -45,6 +54,84 @@ public class EntityUtil {
                 break;
         }
         return directionLabel;
+    }
+
+    public static String getNameFromUUID(final UUID uuid) {
+        try {
+            final lookUpName process = new lookUpName(uuid);
+            final Thread thread = new Thread(process);
+            thread.start();
+            thread.join();
+            return process.getName();
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static String getNameFromUUID(final String uuid) {
+        try {
+            final lookUpName process = new lookUpName(uuid);
+            final Thread thread = new Thread(process);
+            thread.start();
+            thread.join();
+            return process.getName();
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static class lookUpName implements Runnable
+    {
+        private volatile String name;
+        private final String uuid;
+        private final UUID uuidID;
+
+        public lookUpName(final String input) {
+            this.uuid = input;
+            this.uuidID = UUID.fromString(input);
+        }
+
+        public lookUpName(UUID input) {
+            this.uuidID = input;
+            this.uuid = input.toString();
+        }
+
+        @Override
+        public void run() {
+            this.name = this.lookUpName();
+        }
+
+        public String lookUpName() {
+            EntityPlayer player = null;
+            if (mc.world != null) {
+                player = mc.world.getPlayerEntityByUUID(this.uuidID);
+            }
+            if (player == null) {
+                final String url = "https://api.mojang.com/user/profiles/" + this.uuid.replace("-", "") + "/names";
+                try {
+                    final String nameJson = IOUtils.toString(new URL(url));
+                    if(nameJson.contains(",")) {
+                        List<String> names = Arrays.asList(nameJson.split(","));
+                        Collections.reverse(names);
+                        return names.get(1).replace("{\"name\":\"","").replace("\"","").toString();
+                    } else {
+                        return nameJson.replace("[{\"name\":\"", "").replace("\"}]", "").toString();
+                    }
+                }
+                catch (IOException exception) {
+                    exception.printStackTrace();
+                    Dactyl.logger.info("error");
+                    return null;
+                }
+            }
+            return player.getName();
+        }
+
+        public String getName() {
+            return this.name;
+        }
     }
 
     public static String getRelativeDirection() {

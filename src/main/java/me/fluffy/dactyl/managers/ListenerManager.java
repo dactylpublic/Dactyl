@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.managers;
 
+import me.fluffy.dactyl.command.impl.PluginsCommand;
 import me.fluffy.dactyl.listener.Listener;
 import me.fluffy.dactyl.listener.impl.*;
 import net.minecraftforge.common.MinecraftForge;

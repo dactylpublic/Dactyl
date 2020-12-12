@@ -187,6 +187,10 @@ public class RenderUtil {
         GL11.glPopMatrix();
     }
 
+    public static AxisAlignedBB interpolateAxis(final AxisAlignedBB bb) {
+        return new AxisAlignedBB(bb.minX - Minecraft.getMinecraft().getRenderManager().viewerPosX, bb.minY - Minecraft.getMinecraft().getRenderManager().viewerPosY, bb.minZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ, bb.maxX - Minecraft.getMinecraft().getRenderManager().viewerPosX, bb.maxY - Minecraft.getMinecraft().getRenderManager().viewerPosY, bb.maxZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ);
+    }
+
     public static void drawEntityESP(Entity entity, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {
         AxisAlignedBB bb = new AxisAlignedBB(entity.posX - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, entity.posY - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, entity.posZ - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, (entity.posX + entity.getEntityBoundingBox().maxX) - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, (entity.posY + entity.getEntityBoundingBox().maxY) - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, (entity.posZ + entity.getEntityBoundingBox().maxZ) - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ);
         camera.setPosition(((Entity) Objects.requireNonNull(Minecraft.getMinecraft().getRenderViewEntity())).posX, (Minecraft.getMinecraft().getRenderViewEntity()).posY, (Minecraft.getMinecraft().getRenderViewEntity()).posZ);

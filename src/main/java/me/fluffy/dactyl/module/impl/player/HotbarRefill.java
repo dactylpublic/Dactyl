@@ -20,7 +20,7 @@ public class HotbarRefill extends Module {
     public HotbarRefill() {
         super("HotbarRefill", Category.PLAYER);
     }
-    
+
     private TimeUtil timer = new TimeUtil();
 
     @Override

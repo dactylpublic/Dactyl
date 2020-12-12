@@ -34,6 +34,7 @@ public class LogoutSpots extends Module {
     public Setting<Integer> green = new Setting<Integer>("Green", 255, 1, 255, v->!colorSync.getValue());
     public Setting<Integer> blue = new Setting<Integer>("Blue", 255, 1, 255, v->!colorSync.getValue());
     public Setting<Boolean> border = new Setting<Boolean>("Border", true);
+    public Setting<Boolean> box = new Setting<Boolean>("Box", true);
     public Setting<Boolean> smartScaling = new Setting<Boolean>("SmartScaling", false);
     public Setting<LocDisplay> locationDisplay = new Setting<LocDisplay>("Display", LocDisplay.COORDS);
 
@@ -50,6 +51,14 @@ public class LogoutSpots extends Module {
             synchronized (this.spots) {
                 this.spots.forEach(spot -> {
                     if (spot.getEntity() != null) {
+                        Color clr = new Color(red.getValue(), green.getValue(), blue.getValue());
+                        if(colorSync.getValue()) {
+                            clr = Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false));
+                        }
+                        if(box.getValue()) {
+                            AxisAlignedBB interpolateAxis = RenderUtil.interpolateAxis(spot.getEntity().getEntityBoundingBox());
+                            RenderUtil.drawBlockOutline(interpolateAxis, clr, 1.0f);
+                        }
                         double x = this.interpolate(spot.getEntity().lastTickPosX, spot.getEntity().posX, event.getPartialTicks()) - LogoutSpots.mc.getRenderManager().viewerPosX;
                         double y = this.interpolate(spot.getEntity().lastTickPosY, spot.getEntity().posY, event.getPartialTicks()) - LogoutSpots.mc.getRenderManager().viewerPosY;
                         double z = this.interpolate(spot.getEntity().lastTickPosZ, spot.getEntity().posZ, event.getPartialTicks()) - LogoutSpots.mc.getRenderManager().viewerPosZ;
@@ -122,6 +131,7 @@ public class LogoutSpots extends Module {
         GlStateManager.enableLighting();
         GlStateManager.disablePolygonOffset();
         GlStateManager.doPolygonOffset(1.0F, 1500000.0F);
+        GlStateManager.resetColor();
         GlStateManager.popMatrix();
     }
 

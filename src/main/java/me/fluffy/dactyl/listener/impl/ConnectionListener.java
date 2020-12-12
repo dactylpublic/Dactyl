@@ -6,6 +6,7 @@ import me.fluffy.dactyl.event.impl.network.ConnectionEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.listener.Listener;
 import me.fluffy.dactyl.util.ChatUtil;
+import me.fluffy.dactyl.util.EntityUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;

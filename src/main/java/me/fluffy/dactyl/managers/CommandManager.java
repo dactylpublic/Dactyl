@@ -18,6 +18,7 @@ public class CommandManager {
         commandList.add(new ConfigCommand());
         commandList.add(new XRayCommand());
         commandList.add(new IgnoreCommand());
+        commandList.add(new PluginsCommand());
     }
 
     public List<Command> getCommandList() {
