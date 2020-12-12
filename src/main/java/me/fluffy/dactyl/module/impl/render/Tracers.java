@@ -49,6 +49,11 @@ public class Tracers extends Module {
     }
 
     @Override
+    public void onClientUpdate() {
+        this.setModuleInfo(tracerModeSetting.getValue() == TracerMode.ARROW ? "Arrow" : "Line");
+    }
+
+    @Override
     public void onScreen2D(float ticks) {
         if(mc.world == null || mc.player == null) {
             return;

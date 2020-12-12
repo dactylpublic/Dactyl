@@ -41,6 +41,7 @@ public class ModuleManager {
         modules.add(new Vanish());
         modules.add(new Blink());
         modules.add(new PacketFly());
+        modules.add(new AntiHunger());
 
         // misc
         modules.add(new FakePlayer());
@@ -53,6 +54,7 @@ public class ModuleManager {
         modules.add(new AutoRespawn());
         modules.add(new Chat());
         modules.add(new TimerModule());
+        modules.add(new Notifications());
 
         // movement
         modules.add(new Strafe());
@@ -89,6 +91,7 @@ public class ModuleManager {
         modules.add(new Chams());
         modules.add(new Trajectories());
         modules.add(new BlockHighlight());
+        modules.add(new NewChunks());
 
         // client
         modules.add(new ClickGuiModule());

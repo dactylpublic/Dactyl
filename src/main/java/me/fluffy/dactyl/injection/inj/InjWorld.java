@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.injection.inj;
 
+import me.fluffy.dactyl.event.impl.world.EntityAddedEvent;
 import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.module.impl.render.NoRender;
 import net.minecraft.client.Minecraft;
@@ -20,6 +21,11 @@ public class InjWorld {
     @Inject(method = "onEntityRemoved", at = @At("HEAD"), cancellable = true)
     public void onEntityRemoved(Entity entity, CallbackInfo callbackInfo) {
         MinecraftForge.EVENT_BUS.post(new EntityRemovedEvent(entity));
+    }
+
+    @Inject(method = "onEntityAdded", at = @At("HEAD"), cancellable = true)
+    public void onEntityAdded(Entity entity, CallbackInfo callbackInfo) {
+        MinecraftForge.EVENT_BUS.post(new EntityAddedEvent(entity));
     }
 
     @Inject(method = {"checkLightFor"}, at = {@At("HEAD")}, cancellable = true)

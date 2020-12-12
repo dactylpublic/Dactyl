@@ -15,6 +15,11 @@ public class EntityControl extends Module {
         INSTANCE = this;
     }
 
+    @Override
+    public void onClientUpdate() {
+        this.setModuleInfo(mountBypass.getValue() ? "Mount" : "Riding");
+    }
+
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
         if(mc.player == null || mc.world == null) {

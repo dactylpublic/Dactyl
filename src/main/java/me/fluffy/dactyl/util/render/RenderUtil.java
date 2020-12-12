@@ -458,6 +458,58 @@ public class RenderUtil {
         GL11.glPopAttrib();
     }
 
+    public static void drawPlane(double x, double y, double z, AxisAlignedBB bb, float width, int color) {
+        GL11.glPushMatrix();
+        GL11.glTranslated(x, y, z);
+        drawPlane(bb, width, color);
+        GL11.glPopMatrix();
+    }
+
+    public static void drawPlane(AxisAlignedBB axisalignedbb, float width, int color) {
+        GlStateManager.pushMatrix();
+        GlStateManager.glLineWidth(width);
+        GlStateManager.enableBlend();
+        GlStateManager.disableDepth();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+        drawPlane(axisalignedbb, color);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
+
+    public static void drawPlane(AxisAlignedBB boundingBox, int color) {
+        float alpha = (color >> 24 & 0xFF) / 255.0F;
+        float red = (color >> 16 & 0xFF) / 255.0F;
+        float green = (color >> 8 & 0xFF) / 255.0F;
+        float blue = (color & 0xFF) / 255.0F;
+
+        double minX = boundingBox.minX;
+        double minY = boundingBox.minY;
+        double minZ = boundingBox.minZ;
+
+        double maxX = boundingBox.maxX;
+        double maxY = boundingBox.maxY;
+        double maxZ = boundingBox.maxZ;
+
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+        bufferbuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, 0).endVertex();
+        bufferbuilder.pos(maxZ, minY, minZ).color(red, green, blue, alpha).endVertex();
+
+        tessellator.draw();
+    }
+
 
     public static void drawLine(double startX, double startY, double startZ, double endX, double endY, double endZ, int weight, Color color) {
         GlStateManager.pushMatrix();
