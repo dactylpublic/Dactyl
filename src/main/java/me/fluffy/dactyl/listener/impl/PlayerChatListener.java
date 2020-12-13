@@ -29,8 +29,11 @@ public class PlayerChatListener extends Listener {
                 if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix()) || Dactyl.commandManager.matchesCommand(cmd)) {
                     if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix()) && !Dactyl.commandManager.matchesCommand(cmd)) {
                         Dactyl.commandManager.sendHelp();
+                        event.setCanceled(true);
                     }
-                    event.setCanceled(true);
+                    if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix()) && Dactyl.commandManager.matchesCommand(cmd)) {
+                        event.setCanceled(true);
+                    }
                 }
             }
         } else if(event.getType() == PacketEvent.PacketType.INCOMING) {
