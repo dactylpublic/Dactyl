@@ -13,6 +13,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.awt.*;
+import java.util.HashMap;
 
 public class Notifications extends Module {
     Setting<NotifMode> modeSetting = new Setting<NotifMode>("Mode", NotifMode.CHAT);
@@ -23,6 +24,21 @@ public class Notifications extends Module {
     Setting<Boolean> unclogged = new Setting<Boolean>("Unclogged", true, v->modeSetting.getValue() == NotifMode.CHAT);
     public Notifications() {
         super("Notifications", Category.MISC);
+    }
+
+    private final HashMap<String, Long> timeSent = new HashMap<>();
+
+    @Override
+    public void onClientUpdate() {
+        if(mc.player == null || mc.world == null) {
+            return;
+        }
+        timeSent.entrySet().removeIf(time -> ((System.currentTimeMillis() - time.getValue()) >= 500));
+    }
+
+    @Override
+    public void onToggle() {
+        timeSent.clear();
     }
 
     @SubscribeEvent
@@ -53,6 +69,9 @@ public class Notifications extends Module {
         if(visualRange.getValue()) {
             if (event.getEntity() instanceof EntityPlayer && event.getEntity() != mc.player) {
                 EntityPlayer entityPlayer = (EntityPlayer)event.getEntity();
+                if(timeSent.containsKey(entityPlayer.getName()+" left your visual range.") || timeSent.containsKey("&d"+entityPlayer.getName()+" left your visual range.")) {
+                    return;
+                }
                 if(modeSetting.getValue() == NotifMode.POPUP) {
                     sendNotification(entityPlayer.getName()+" left your visual range.", true);
                 } else {
@@ -81,6 +100,7 @@ public class Notifications extends Module {
             PositionedSoundRecord sound = new PositionedSoundRecord(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1, 1, mc.player.getPosition());
             mc.getSoundHandler().playSound(sound);
         }
+        timeSent.put(message, System.currentTimeMillis());
     }
 
 
