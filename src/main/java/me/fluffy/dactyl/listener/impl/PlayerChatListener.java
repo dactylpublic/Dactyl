@@ -26,7 +26,7 @@ public class PlayerChatListener extends Listener {
                 PlayerChatEvent e = new PlayerChatEvent(packet.getMessage(), ForgeEvent.Stage.POST);
                 MinecraftForge.EVENT_BUS.post(e);
                 String cmd = e.getMessage().split(" ")[0].replace(Dactyl.commandManager.getPrefix(), "");
-                if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix())) {
+                if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix()) || Dactyl.commandManager.matchesCommand(cmd)) {
                     if(packet.getMessage().startsWith(Dactyl.commandManager.getPrefix()) && !Dactyl.commandManager.matchesCommand(cmd)) {
                         Dactyl.commandManager.sendHelp();
                     }
@@ -52,7 +52,7 @@ public class PlayerChatListener extends Listener {
     public void onChat(PlayerChatEvent event) {
         if(event.getStage() == ForgeEvent.Stage.POST) {
             String cmd = event.getMessage().split(" ")[0].replace(Dactyl.commandManager.getPrefix(), "");
-            if (Dactyl.commandManager.matchesCommand(cmd)) {
+            if (event.getMessage().startsWith(Dactyl.commandManager.getPrefix()) && Dactyl.commandManager.matchesCommand(cmd)) {
                 CommandSendEvent e = new CommandSendEvent(cmd, event.getMessage().split(" "));
                 MinecraftForge.EVENT_BUS.post(e);
             }
