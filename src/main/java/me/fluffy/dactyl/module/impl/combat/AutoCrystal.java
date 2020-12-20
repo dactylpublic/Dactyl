@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 
 public class AutoCrystal extends Module {
     Setting<SettingPage> settingPage = new Setting<SettingPage>("Setting", SettingPage.PLACE);
-
     // place
     Setting<Boolean> doCaPlace = new Setting<Boolean>("Place", true, vis->settingPage.getValue() == SettingPage.PLACE);
     Setting<Boolean> tracePlace = new Setting<Boolean>("PlaceTrace", false, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
@@ -124,6 +123,7 @@ public class AutoCrystal extends Module {
     private final TimeUtil modInfoTimer = new TimeUtil();
     private final TimeUtil novolaTimer = new TimeUtil();
 
+
     private static float yaw;
     private static float pitch;
     private static boolean isRotating;
@@ -168,8 +168,12 @@ public class AutoCrystal extends Module {
                             if (e instanceof EntityEnderCrystal) {
                                 if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
                                     e.setDead();
-                                    if(attackedCrystals.containsKey(e)) {
-                                        attackedCrystals.remove(e);
+                                    Iterator<EntityEnderCrystal> crystalIterator = attackedCrystals.keySet().iterator();
+                                    while (crystalIterator.hasNext()) {
+                                        if(attackedCrystals.containsKey(e)) {
+                                            crystalIterator.remove();
+                                            //attackedCrystals.remove(e);
+                                        }
                                     }
                                 }
                             }
@@ -177,17 +181,6 @@ public class AutoCrystal extends Module {
                     }
                 }
             }
-            /*if(event.getPacket() instanceof SPacketDestroyEntities) {
-                SPacketDestroyEntities packet = (SPacketDestroyEntities)event.getPacket();
-                for (int id : packet.getEntityIDs()) {
-                    Entity entity = mc.world.getEntityByID(id);
-                    if (entity instanceof EntityEnderCrystal) {
-                        if(placedCrystals.contains(new BlockPos(entity.getPositionVector()).down())){
-                            placedCrystals.remove((new BlockPos(entity.getPositionVector())).down());
-                        }
-                    }
-                }
-            }*/
             if(event.getPacket() instanceof SPacketSpawnObject) {
                 SPacketSpawnObject packetSpawnObject = (SPacketSpawnObject)event.getPacket();
                 if(doCaBreak.getValue() && predict.getValue()) {
