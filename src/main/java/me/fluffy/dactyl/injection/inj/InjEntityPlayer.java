@@ -3,7 +3,6 @@ package me.fluffy.dactyl.injection.inj;
 import me.fluffy.dactyl.event.impl.player.PlayerTravelEvent;
 import me.fluffy.dactyl.event.impl.world.CollisionAppliedEvent;
 import me.fluffy.dactyl.event.impl.world.WaterPushEvent;
-import me.fluffy.dactyl.module.impl.player.PacketFly;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,14 +24,6 @@ public abstract class InjEntityPlayer extends InjEntity {
             info.cancel();
         }
     }
-
-    @Inject(method={"isEntityInsideOpaqueBlock"}, at={@At(value="HEAD")}, cancellable=true)
-    private void isEntityInsideOpaqueBlock(CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if(PacketFly.INSTANCE != null && PacketFly.INSTANCE.isEnabled()) {
-            callbackInfoReturnable.cancel();
-        }
-    }
-
 
     @Inject(method = "isPushedByWater()Z", at = @At("HEAD"), cancellable = true)
     public void isPushedByWater(CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
