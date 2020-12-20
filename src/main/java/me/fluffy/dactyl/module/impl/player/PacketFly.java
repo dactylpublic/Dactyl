@@ -33,8 +33,10 @@ public class PacketFly extends Module {
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
+    public static PacketFly INSTANCE;
     public PacketFly() {
         super("PacketFly", Category.PLAYER);
+        INSTANCE = this;
     }
     private int teleportId;
     private int flightCounter;

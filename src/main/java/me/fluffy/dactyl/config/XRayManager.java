@@ -53,7 +53,7 @@ public class XRayManager {
     }
 
     public void removeBlock(String name) {
-        xrayList.removeIf(block->block.getLocalizedName().replaceAll("\\s+","_").equalsIgnoreCase(name));
+        xrayList.removeIf(block->block != null && block.getLocalizedName() != null && name != null && block.getLocalizedName().replaceAll("\\s+","_").equalsIgnoreCase(name));
     }
 
     public void save() throws IOException {
