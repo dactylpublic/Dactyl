@@ -2,13 +2,16 @@ package me.fluffy.dactyl.module.impl.misc;
 
 import me.fluffy.dactyl.event.impl.network.ConnectionEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
+import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.injection.inj.access.ICPacketChatMessage;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.render.LogoutSpots;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.ChatUtil;
+import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.CPacketChatMessage;
+import net.minecraft.network.play.server.SPacketChat;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Chat extends Module {
@@ -19,8 +22,29 @@ public class Chat extends Module {
     public Setting<Boolean> connectionMessages = new Setting<Boolean>("ConnMsgs", false);
     public Setting<Boolean> connectionWatermark = new Setting<Boolean>("ConnLogo", true, v->connectionMessages.getValue());
     public Setting<Boolean> connectionClogged = new Setting<Boolean>("ConnFilled", false, v->connectionMessages.getValue());
+    public Setting<Boolean> afkReply = new Setting<Boolean>("AFKReply", false);
+    public Setting<Integer> afkDelay = new Setting<Integer>("AFKDelay", 15, 1, 40, v->afkReply.getValue(), "Delay (in seconds)");
+    public Setting<String> afkMessage = new Setting<String>("AFKMessage", "[Dactyl] I am currently AFK.", v->afkReply.getValue());
     public Chat() {
         super("Chat", Category.MISC);
+    }
+
+    private final TimeUtil afkTimer = new TimeUtil();
+    private final TimeUtil msgTimer = new TimeUtil();
+
+    @SubscribeEvent
+    public void onMove(MoveEvent event) {
+        afkTimer.reset();
+    }
+
+    @SubscribeEvent
+    public void onChat(PacketEvent event) {
+        if(event.getType() == PacketEvent.PacketType.INCOMING) {
+            if (event.getPacket() instanceof SPacketChat && afkTimer.hasPassed(afkDelay.getValue() * 1000) && afkReply.getValue() && (((SPacketChat)event.getPacket()).getChatComponent().getFormattedText()).contains("§d") && ((SPacketChat)event.getPacket()).getChatComponent().getFormattedText().contains(" whispers: ") && msgTimer.hasPassed(10000L)) {
+                mc.player.sendChatMessage("/r "+afkMessage.getValue());
+                msgTimer.reset();
+            }
+        }
     }
 
 
