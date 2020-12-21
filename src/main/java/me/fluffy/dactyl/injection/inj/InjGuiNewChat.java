@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.injection.inj;
 
 import me.fluffy.dactyl.Dactyl;
+import me.fluffy.dactyl.module.impl.client.Media;
 import me.fluffy.dactyl.module.impl.misc.Chat;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -18,12 +19,20 @@ public class InjGuiNewChat {
         }
     }
 
+    @Redirect(method = "getChatComponent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;getStringWidth(Ljava/lang/String;)I", ordinal = 0))
+    public int getChatComponent(FontRenderer fontRenderer, String text) {
+        if(Chat.INSTANCE.isEnabled() && Chat.INSTANCE.customFont.getValue()) {
+            return (int) Dactyl.fontUtil.getStringWidth(Media.INSTANCE.onRenderString(text));
+        }
+        return fontRenderer.getStringWidth(Media.INSTANCE.onRenderString(text));
+    }
+
     @Redirect(method = "drawChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I", ordinal = 0))
     public int drawStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color) {
         if(Chat.INSTANCE.isEnabled() && Chat.INSTANCE.customFont.getValue()) {
             Dactyl.fontUtil.drawStringFloatShadow(text, x-0.5f, y-0.5f, color);
             return 1;
         }
-        return fontRenderer.drawStringWithShadow(text, x, y, color);
+        return fontRenderer.drawStringWithShadow(Media.INSTANCE.onRenderString(text), x, y, color);
     }
 }

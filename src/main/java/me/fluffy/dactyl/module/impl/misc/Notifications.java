@@ -7,6 +7,8 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.ChatUtil;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundCategory;
@@ -14,12 +16,15 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Notifications extends Module {
     Setting<NotifMode> modeSetting = new Setting<NotifMode>("Mode", NotifMode.CHAT);
     Setting<Boolean> visualRange = new Setting<Boolean>("VisualRange", true);
     Setting<Boolean> kick = new Setting<Boolean>("Kick", true);
     Setting<Boolean> sound = new Setting<Boolean>("Sound", false);
+    Setting<Boolean> pearls = new Setting<Boolean>("Pearls", true);
     Setting<Boolean> watermark = new Setting<Boolean>("Watermark", true, v->modeSetting.getValue() == NotifMode.CHAT);
     Setting<Boolean> unclogged = new Setting<Boolean>("Unclogged", true, v->modeSetting.getValue() == NotifMode.CHAT);
     public Notifications() {
@@ -27,13 +32,53 @@ public class Notifications extends Module {
     }
 
     private final HashMap<String, Long> timeSent = new HashMap<>();
+    ConcurrentHashMap<UUID, Integer> uuidMap = new ConcurrentHashMap<UUID, Integer>();
 
     @Override
     public void onClientUpdate() {
         if(mc.player == null || mc.world == null) {
             return;
         }
+        doPearlNotifs();
         timeSent.entrySet().removeIf(time -> ((System.currentTimeMillis() - time.getValue()) >= 500));
+    }
+
+    private void doPearlNotifs() {
+        if(pearls.getValue()) {
+            for (Entity entity : mc.world.loadedEntityList) {
+                if (entity instanceof EntityEnderPearl) {
+                    EntityPlayer closest = null;
+                    for (EntityPlayer p : mc.world.playerEntities) {
+                        if (closest == null || entity.getDistance(p) < entity.getDistance(closest)) {
+                            closest = p;
+                        }
+                    }
+                    if (closest == null || closest.getDistance(entity) >= 2.0f || this.uuidMap.containsKey(entity.getUniqueID()) || closest.getName().equalsIgnoreCase(mc.player.getName())) {
+                        continue;
+                    }
+                    this.uuidMap.put(entity.getUniqueID(), 200);
+                    sendChatNotif("&d" + closest.getName() + " threw a pearl " + replaceDir(entity.getHorizontalFacing().getName()));
+                }
+            }
+        }
+        this.uuidMap.forEach((name, timeout) -> {
+            if (timeout <= 0) {
+                this.uuidMap.remove(name);
+            }
+            else {
+                this.uuidMap.put(name, timeout - 1);
+            }
+        });
+    }
+
+    private String replaceDir(String x) {
+        if(x.equalsIgnoreCase("west")) {
+            return "east";
+        }
+        if(x.equalsIgnoreCase("east")) {
+            return "west";
+        }
+        return x;
     }
 
     @Override
@@ -93,6 +138,18 @@ public class Notifications extends Module {
         } else {
             ChatUtil.printMsg(message, watermark.getValue(), unclogged.getValue(), -666);
         }
+        if(sound.getValue()) {
+            if(mc.getSoundHandler() == null || mc.player == null) {
+                return;
+            }
+            PositionedSoundRecord sound = new PositionedSoundRecord(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1, 1, mc.player.getPosition());
+            mc.getSoundHandler().playSound(sound);
+        }
+        timeSent.put(message, System.currentTimeMillis());
+    }
+
+    private void sendChatNotif(String message) {
+        ChatUtil.printMsg(message, watermark.getValue(), unclogged.getValue(), -666);
         if(sound.getValue()) {
             if(mc.getSoundHandler() == null || mc.player == null) {
                 return;
