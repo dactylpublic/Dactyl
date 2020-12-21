@@ -214,7 +214,7 @@ public class Nametags extends Module {
     }
 
 
-    public int getTotemPops(String user) {
+    public static int getTotemPops(String user) {
         if(Dactyl.totemManager.getPoppedUsers() != null && Dactyl.totemManager.getPoppedUsers().get(user) != null) {
             return (int)Dactyl.totemManager.getPoppedUsers().get(user);
         }
