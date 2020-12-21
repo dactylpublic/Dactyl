@@ -142,7 +142,7 @@ public class LogoutSpots extends Module {
             return;
         }
         if(event.getConnectionType() == ConnectionEvent.ConnectionType.LOGIN) {
-            this.spots.removeIf(pos -> pos.getName().equalsIgnoreCase(event.getName()));
+            this.spots.removeIf(pos -> event.getName().equalsIgnoreCase(pos.getName()));
         } else {
             EntityPlayer entity2 = mc.world.getPlayerEntityByName(event.getName());
             if (event.getName() != null && entity2 != null) {
