@@ -170,6 +170,7 @@ public class AutoCrystal extends Module {
                                     e.setDead();
                                     Iterator<EntityEnderCrystal> crystalIterator = attackedCrystals.keySet().iterator();
                                     while (crystalIterator.hasNext()) {
+                                        crystalIterator.next();
                                         if(attackedCrystals.containsKey(e)) {
                                             crystalIterator.remove();
                                             //attackedCrystals.remove(e);
