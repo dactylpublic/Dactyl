@@ -15,6 +15,7 @@ import net.minecraft.network.play.server.SPacketChat;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Chat extends Module {
+    public Setting<Boolean> noBorder = new Setting<Boolean>("NoBorder", false);
     public Setting<Boolean> chatSuffix = new Setting<Boolean>("Suffix", true);
     public Setting<Boolean> fancySuffix = new Setting<Boolean>("FancySuffix", true, v->chatSuffix.getValue());
     public Setting<String> customChatSuffix = new Setting<String>("CustomSuffix", "Dactyl", v->!fancySuffix.getValue());
@@ -25,8 +26,10 @@ public class Chat extends Module {
     public Setting<Boolean> afkReply = new Setting<Boolean>("AFKReply", false);
     public Setting<Integer> afkDelay = new Setting<Integer>("AFKDelay", 15, 1, 40, v->afkReply.getValue(), "Delay (in seconds)");
     public Setting<String> afkMessage = new Setting<String>("AFKMessage", "[Dactyl] I am currently AFK.", v->afkReply.getValue());
+    public static Chat INSTANCE;
     public Chat() {
         super("Chat", Category.MISC);
+        INSTANCE = this;
     }
 
     private final TimeUtil afkTimer = new TimeUtil();

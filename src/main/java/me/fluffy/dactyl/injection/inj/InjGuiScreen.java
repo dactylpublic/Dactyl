@@ -34,25 +34,18 @@ public class InjGuiScreen {
             if (tagCompound != null && tagCompound.hasKey("BlockEntityTag", 10)) {
                 NBTTagCompound blockEntityTag = tagCompound.getCompoundTag("BlockEntityTag");
                 if (blockEntityTag.hasKey("Items", 9)) {
-                    // We'll take over!
                     info.cancel();
-
                     NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>withSize(27, ItemStack.EMPTY);
                     ItemStackHelper.loadAllItems(blockEntityTag, nonnulllist);
-
                     GlStateManager.enableBlend();
                     GlStateManager.disableRescaleNormal();
                     RenderHelper.disableStandardItemLighting();
                     GlStateManager.disableLighting();
                     GlStateManager.disableDepth();
-
-
                     int width = Math.max(144, fontRenderer.getStringWidth(stack.getDisplayName())+3); //9*16
-
                     int x1 = x + 12;
                     int y1 = y - 12;
-                    int height = 48+9; //3*16
-
+                    int height = 48+9;
                     this.itemRender.zLevel = 300.0F;
                     this.drawGradientRectP(x1 - 3, y1 - 4, x1 + width + 3, y1 - 3, -267386864, -267386864);
                     this.drawGradientRectP(x1 - 3, y1 + height + 3, x1 + width + 3, y1 + height + 4, -267386864, -267386864);
@@ -64,7 +57,6 @@ public class InjGuiScreen {
                     this.drawGradientRectP(x1 - 3, y1 - 3, x1 + width + 3, y1 - 3 + 1, Colors.INSTANCE.getColor(1, false), Colors.INSTANCE.getColor(1, false));
                     this.drawGradientRectP(x1 - 3, y1 + height + 2, x1 + width + 3, y1 + height + 3, Colors.INSTANCE.getColor(1, false), Colors.INSTANCE.getColor(1, false));
                     fontRenderer.drawString(stack.getDisplayName(), x+12, y-12, Colors.INSTANCE.getColor(1, false));
-
                     GlStateManager.enableBlend();
                     GlStateManager.enableAlpha();
                     GlStateManager.enableTexture2D();
@@ -81,7 +73,6 @@ public class InjGuiScreen {
                     }
                     RenderHelper.disableStandardItemLighting();
                     this.itemRender.zLevel = 0.0F;
-
                     GlStateManager.enableLighting();
                     GlStateManager.enableDepth();
                     RenderHelper.enableStandardItemLighting();

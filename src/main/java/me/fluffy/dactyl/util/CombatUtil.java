@@ -183,7 +183,7 @@ public class CombatUtil {
     }
 
     public static boolean isHard(Block block) {
-        return block == Blocks.OBSIDIAN || block == Blocks.BEDROCK;
+        return block == Blocks.OBSIDIAN || block == Blocks.BEDROCK || block == Blocks.ANVIL || block == Blocks.ENDER_CHEST;
     }
 
     public static Vec3d interpolateEntity(Entity entity) {
