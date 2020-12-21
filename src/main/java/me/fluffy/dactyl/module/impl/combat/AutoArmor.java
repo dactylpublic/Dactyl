@@ -38,6 +38,7 @@ public class AutoArmor extends Module {
         if(mc.player == null || mc.world == null) {
             return;
         }
+        this.setModuleInfo(mendWhileXP.getValue() ? "Mend" : "Equip");
         boolean doMend = (mendWhileXP.getValue() && Mouse.isButtonDown(1) && (mc.player.getHeldItemMainhand().getItem() instanceof ItemExpBottle));
         if(doMend) {
             for (ItemStack is : mc.player.inventory.armorInventory) {

@@ -60,6 +60,7 @@ public class NoSlow extends Module {
         if(mc.player == null || mc.world == null || mc.gameSettings == null) {
             return;
         }
+        this.setModuleInfo(strictSlowDown.getValue() ? "Strict" : "Loose");
         handleWebYMovement();
         handleShieldOffhand();
         handleSneakBypass();
