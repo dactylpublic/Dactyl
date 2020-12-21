@@ -14,9 +14,13 @@ public class Media extends Module {
     }
 
     public String onRenderString(String s) {
+        if(!this.isEnabled()) {
+            return s;
+        }
         if(mc.getSession().getUsername() == null) {
             return s;
         }
+        s = s.replace(mc.getSession().getUsername(), fakeUsername.getValue());
         return s.replace(mc.getSession().getUsername(), fakeUsername.getValue());
     }
 }
