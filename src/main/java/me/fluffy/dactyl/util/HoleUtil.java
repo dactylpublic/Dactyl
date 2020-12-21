@@ -22,4 +22,14 @@ public class HoleUtil {
         }
         return (size == 5);
     }
+
+    public static boolean isHole(BlockPos blockpos) {
+        int size = 0;
+        for(BlockPos bPos : holeBlocks) {
+            if(CombatUtil.isHard(mc.world.getBlockState(blockpos.add(bPos)).getBlock())) {
+                size++;
+            }
+        }
+        return (size == 5);
+    }
 }

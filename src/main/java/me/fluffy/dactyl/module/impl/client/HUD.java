@@ -109,8 +109,8 @@ public class HUD extends Module {
     private void sortModules() {
         Comparator<ArrayListElement> comparator = (first, second) ->
         {
-            String firstName = first.module.getDisplayName() + (first.module.getModuleInfo().length() > 0 ? first.module.getModuleInfo()+"[]" : "");
-            String secondName = second.module.getDisplayName() + (second.module.getModuleInfo().length() > 0 ? second.module.getModuleInfo()+"[]" : "");
+            String firstName = first.module.getDisplayName() + (first.module.getModuleInfo().length() > 0 ? " ["+first.module.getModuleInfo()+"]" : "");
+            String secondName = second.module.getDisplayName() + (second.module.getModuleInfo().length() > 0 ? " ["+second.module.getModuleInfo()+"]" : "");
             float dif = Dactyl.fontUtil.getStringWidth(secondName) -  Dactyl.fontUtil.getStringWidth(firstName);
             return dif != 0 ? (int) dif : secondName.compareTo(firstName);
         };

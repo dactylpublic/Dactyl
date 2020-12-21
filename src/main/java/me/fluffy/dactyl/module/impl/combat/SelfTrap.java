@@ -5,6 +5,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockObsidian;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -68,11 +69,11 @@ public class SelfTrap extends Module {
             return;
         }
         if(swapModeSetting.getValue() == SelfTrap.SwapMode.NONE) {
-            if(!(mc.player.inventory.getStackInSlot(mc.player.inventory.currentItem).getItem() instanceof ItemBlock)) {
+            if(!(mc.player.inventory.getStackInSlot(mc.player.inventory.currentItem).getItem() instanceof ItemBlock) && !(mc.player.getHeldItemOffhand().getItem() instanceof ItemBlock)) {
                 resetAutoTrap();
                 return;
             }
-            if (!(((ItemBlock) mc.player.inventory.getStackInSlot(mc.player.inventory.currentItem).getItem()).getBlock() instanceof BlockObsidian)) {
+            if(!(Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem()) instanceof BlockObsidian) && !(Block.getBlockFromItem(mc.player.getHeldItemOffhand().getItem()) instanceof BlockObsidian)) {
                 resetAutoTrap();
                 return;
             }
@@ -106,7 +107,7 @@ public class SelfTrap extends Module {
                 return;
             }
             BlockPos placementPosition = new BlockPos(mc.player.getPositionVector()).down().add(getTrap().get(step).x, getTrap().get(step).y, getTrap().get(step).z);
-            boolean blockPlaced = CombatUtil.placeBlock(placementPosition, false, rotate.getValue(), false, true, swapModeSetting.getValue().equals(SelfTrap.SwapMode.SILENT), findObi());
+            boolean blockPlaced = CombatUtil.placeBlock(placementPosition, false, rotate.getValue(), false, (swapModeSetting.getValue() != SwapMode.NONE), swapModeSetting.getValue().equals(SelfTrap.SwapMode.SILENT), findObi());
             if (blockPlaced) {
                 placed++;
             }

@@ -6,6 +6,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockObsidian;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -71,12 +72,12 @@ public class AutoTrap extends Module {
             return;
         }
         if(swapModeSetting.getValue() == SwapMode.NONE) {
-            if(!(mc.player.inventory.getStackInSlot(mc.player.inventory.currentItem).getItem() instanceof ItemBlock)) {
+            if(!(mc.player.inventory.getStackInSlot(mc.player.inventory.currentItem).getItem() instanceof ItemBlock) && !(mc.player.getHeldItemOffhand().getItem() instanceof ItemBlock)) {
                 resetAutoTrap();
                 this.setModuleInfo("");
                 return;
             }
-            if (!(((ItemBlock) mc.player.inventory.getStackInSlot(mc.player.inventory.currentItem).getItem()).getBlock() instanceof BlockObsidian)) {
+            if(!(Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem()) instanceof BlockObsidian) && !(Block.getBlockFromItem(mc.player.getHeldItemOffhand().getItem()) instanceof BlockObsidian)) {
                 resetAutoTrap();
                 this.setModuleInfo("");
                 return;
@@ -132,7 +133,7 @@ public class AutoTrap extends Module {
                 step++;
                 return;
             }
-            boolean blockPlaced = CombatUtil.placeBlock(placementPosition, false, rotate.getValue(), false, true, swapModeSetting.getValue().equals(SwapMode.SILENT), findObi());
+            boolean blockPlaced = CombatUtil.placeBlock(placementPosition, false, rotate.getValue(), false, (swapModeSetting.getValue() != SwapMode.NONE), swapModeSetting.getValue().equals(SwapMode.SILENT), findObi());
             if (blockPlaced) {
                 placed++;
             }

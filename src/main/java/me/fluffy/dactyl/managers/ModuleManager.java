@@ -29,6 +29,7 @@ public class ModuleManager {
         modules.add(new Surround());
         modules.add(new SelfTrap());
         modules.add(new AutoArmor());
+        modules.add(new HoleFill());
 
         // player
         modules.add(new Freecam());
