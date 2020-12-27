@@ -33,6 +33,7 @@ public class PacketFly extends Module {
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
+    public Setting<Boolean> cancelSPacket = new Setting<Boolean>("TCancel", false);
     public PacketFly() {
         super("PacketFly", Category.PLAYER);
     }
@@ -110,7 +111,13 @@ public class PacketFly extends Module {
                 if (mc.player.isEntityAlive()) {
                     final BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
                     if (mc.world.isBlockLoaded(pos, false) && !(mc.currentScreen instanceof GuiDownloadTerrain)) {
-                        idTimeMap.remove(packet.getTeleportId());
+                        if(idTimeMap.containsKey(packet.getTeleportId())) {
+                            idTimeMap.remove(packet.getTeleportId());
+                            if(cancelSPacket.getValue()) {
+                                event.setCanceled(true);
+                                return;
+                            }
+                        }
                     }
                 }
                 ((ISPacketPlayerPosLook)packet).setYaw(mc.player.rotationYaw);
