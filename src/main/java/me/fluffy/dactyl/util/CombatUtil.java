@@ -74,6 +74,24 @@ public class CombatUtil {
         return new BlockPos(Math.floor(mc.player.posX), Math.floor(mc.player.posY), Math.floor(mc.player.posZ));
     }
 
+    public static int findHotbarBlock(final Class clazz) {
+        for (int i = 0; i < 9; ++i) {
+            final ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack != ItemStack.EMPTY) {
+                if (clazz.isInstance(stack.getItem())) {
+                    return i;
+                }
+                if (stack.getItem() instanceof ItemBlock) {
+                    final Block block = ((ItemBlock)stack.getItem()).getBlock();
+                    if (clazz.isInstance(block)) {
+                        return i;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
     public static int findCrapple() {
         if (mc.player == null) {
             return -1;
