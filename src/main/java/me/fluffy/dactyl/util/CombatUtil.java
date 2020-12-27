@@ -46,6 +46,8 @@ public class CombatUtil {
 
     private static final List<Integer> invalidSlots = Arrays.asList(0, 5, 6, 7, 8);
 
+    private static final List<Integer> hotbarSlots = Arrays.asList(36, 37, 38, 39, 40, 41, 42, 43, 44);
+
     public static final List<Block> blackList = Arrays.asList(Blocks.TALLGRASS, Blocks.ENDER_CHEST, (Block)Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.CRAFTING_TABLE, Blocks.ANVIL, Blocks.BREWING_STAND, (Block)Blocks.HOPPER, Blocks.DROPPER, Blocks.DISPENSER, Blocks.TRAPDOOR);
     public static final List<Block> shulkerList = Arrays.asList(Blocks.WHITE_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX, Blocks.YELLOW_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX, Blocks.SILVER_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX, Blocks.BROWN_SHULKER_BOX, Blocks.GREEN_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.BLACK_SHULKER_BOX);
 
@@ -104,6 +106,28 @@ public class CombatUtil {
                 continue;
             }
             if(stack.getItem().equals(i) && (stack.getItemDamage() == 1)) {
+                return x;
+            }
+        }
+        return -1;
+    }
+
+    public static int findItemSlotNotHotbar(Item i) {
+        if (mc.player == null) {
+            return -1;
+        }
+        for (int x = 0; x < mc.player.inventoryContainer.getInventory().size(); x++) {
+            if(invalidSlots.contains(x)) {
+                continue;
+            }
+            if(hotbarSlots.contains(x)) {
+                continue;
+            }
+            ItemStack stack = mc.player.inventoryContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(stack.getItem().equals(i)) {
                 return x;
             }
         }
@@ -294,11 +318,13 @@ public class CombatUtil {
             return false;
         }
         if(doSwitch) {
-            if(silentSwitch) {
-                mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
-            } else {
-                if(mc.player.inventory.currentItem != toSwitch) {
-                    mc.player.inventory.currentItem = toSwitch;
+            if(!offhand) {
+                if (silentSwitch) {
+                    mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
+                } else {
+                    if (mc.player.inventory.currentItem != toSwitch) {
+                        mc.player.inventory.currentItem = toSwitch;
+                    }
                 }
             }
         }

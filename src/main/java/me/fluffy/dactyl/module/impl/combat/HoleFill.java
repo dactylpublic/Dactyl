@@ -28,6 +28,7 @@ public class HoleFill extends Module {
     public Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", false);
     public Setting<SwapMode> swapModeSetting = new Setting<SwapMode>("SwapMode", SwapMode.NORMAL);
     public Setting<Boolean> resetSwap = new Setting<Boolean>("ResetSwap", true);
+    public Setting<Boolean> offhandOnly = new Setting<Boolean>("OffhandOnly", false);
     public Setting<Boolean> disableSwap = new Setting<Boolean>("DisableSwap", false);
     public Setting<Boolean> smart = new Setting<Boolean>("Smart", false);
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 3.0d, 1.0d, 10.0d, v->smart.getValue());
@@ -71,6 +72,11 @@ public class HoleFill extends Module {
                 resetHoleFill();
                 return;
             }
+            boolean isOffhanding = (mc.player.getHeldItemOffhand().getItem() instanceof ItemBlock && Block.getBlockFromItem(mc.player.getHeldItemOffhand().getItem()) instanceof BlockObsidian);
+            if(offhandOnly.getValue() && !isOffhanding) {
+                resetHoleFill();
+                return;
+            }
         }
         int size = 0;
         if(getHolesToFill() != null) {
@@ -107,11 +113,12 @@ public class HoleFill extends Module {
                 }
                 break;
             }
-            if(findObi() == -1) {
+            boolean isOffhanding = (mc.player.getHeldItemOffhand().getItem() instanceof ItemBlock && Block.getBlockFromItem(mc.player.getHeldItemOffhand().getItem()) instanceof BlockObsidian);
+            if(!isOffhanding && findObi() == -1) {
                 return;
             }
             BlockPos placementPosition = getHolesToFill().get(step);
-            boolean blockPlaced = CombatUtil.placeBlock(placementPosition, (Block.getBlockFromItem(mc.player.getHeldItemOffhand().getItem()) instanceof BlockObsidian), rotate.getValue(), false, (swapModeSetting.getValue() != SwapMode.NONE), swapModeSetting.getValue().equals(SwapMode.SILENT), findObi());
+            boolean blockPlaced = CombatUtil.placeBlock(placementPosition, isOffhanding, rotate.getValue(), false, (swapModeSetting.getValue() != SwapMode.NONE), swapModeSetting.getValue().equals(SwapMode.SILENT), findObi());
             if (blockPlaced) {
                 placed++;
             }

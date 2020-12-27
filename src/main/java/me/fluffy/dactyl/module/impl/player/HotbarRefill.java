@@ -24,14 +24,13 @@ public class HotbarRefill extends Module {
     private TimeUtil timer = new TimeUtil();
 
     @Override
+    public void onToggle() {
+        timer.reset();
+    }
+
+    @Override
     public void onClientUpdate() {
-        if(mc.player == null || mc.world == null) {
-            return;
-        }
-        if (mc.currentScreen != null) {
-            return;
-        }
-        if(!timer.hasPassed(delay.getValue().longValue())) {
+        if(mc.player == null || mc.world == null || mc.currentScreen != null || !timer.hasPassed(delay.getValue().longValue())) {
             return;
         }
         for (int x = 0; x < 9; x++) {
@@ -39,16 +38,11 @@ public class HotbarRefill extends Module {
             if (stack.isEmpty() || stack.getItem() == Items.AIR || !stack.isStackable() || stack.getCount() >= stack.getMaxStackSize() || stack.getCount() > limit.getValue()) {
                 return;
             }
-            for (int i = 9; i < 36; i++) {
-                ItemStack item = mc.player.inventory.getStackInSlot(i);
-                if (item.isEmpty()) {
-                    continue;
-                }
-                if(stack.getItem() == item.getItem() && stack.getDisplayName().equals(item.getDisplayName())) {
-                    mc.playerController.windowClick(mc.player.inventoryContainer.windowId, i, 0, ClickType.QUICK_MOVE, mc.player);
-                    mc.playerController.updateController();
-                    timer.reset();
-                }
+            int foundItemSlot = CombatUtil.findItemSlotNotHotbar(stack.getItem());
+            if(foundItemSlot != -1) {
+                mc.playerController.windowClick(mc.player.inventoryContainer.windowId, foundItemSlot, 0, ClickType.QUICK_MOVE, mc.player);
+                mc.playerController.updateController();
+                timer.reset();
             }
         }
     }
