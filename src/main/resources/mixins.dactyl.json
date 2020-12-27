@@ -33,6 +33,7 @@
     "InjStateImplementation",
     "InjVisGraph",
     "InjWorld",
+    "access.IBlock",
     "access.ICPacketChatMessage",
     "access.ICPacketCloseWindow",
     "access.ICPacketCustomPayload",

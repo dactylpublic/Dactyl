@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.util;
 
 import me.fluffy.dactyl.Dactyl;
+import me.fluffy.dactyl.injection.inj.access.IBlock;
 import me.fluffy.dactyl.injection.inj.access.IVec3i;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
 import net.minecraft.block.Block;
@@ -152,6 +153,70 @@ public class CombatUtil {
         return -1;
     }
 
+    public static Pair<Integer, Integer> findHotbarRefillSlot(int limit) {
+        Pair<Integer, Integer> returnPair = null;
+        for (final Map.Entry<Integer, ItemStack> hotbarSlot : getHotbar().entrySet()) {
+            final ItemStack stack = hotbarSlot.getValue();
+            if (!stack.isEmpty()) {
+                if (stack.getItem() == Items.AIR) {
+                    continue;
+                }
+                if (!stack.isStackable()) {
+                    continue;
+                }
+                if (stack.getCount() >= stack.getMaxStackSize()) {
+                    continue;
+                }
+                if (stack.getCount() > limit) {
+                    continue;
+                }
+                final int inventorySlot = findCompatibleInventorySlot(stack);
+                if (inventorySlot == -1) {
+                    continue;
+                }
+                returnPair = new Pair<Integer, Integer>(inventorySlot, hotbarSlot.getKey());
+            }
+        }
+        return returnPair;
+    }
+
+    private static int findCompatibleInventorySlot(final ItemStack hotbarStack) {
+        int inventorySlot = -1;
+        int smallestStackSize = 999;
+        for (final Map.Entry<Integer, ItemStack> entry : getInventory().entrySet()) {
+            final ItemStack inventoryStack = entry.getValue();
+            if (!inventoryStack.isEmpty()) {
+                if (inventoryStack.getItem() == Items.AIR) {
+                    continue;
+                }
+                if (!isCompatibleStacks(hotbarStack, inventoryStack)) {
+                    continue;
+                }
+                final int currentStackSize = ((ItemStack)mc.player.inventoryContainer.getInventory().get((int)entry.getKey())).getCount();
+                if (smallestStackSize <= currentStackSize) {
+                    continue;
+                }
+                smallestStackSize = currentStackSize;
+                inventorySlot = entry.getKey();
+            }
+        }
+        return inventorySlot;
+    }
+
+    private static boolean isCompatibleStacks(final ItemStack stack1, final ItemStack stack2) {
+        if (!stack1.getItem().equals(stack2.getItem())) {
+            return false;
+        }
+        if (stack1.getItem() instanceof ItemBlock && stack2.getItem() instanceof ItemBlock) {
+            final Block block1 = ((ItemBlock)stack1.getItem()).getBlock();
+            final Block block2 = ((ItemBlock)stack2.getItem()).getBlock();
+            if (!((IBlock)block1).getMaterial().equals(((IBlock)block2).getMaterial())) {
+                return false;
+            }
+        }
+        return stack1.getDisplayName().equals(stack2.getDisplayName()) && stack1.getItemDamage() == stack2.getItemDamage();
+    }
+
     public static int findItemSlot(Item i) {
         if (mc.player == null) {
             return -1;
@@ -192,6 +257,23 @@ public class CombatUtil {
             }
         }
         return index;
+    }
+
+    private static Map<Integer, ItemStack> getInventory() {
+        return getInventorySlots(9, 35);
+    }
+
+    private static Map<Integer, ItemStack> getHotbar() {
+        return getInventorySlots(36, 44);
+    }
+
+    public static Map<Integer, ItemStack> getInventorySlots(int current, final int last) {
+        final Map<Integer, ItemStack> fullInventorySlots = new HashMap<Integer, ItemStack>();
+        while (current <= last) {
+            fullInventorySlots.put(current, (ItemStack)mc.player.inventoryContainer.getInventory().get(current));
+            ++current;
+        }
+        return fullInventorySlots;
     }
 
     public static int getSlotIndex(int index) {
@@ -986,6 +1068,33 @@ public class CombatUtil {
         return true;
     }
 
+
+    public static class Pair<T, S> {
+        T key;
+        S value;
+
+        public Pair(final T key, final S value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public T getKey() {
+            return this.key;
+        }
+
+        public S getValue() {
+            return this.value;
+        }
+
+        public void setKey(final T key) {
+            this.key = key;
+        }
+
+        public void setValue(final S value) {
+            this.value = value;
+        }
+    }
+
     private static boolean isValidRenderPos(boolean isOnePointThirteen, BlockPos blockPos) {
         if(!isOnePointThirteen) {
             final BlockPos boost = blockPos.add(0, 1, 0);
@@ -1122,6 +1231,7 @@ public class CombatUtil {
                 MathHelper.wrapDegrees(yaw - mc.player.rotationYaw), mc.player.rotationPitch +
                 MathHelper.wrapDegrees(pitch - mc.player.rotationPitch) };
     }
+
 
 
 }
