@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.module.impl.misc;
 
 import me.fluffy.dactyl.event.impl.network.PlayerDisconnectEvent;
+import me.fluffy.dactyl.event.impl.player.UpdatePopEvent;
 import me.fluffy.dactyl.event.impl.world.EntityAddedEvent;
 import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.module.Module;
@@ -25,6 +26,9 @@ public class Notifications extends Module {
     Setting<Boolean> kick = new Setting<Boolean>("Kick", true);
     Setting<Boolean> sound = new Setting<Boolean>("Sound", false);
     Setting<Boolean> pearls = new Setting<Boolean>("Pearls", true);
+    Setting<Boolean> totemPops = new Setting<Boolean>("Pops", true);
+    Setting<Boolean> totemPopWatermark = new Setting<Boolean>("PopLogo", true, v->totemPops.getValue());
+    Setting<Boolean> totemPopClogged = new Setting<Boolean>("PopClogged", false, v->totemPops.getValue());
     Setting<Boolean> watermark = new Setting<Boolean>("Watermark", true, v->modeSetting.getValue() == NotifMode.CHAT);
     Setting<Boolean> unclogged = new Setting<Boolean>("Unclogged", true, v->modeSetting.getValue() == NotifMode.CHAT);
     public Notifications() {
@@ -33,6 +37,14 @@ public class Notifications extends Module {
 
     private final HashMap<String, Long> timeSent = new HashMap<>();
     ConcurrentHashMap<UUID, Integer> uuidMap = new ConcurrentHashMap<UUID, Integer>();
+
+    @SubscribeEvent
+    public void onPop(UpdatePopEvent event) {
+        if(mc.player == null || mc.world == null) {
+            return;
+        }
+        ChatUtil.printMsg("&9"+event.getUser()+" has popped &6"+String.valueOf(event.getPopCount())+" totem(s).", totemPopWatermark.getValue(), !totemPopClogged.getValue(), -138592);
+    }
 
     @Override
     public void onClientUpdate() {
