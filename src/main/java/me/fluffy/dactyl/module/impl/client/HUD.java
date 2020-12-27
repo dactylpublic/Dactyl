@@ -42,6 +42,7 @@ public class HUD extends Module {
     public Setting<Boolean> speed = new Setting<Boolean>("Speed", true, v->renderHud.getValue());
     public Setting<Boolean> ping = new Setting<Boolean>("Ping", true, v->renderHud.getValue());
     public Setting<Boolean> clock = new Setting<Boolean>("Clock", true, v->renderHud.getValue());
+    public Setting<Boolean> grayColor = new Setting<Boolean>("GrayColor", false, v->renderHud.getValue());
     public Setting<Boolean> direction = new Setting<Boolean>("Direction", true, v->renderHud.getValue());
     public Setting<Boolean> coords = new Setting<Boolean>("Coords", true, v->renderHud.getValue());
     public Setting<Boolean> netherCoords = new Setting<Boolean>("NetherCoords", true, v->renderHud.getValue() && coords.getValue());
@@ -271,19 +272,32 @@ public class HUD extends Module {
         }
 
         if(fps.getValue()) {
-            normal.add(new TextElement(TextFormatting.RESET + "FPS " + TextFormatting.WHITE + String.valueOf(mc.getDebugFPS()), 0xffffffff, false));
+            if(!grayColor.getValue()) {
+                normal.add(new TextElement(TextFormatting.RESET + "FPS " + TextFormatting.WHITE + String.valueOf(mc.getDebugFPS()), 0xffffffff, false));
+            } else {
+                normal.add(new TextElement(TextFormatting.GRAY + "FPS " + TextFormatting.WHITE + String.valueOf(mc.getDebugFPS()), 0xffffffff, false));
+            }
         }
 
         if(tps.getValue()) {
             float tick = Dactyl.INSTANCE.getTickRateManager().getTickRate();
             float rounded = (float) ((float)Math.round(tick * 100.0) / 100.0);
-            normal.add(new TextElement(TextFormatting.RESET + "TPS " + TextFormatting.WHITE + String.valueOf(rounded), 0xffffffff, false));
+            if(!grayColor.getValue()) {
+                normal.add(new TextElement(TextFormatting.RESET + "TPS " + TextFormatting.WHITE + String.valueOf(rounded), 0xffffffff, false));
+            } else {
+                normal.add(new TextElement(TextFormatting.GRAY + "TPS " + TextFormatting.WHITE + String.valueOf(rounded), 0xffffffff, false));
+            }
         }
 
         if(ping.getValue()) {
             int ms = EntityUtil.getPing(mc.player);
             String msText = ChatFormatting.RESET + "Ping " + ChatFormatting.WHITE + String.valueOf(ms) + "ms";
-            normal.add(new TextElement(msText, 0xffffffff, false));
+            if(!grayColor.getValue()) {
+                normal.add(new TextElement(msText, 0xffffffff, false));
+            } else {
+                String msGrayText = ChatFormatting.GRAY + "Ping " + ChatFormatting.WHITE + String.valueOf(ms) + "ms";
+                normal.add(new TextElement(msGrayText, 0xffffffff, false));
+            }
         }
 
         if(clock.getValue()) {
@@ -296,11 +310,20 @@ public class HUD extends Module {
             }
             String hourString = isAfternoon ? String.valueOf(hour-12) : String.valueOf(hour);
             String textTime = ChatFormatting.RESET + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "")+String.valueOf(mins) + (isAfternoon ? "pm" : "am");
-            normal.add(new TextElement(textTime, 0xffffffff, false));
+            if(!grayColor.getValue()) {
+                normal.add(new TextElement(textTime, 0xffffffff, false));
+            } else {
+                String textGrayTime = ChatFormatting.GRAY + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "")+String.valueOf(mins) + (isAfternoon ? "pm" : "am");
+                normal.add(new TextElement(textGrayTime, 0xffffffff, false));
+            }
         }
 
         if(speed.getValue()) {
-            normal.add(new TextElement(TextFormatting.RESET + "Speed " + TextFormatting.WHITE + String.format("%,.2f", SpeedListener.INSTANCE.getSpeedKpH()) + " km/h", 0xffffffff, false));
+            if(!grayColor.getValue()) {
+                normal.add(new TextElement(TextFormatting.RESET + "Speed " + TextFormatting.WHITE + String.format("%,.2f", SpeedListener.INSTANCE.getSpeedKpH()) + " km/h", 0xffffffff, false));
+            } else {
+                normal.add(new TextElement(TextFormatting.GRAY + "Speed " + TextFormatting.WHITE + String.format("%,.2f", SpeedListener.INSTANCE.getSpeedKpH()) + " km/h", 0xffffffff, false));
+            }
         }
 
 
