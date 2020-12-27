@@ -47,8 +47,7 @@ public class Flight extends Module {
             mc.player.motionX = dir[0];
             mc.player.motionY = -(glideSpeed.getValue() / 10f);
             mc.player.motionZ = dir[1];
-        }
-        if(!EntityUtil.isMoving()) {
+        } else {
             if(antiKick.getValue()) {
                 mc.player.motionY = -(glideSpeed.getValue() / 10f);
             }
