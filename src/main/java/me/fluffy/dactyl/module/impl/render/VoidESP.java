@@ -49,7 +49,9 @@ public class VoidESP extends Module {
         for(BlockPos voidHole : voidPositions) {
             double transY = negativeTranslate.getValue() ? (-yTranslate.getValue()) : yTranslate.getValue();
             double extY = negativeExtrude.getValue() ? (-yExtrude.getValue()) : yExtrude.getValue();
+            Nametags.enableGL2D();
             RenderUtil.drawOffsetBox(voidHole, transY, extY, colorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(red.getValue(), green.getValue(), blue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
+            Nametags.disableGL2D();
         }
     }
 
