@@ -611,6 +611,44 @@ public class RenderUtil {
         GlStateManager.popMatrix();
     }
 
+    public static void drawFixedBoxESP(BlockPos pos, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {
+        IBlockState iblockstate = Minecraft.getMinecraft().world.getBlockState(pos);
+        Vec3d interp = EntityUtil.interpolateEntity((Entity)Minecraft.getMinecraft().player, Minecraft.getMinecraft().getRenderPartialTicks());
+        RenderUtil.drawBoxESPBB(iblockstate.getSelectedBoundingBox(Minecraft.getMinecraft().world, pos).grow((double)0.002f).offset(-interp.x, -interp.y, -interp.z), color, lineWidth, outline, box, boxAlpha);
+    }
+
+    public static void drawBoxESPBB(AxisAlignedBB bb, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {
+        camera.setPosition(((Entity) Objects.requireNonNull(Minecraft.getMinecraft().getRenderViewEntity())).posX, (Minecraft.getMinecraft().getRenderViewEntity()).posY, (Minecraft.getMinecraft().getRenderViewEntity()).posZ);
+        if (camera.isBoundingBoxInFrustum(new AxisAlignedBB(bb.minX + (Minecraft.getMinecraft().getRenderManager()).viewerPosX, bb.minY +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosY, bb.minZ +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, bb.maxX +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosX, bb.maxY +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosY, bb.maxZ +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosZ))) {
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            GlStateManager.disableDepth();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
+            GlStateManager.disableTexture2D();
+            GlStateManager.depthMask(false);
+            GL11.glEnable(2848);
+            GL11.glHint(3154, 4354);
+            GL11.glLineWidth(lineWidth);
+            if (box) {
+                RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
+            }
+            if (outline) {
+                RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+            }
+            GL11.glDisable(2848);
+            GlStateManager.depthMask(true);
+            GlStateManager.enableDepth();
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+        }
+    }
+
     public static void drawBoxESP(BlockPos pos, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {
         AxisAlignedBB bb = new AxisAlignedBB(pos.getX() - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, pos.getY() - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, pos.getZ() - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, (pos.getX() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, (pos.getY() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, (pos.getZ() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ);
         camera.setPosition(((Entity) Objects.requireNonNull(Minecraft.getMinecraft().getRenderViewEntity())).posX, (Minecraft.getMinecraft().getRenderViewEntity()).posY, (Minecraft.getMinecraft().getRenderViewEntity()).posZ);

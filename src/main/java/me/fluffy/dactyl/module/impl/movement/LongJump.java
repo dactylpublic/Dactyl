@@ -15,6 +15,7 @@ import java.util.Objects;
 public class LongJump extends Module {
     public Setting<Double> boost = new Setting<Double>("Boost", 4.0D, 0.1D, 10.0D);
     public Setting<Boolean> autoSprint = new Setting<Boolean>("AutoSprint", false);
+    public Setting<Boolean> autoOff = new Setting<Boolean>("AutoOff", false);
     public Setting<Boolean> timeOut = new Setting<Boolean>("Timeout", false);
     public Setting<Integer> timeOutDelay = new Setting<Integer>("TimeoutDelay", 150, 50, 1000, v->timeOut.getValue());
 
@@ -28,10 +29,12 @@ public class LongJump extends Module {
     private final TimeUtil timer = new TimeUtil();
     private int stage = 0;
     private double moveSpeed, lastDist;
+    private boolean didJump = false;
 
     @Override
     public void onToggle() {
         timer.reset();
+        didJump = false;
     }
 
     @Override
@@ -42,6 +45,9 @@ public class LongJump extends Module {
         lastDist = Math.sqrt(((mc.player.posX - mc.player.prevPosX) * (mc.player.posX - mc.player.prevPosX)) + ((mc.player.posZ - mc.player.prevPosZ) * (mc.player.posZ - mc.player.prevPosZ)));
         if(canSprint() && autoSprint.getValue()) {
             mc.player.setSprinting(true);
+        }
+        if(didJump && autoOff.getValue() && mc.player.onGround) {
+            this.toggle();
         }
         this.setModuleInfo(timeOut.getValue() ? "Timeout" : "Boost");
     }
@@ -89,6 +95,9 @@ public class LongJump extends Module {
         } else {
             event.setX(0);
             event.setZ(0);
+        }
+        if((forward * moveSpeed * -Math.sin(Math.toRadians(yaw)) + strafe * moveSpeed * Math.cos(Math.toRadians(yaw))) * 0.99D != 0 || (forward * moveSpeed * Math.cos(Math.toRadians(yaw)) - strafe * moveSpeed * -Math.sin(Math.toRadians(yaw))) * 0.99D != 0) {
+            didJump = true;
         }
         event.setX((forward * moveSpeed * -Math.sin(Math.toRadians(yaw)) + strafe * moveSpeed * Math.cos(Math.toRadians(yaw))) * 0.99D);
         event.setZ((forward * moveSpeed * Math.cos(Math.toRadians(yaw)) - strafe * moveSpeed * -Math.sin(Math.toRadians(yaw))) * 0.99D);

@@ -30,9 +30,9 @@ public class BlockHighlight extends Module {
             BlockPos blockpos = rayTraceResult.getBlockPos();
             if(blockpos != null) {
                 if(colorSync.getValue()) {
-                    RenderUtil.drawBoxESP(blockpos, Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)), width.getValue().floatValue(), true, false, 0);
+                    RenderUtil.drawFixedBoxESP(blockpos, Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)), width.getValue().floatValue(), true, false, 0);
                 } else {
-                    RenderUtil.drawBoxESP(blockpos, new Color(red.getValue(), green.getValue(), blue.getValue(), 255), width.getValue().floatValue(), true, false, 0);
+                    RenderUtil.drawFixedBoxESP(blockpos, new Color(red.getValue(), green.getValue(), blue.getValue(), 255), width.getValue().floatValue(), true, false, 0);
                 }
             }
         }
