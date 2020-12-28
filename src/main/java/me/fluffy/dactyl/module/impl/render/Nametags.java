@@ -221,7 +221,7 @@ public class Nametags extends Module {
         return 0;
     }
 
-    public void drawBorderedRect(float x, float y, float x1, float y1, float width, int internalColor, int borderColor) {
+    public static void drawBorderedRect(float x, float y, float x1, float y1, float width, int internalColor, int borderColor) {
         /*GL11.glPushMatrix();
         enableGL2D();
         RenderUtil.drawRect(x + width, y + width, x1 - width, y1 - width, internalColor);

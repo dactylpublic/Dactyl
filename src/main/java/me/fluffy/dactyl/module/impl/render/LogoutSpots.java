@@ -108,9 +108,9 @@ public class LogoutSpots extends Module {
             clr = Colors.INSTANCE.getColor(1, false);
         }
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, 0.75F, 1.0F, 1996488704, clr);
+            Nametags.drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1F, 1.0F, 1996488704, clr);
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, 0.75F, 1.0F, 1996488704, clr);
+            Nametags.drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1F, 1.0F, 1996488704, clr);
         }
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
@@ -166,17 +166,6 @@ public class LogoutSpots extends Module {
 
     public String getDisplayName(String name, double x, double y, double z) {
         return name + ((locationDisplay.getValue() == LocDisplay.COORDS) ? " XYZ: " + String.format("%.0f", x) + " " + String.format("%.0f", y) + " " + String.format("%.0f", z) : " "+String.format("%.0f", mc.player.getDistance(x, y, z))+"m");
-    }
-
-    public void drawBorderedRect(double x, double y, double x1, double y1, double width, float borderWidth, int internalColor, int borderColor) {
-        GL11.glPushMatrix();
-        enableGL2D();
-        RenderUtil.drawRect(x + width, y + width, x1 - width, y1 - width, internalColor);
-        if(border.getValue()) {
-            RenderUtil.drawBetterColoredRect(x + borderWidth, y + borderWidth, x1 - borderWidth, y1 - borderWidth, borderWidth, borderColor);
-        }
-        disableGL2D();
-        GL11.glPopMatrix();
     }
 
     public static void enableGL2D() {
