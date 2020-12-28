@@ -15,6 +15,7 @@
     "InjEntityPlayerSP",
     "InjEntityRenderer",
     "InjFontRenderer",
+    "InjGuiChat",
     "InjGuiIngame",
     "InjGuiNewChat",
     "InjGuiScreen",
