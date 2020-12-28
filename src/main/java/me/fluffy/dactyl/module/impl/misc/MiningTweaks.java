@@ -40,6 +40,7 @@ public class MiningTweaks extends Module {
     public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v->modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> reset = new Setting<Boolean>("Reset", true);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v->modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 20, 1, 50, v->modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
     public MiningTweaks() {
         super("BreakTweaks", Category.MISC);
@@ -59,7 +60,7 @@ public class MiningTweaks extends Module {
             return;
         }
         if(currentPos != null) {
-            if (mc.player != null && mc.player.getDistanceSq(this.currentPos) > 2500.0) {
+            if (mc.player != null && mc.player.getDistanceSq(this.currentPos) > ((resetRange.getValue())^2)) {
                 this.currentPos = null;
                 this.currentBlockState = null;
                 return;
