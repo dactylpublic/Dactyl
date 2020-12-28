@@ -27,10 +27,12 @@ public class InjGuiChat extends GuiScreen {
     }
 
     int curr = 0;
+    int divisor = 0;
     boolean finished = false;
     @Inject(method = "initGui", at = @At("INVOKE"))
     private void initGui(CallbackInfo callbackInfo) {
         curr = 0;
+        divisor = 0;
         finished = false;
     }
 
@@ -38,7 +40,13 @@ public class InjGuiChat extends GuiScreen {
     private void drawScreen(int n6, int n2, int n3, int n4, int n5) {
         if (!finished) {
             inputField.setFocused(Display.isActive());
-            curr++;
+            divisor++;
+            if(divisor >= 100) {
+                divisor = 0;
+            }
+            if(divisor % 2 == 0.0) {
+                curr++;
+            }
             if(curr >= 14) {
                 finished = true;
             }
