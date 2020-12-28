@@ -109,9 +109,9 @@ public class Nametags extends Module {
         GL11.glDisable(2929);
         GlStateManager.enableBlend();
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
@@ -221,15 +221,38 @@ public class Nametags extends Module {
         return 0;
     }
 
-    public void drawBorderedRect(double x, double y, double x1, double y1, double width, float borderWidth, int internalColor, int borderColor) {
-        GL11.glPushMatrix();
+    public void drawBorderedRect(float x, float y, float x1, float y1, float width, int internalColor, int borderColor) {
+        /*GL11.glPushMatrix();
         enableGL2D();
         RenderUtil.drawRect(x + width, y + width, x1 - width, y1 - width, internalColor);
         if(border.getValue()) {
             RenderUtil.drawBetterColoredRect(x + borderWidth, y + borderWidth, x1 - borderWidth, y1 - borderWidth, borderWidth, borderColor);
         }
         disableGL2D();
-        GL11.glPopMatrix();
+        GL11.glPopMatrix();*/
+        float alpha = (borderColor >> 24 & 255) / 255.0F;
+        float red = (borderColor >> 16 & 255) / 255.0F;
+        float green = (borderColor >> 8 & 255) / 255.0F;
+        float blue = (borderColor & 255) / 255.0F;
+        GlStateManager.pushMatrix();
+        enableGL2D();
+        RenderUtil.drawRect(x, y, x1, y1, internalColor);
+        GL11.glColor4f(red, green, blue, alpha);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glLineWidth(width);
+        GL11.glBegin(GL11.GL_LINE_STRIP);
+        GL11.glVertex2f(x, y);
+        GL11.glVertex2f(x, y1);
+        GL11.glVertex2f(x1, y1);
+        GL11.glVertex2f(x1, y);
+        GL11.glVertex2f(x, y);
+        GL11.glEnd();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_BLEND);
+        disableGL2D();
+        GlStateManager.popMatrix();
     }
 
     public static void enableGL2D() {
