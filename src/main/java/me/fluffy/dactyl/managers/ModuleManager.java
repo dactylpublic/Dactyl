@@ -57,6 +57,7 @@ public class ModuleManager {
         modules.add(new Chat());
         modules.add(new TimerModule());
         modules.add(new Notifications());
+        modules.add(new PacketLogger());
 
         // movement
         modules.add(new Strafe());
