@@ -93,6 +93,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BREAK, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> fasterResetRot = new Setting<Boolean>("FastRReset", false, v->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> africanMode = new Setting<Boolean>("AfricanMode", false, vis->settingPage.getValue() == SettingPage.MISC);
@@ -457,6 +458,9 @@ public class AutoCrystal extends Module {
                     }
                     placedCrystals.add(placePosition);
                     mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
+                    if(swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
+                        mc.player.swingArm(placeHand);
+                    }
                     placeTimer.reset();
                 }
             }
@@ -515,7 +519,9 @@ public class AutoCrystal extends Module {
     private void attackCrystal(Entity entity) {
         Criticals.INSTANCE.ignoring = true;
         mc.playerController.attackEntity(mc.player, entity);
-        mc.player.swingArm(offhandSwing.getValue() ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
+        if(swingSetting.getValue() == SwingLogic.BREAK || swingSetting.getValue() == SwingLogic.BOTH) {
+            mc.player.swingArm(offhandSwing.getValue() ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
+        }
         if (attackedCrystals.containsKey(entity)) {
             attackedCrystals.put((EntityEnderCrystal) entity, attackedCrystals.get(entity) + 1);
         } else {
@@ -667,6 +673,13 @@ public class AutoCrystal extends Module {
 
     public Set<BlockPos> getPlacedCrystals() {
         return this.placedCrystals;
+    }
+
+    private enum SwingLogic {
+        PLACE,
+        BREAK,
+        BOTH,
+        NONE
     }
 
     private enum AttackLogic {

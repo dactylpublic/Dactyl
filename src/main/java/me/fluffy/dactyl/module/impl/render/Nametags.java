@@ -111,7 +111,7 @@ public class Nametags extends Module {
         if(!Dactyl.fontUtil.isCustomFont()) {
             drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2.3f), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
