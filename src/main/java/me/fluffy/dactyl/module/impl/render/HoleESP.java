@@ -14,14 +14,16 @@ import net.minecraft.util.math.Vec3i;
 
 import java.awt.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 public class HoleESP extends Module {
     Setting<Integer> holes = new Setting<Integer>("Holes", 50, 1, 50);
     Setting<Boolean> outline = new Setting<Boolean>("Outline", true);
     Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.5d, 3.0d, vi->outline.getValue());
     Setting<Boolean> box = new Setting<Boolean>("Box", true);
-    Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vi->box.getValue());
+    Setting<Boolean> betterBox = new Setting<Boolean>("BetterBox", false, v->box.getValue());
+    Setting<Integer> endOpacity = new Setting<Integer>("EndAlpha", 120, 1, 255, v->box.getValue()&&betterBox.getValue());
+    Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vi->box.getValue()&&!betterBox.getValue());
     Setting<Double> renderRange = new Setting<Double>("RenderRange", 8.0d, 1.0d, 20.0d);
     Setting<Boolean> negativeTranslate = new Setting<Boolean>("NegTrans", false);
     Setting<Double> yTranslate = new Setting<Double>("TranslateY", 1.0d, 0.0d, 3.0d);
@@ -43,6 +45,14 @@ public class HoleESP extends Module {
 
     private ConcurrentHashMap<BlockPos, Boolean> renderHoles;
 
+    @Override
+    public void onClientUpdate() {
+        if(mc.player == null || mc.world == null) {
+            return;
+        }
+        this.updateHoles();
+    }
+
 
     @Override
     public void onRender3D(Render3DEvent event) {
@@ -56,20 +66,20 @@ public class HoleESP extends Module {
             BlockPos pos = blockPos;
             double transY = negativeTranslate.getValue() ? (-yTranslate.getValue()) : yTranslate.getValue();
             double extY = negativeExtrude.getValue() ? (-yExtrude.getValue()) : yExtrude.getValue();
-            if(isBedrock) {
-                RenderUtil.drawOffsetBox(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
+            if(betterBox.getValue()) {
+                if (isBedrock) {
+                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), 0, endOpacity.getValue());
+                } else {
+                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), 0, endOpacity.getValue());
+                }
             } else {
-                RenderUtil.drawOffsetBox(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
+                if (isBedrock) {
+                    RenderUtil.drawOffsetBox(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
+                } else {
+                    RenderUtil.drawOffsetBox(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), boxAlpha.getValue());
+                }
             }
         });
-    }
-
-    @Override
-    public void onClientUpdate() {
-        if(mc.player == null || mc.world == null) {
-            return;
-        }
-        updateHoles();
     }
 
     private void updateHoles() {

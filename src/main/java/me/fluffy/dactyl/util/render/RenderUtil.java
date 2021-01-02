@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.tileentity.TileEntityStructureRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.entity.Entity;
@@ -713,6 +714,74 @@ public class RenderUtil {
             GlStateManager.disableBlend();
             GlStateManager.popMatrix();
         }
+    }
+    public static void drawOffsetBoxOpacity(BlockPos pos, double translateY, double extrudeY, Color color, float lineWidth, boolean outline, boolean box, int startalpha, int endalpha) {
+        AxisAlignedBB bb = new AxisAlignedBB(pos.getX() - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, pos.getY() + translateY - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, pos.getZ() - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, (pos.getX() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, (pos.getY() + extrudeY + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, (pos.getZ() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ);
+        AxisAlignedBB boxbb = new AxisAlignedBB(pos.getX() - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, pos.getY() - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, pos.getZ() - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, (pos.getX() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, (pos.getY() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, (pos.getZ() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ);
+        camera.setPosition(((Entity) Objects.requireNonNull(Minecraft.getMinecraft().getRenderViewEntity())).posX, (Minecraft.getMinecraft().getRenderViewEntity()).posY, (Minecraft.getMinecraft().getRenderViewEntity()).posZ);
+        if (camera.isBoundingBoxInFrustum(new AxisAlignedBB(bb.minX + (Minecraft.getMinecraft().getRenderManager()).viewerPosX, bb.minY +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosY, bb.minZ +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, bb.maxX +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosX, bb.maxY +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosY, bb.maxZ +
+                (Minecraft.getMinecraft().getRenderManager()).viewerPosZ))) {
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            GlStateManager.disableDepth();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
+            GlStateManager.disableTexture2D();
+            GlStateManager.depthMask(false);
+            GL11.glEnable(2848);
+            GL11.glHint(3154, 4354);
+            GL11.glLineWidth(lineWidth);
+            if (box) {
+                renderFilledGradientBox(boxbb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, startalpha / 255.0F, endalpha / 255.0F);
+            }
+            if (outline) {
+                RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+            }
+            GL11.glDisable(2848);
+            GlStateManager.depthMask(true);
+            GlStateManager.enableDepth();
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+        }
+    }
+
+    public static void renderFilledGradientBox(AxisAlignedBB aabb, float red, float green, float blue, float startalpha, float endalpha) {
+        renderFilledGradientBox(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ, red, green, blue, startalpha, endalpha);
+    }
+
+    public static void renderFilledGradientBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float startalpha, float endalpha) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        tessellator.draw();
     }
 
     public static int toRGBA(final int r, final int g, final int b) {
