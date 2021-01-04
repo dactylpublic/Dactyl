@@ -225,8 +225,16 @@ public class AutoCrystal extends Module {
     @SubscribeEvent
     public void onRemoveEntity(EntityRemovedEvent event) {
         if(event.getEntity() instanceof EntityEnderCrystal) {
-            if(attackedCrystals.containsKey(event.getEntity())) {
+            /*if(attackedCrystals.containsKey(event.getEntity())) {
                 attackedCrystals.remove(event.getEntity());
+            }*/
+            Iterator<EntityEnderCrystal> crystalIterator = attackedCrystals.keySet().iterator();
+            while (crystalIterator.hasNext()) {
+                crystalIterator.next();
+                if(attackedCrystals.containsKey(event.getEntity())) {
+                    crystalIterator.remove();
+                    //attackedCrystals.remove(e);
+                }
             }
         }
     }
