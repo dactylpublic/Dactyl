@@ -31,6 +31,9 @@ public class PacketFly extends Module {
     public Setting<Mode> mode = new Setting<Mode>("Mode", Mode.FACTOR);
     public Setting<Integer> tickCount = new Setting<Integer>("Factor", 1, 1, 10, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
+    public Setting<Boolean> multiply = new Setting<Boolean>("Multiply", false);
+    public Setting<Boolean> multiplyY = new Setting<Boolean>("MultiplyY", true, v->multiply.getValue());
+    public Setting<Double> multiplier = new Setting<Double>("M", 1.5d, 1.0d, 3.0d, v->multiply.getValue());
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
     public Setting<Boolean> cancelSPacket = new Setting<Boolean>("TCancel", true);
@@ -76,9 +79,19 @@ public class PacketFly extends Module {
         }
         double[] arrd = getSpeed(phaseSetting.getValue().equals(PhaseMode.FULL) && b1 ? 0.031 : 0.26);
         for (int i = 1; i <= (mode.getValue() == Mode.FACTOR ? tickCount.getValue() : 1); ++i) {
-            mc.player.motionX = arrd[0] * (double)i;
-            mc.player.motionY = d * (double)i;
-            mc.player.motionZ = arrd[1] * (double)i;
+            if(multiply.getValue()) {
+                mc.player.motionX = (arrd[0] * (double)i) * multiplier.getValue();
+                if(multiplyY.getValue()) {
+                    mc.player.motionY = (d * (double) i) * multiplier.getValue();
+                } else {
+                    mc.player.motionY = (d * (double) i);
+                }
+                mc.player.motionZ = (arrd[1] * (double)i) * multiplier.getValue();
+            } else {
+                mc.player.motionX = arrd[0] * (double)i;
+                mc.player.motionY = d * (double)i;
+                mc.player.motionZ = arrd[1] * (double)i;
+            }
             doPackets(mc.player.motionX, mc.player.motionY, mc.player.motionZ, !mode.getValue().equals(Mode.SETBACK));
         }
     }
