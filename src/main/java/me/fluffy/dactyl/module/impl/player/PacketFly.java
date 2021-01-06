@@ -32,7 +32,6 @@ public class PacketFly extends Module {
     public Setting<Integer> tickCount = new Setting<Integer>("Factor", 1, 1, 10, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<Boolean> multiply = new Setting<Boolean>("Multiply", false);
-    public Setting<Boolean> multiplyY = new Setting<Boolean>("MultiplyY", true, v->multiply.getValue());
     public Setting<Double> multiplier = new Setting<Double>("M", 1.5d, 1.0d, 3.0d, v->multiply.getValue());
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
@@ -77,21 +76,12 @@ public class PacketFly extends Module {
         if (phaseSetting.getValue() == PhaseMode.FULL && b1 && (mc.player.moveForward != 0.0 || mc.player.moveStrafing != 0.0) && d != 0.0) {
             d /= 2.5;
         }
-        double[] arrd = getSpeed(phaseSetting.getValue().equals(PhaseMode.FULL) && b1 ? 0.031 : 0.26);
+        double multipliergod = multiply.getValue() ? multiplier.getValue() : 1.0d;
+        double[] arrd = getSpeed(phaseSetting.getValue().equals(PhaseMode.FULL) && b1 ? 0.031*multipliergod : 0.26*multipliergod);
         for (int i = 1; i <= (mode.getValue() == Mode.FACTOR ? tickCount.getValue() : 1); ++i) {
-            if(multiply.getValue()) {
-                mc.player.motionX = (arrd[0] * (double)i) * multiplier.getValue();
-                if(multiplyY.getValue()) {
-                    mc.player.motionY = (d * (double) i) * multiplier.getValue();
-                } else {
-                    mc.player.motionY = (d * (double) i);
-                }
-                mc.player.motionZ = (arrd[1] * (double)i) * multiplier.getValue();
-            } else {
-                mc.player.motionX = arrd[0] * (double)i;
-                mc.player.motionY = d * (double)i;
-                mc.player.motionZ = arrd[1] * (double)i;
-            }
+            mc.player.motionX = arrd[0] * (double)i;
+            mc.player.motionY = d * (double)i;
+            mc.player.motionZ = arrd[1] * (double)i;
             doPackets(mc.player.motionX, mc.player.motionY, mc.player.motionZ, !mode.getValue().equals(Mode.SETBACK));
         }
     }
