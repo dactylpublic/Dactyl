@@ -137,6 +137,9 @@ public class ESP extends Module {
     }
 
     private void drawText(final Entity entityIn) {
+        if(entityIn == null || entityIn.getDisplayName() == null) {
+            return;
+        }
         GlStateManager.pushMatrix();
         final double scale = 1.0;
         final String name = (entityIn instanceof EntityItem) ? ((EntityItem)entityIn).getItem().getDisplayName() : ((entityIn instanceof EntityEnderPearl) ? "Thrown Ender Pearl" : ((entityIn instanceof EntityExpBottle) ? "Thrown Exp Bottle" : "null"));

@@ -104,7 +104,7 @@ public class Components extends Module {
 
         if(targetPopped.getValue()) {
             if(Nametags.getTotemPops(targetEntity.getName()) > 0) {
-                font.drawStringWithShadow("TP: "+ TextFormatting.BLUE + String.valueOf(Nametags.getTotemPops(targetEntity.getName())), setX+20, setY, 0xffffffff);
+                font.drawStringWithShadow("TP: "+ TextFormatting.RED + String.valueOf(Nametags.getTotemPops(targetEntity.getName())), setX+20, setY, 0xffffffff);
                 setY+=10;
             }
         }
@@ -113,7 +113,7 @@ public class Components extends Module {
             setY+=10;
         }
         if(targetBackground.getValue()) {
-            RenderUtil.drawBetterColoredRect(convertString(targetHudX.getValue()), convertString(targetHudY.getValue()), setX + 63.5, setY + 52.5, 1.0f, c);
+            RenderUtil.drawBetterColoredRect(convertString(targetHudX.getValue()), convertString(targetHudY.getValue()), setX + 63.5 + (EntityUtil.getPing((EntityPlayer) targetEntity) > 100 ? Dactyl.fontUtil.getStringWidth("9") : 0), setY + 52.5, 1.0f, c);
         }
     }
 

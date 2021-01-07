@@ -35,7 +35,6 @@ public class PacketFly extends Module {
     public Setting<Double> multiplier = new Setting<Double>("M", 1.5d, 1.0d, 3.0d, v->multiply.getValue());
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
-    public Setting<Boolean> cancelSPacket = new Setting<Boolean>("TCancel", true);
     public PacketFly() {
         super("PacketFly", Category.PLAYER);
     }
@@ -116,10 +115,6 @@ public class PacketFly extends Module {
                     if (mc.world.isBlockLoaded(pos, false) && !(mc.currentScreen instanceof GuiDownloadTerrain)) {
                         if(idTimeMap.containsKey(packet.getTeleportId())) {
                             idTimeMap.remove(packet.getTeleportId());
-                            if(cancelSPacket.getValue()) {
-                                event.setCanceled(true);
-                                return;
-                            }
                         }
                     }
                 }

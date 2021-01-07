@@ -66,11 +66,11 @@ public class HoleESP extends Module {
             BlockPos pos = blockPos;
             double transY = negativeTranslate.getValue() ? (-yTranslate.getValue()) : yTranslate.getValue();
             double extY = negativeExtrude.getValue() ? (-yExtrude.getValue()) : yExtrude.getValue();
-            if(betterBox.getValue()) {
+            if(box.getValue() && betterBox.getValue()) {
                 if (isBedrock) {
-                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), 0, endOpacity.getValue());
+                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), endOpacity.getValue(), 0);
                 } else {
-                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), 0, endOpacity.getValue());
+                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), endOpacity.getValue(), 0);
                 }
             } else {
                 if (isBedrock) {

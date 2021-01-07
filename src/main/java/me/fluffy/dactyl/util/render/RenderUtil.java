@@ -734,11 +734,11 @@ public class RenderUtil {
             GL11.glEnable(2848);
             GL11.glHint(3154, 4354);
             GL11.glLineWidth(lineWidth);
-            if (box) {
+            if (outline) {
                 renderFilledGradientBox(boxbb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, startalpha / 255.0F, endalpha / 255.0F);
             }
-            if (outline) {
-                RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+            if (box) {
+                drawGradientBB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY+.8, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, startalpha / 255.0F, endalpha / 255.0F);
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);
@@ -749,6 +749,29 @@ public class RenderUtil {
         }
     }
 
+    public static void drawGradientBB(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float startalpha, float endalpha) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, startalpha).endVertex();
+        tessellator.draw();
+    }
+
     public static void renderFilledGradientBox(AxisAlignedBB aabb, float red, float green, float blue, float startalpha, float endalpha) {
         renderFilledGradientBox(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ, red, green, blue, startalpha, endalpha);
     }
@@ -756,31 +779,26 @@ public class RenderUtil {
     public static void renderFilledGradientBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float startalpha, float endalpha) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, 0.0F).endVertex();
         bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, startalpha).endVertex();
         bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, startalpha).endVertex();
         bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
         bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
-        bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
         bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, startalpha).endVertex();
         bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, endalpha).endVertex();
         bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, startalpha).endVertex();
-        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, startalpha).endVertex();
         bufferbuilder.pos(maxX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
-        bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, endalpha).endVertex();
         bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
         bufferbuilder.pos(maxX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, maxZ).color(red, green, blue, endalpha).endVertex();
         bufferbuilder.pos(minX, minY, maxZ).color(red, green, blue, startalpha).endVertex();
         bufferbuilder.pos(minX, maxY, maxZ).color(red, green, blue, endalpha).endVertex();
-        bufferbuilder.pos(minX, maxY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(minX, minY, minZ).color(red, green, blue, endalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, startalpha).endVertex();
+        bufferbuilder.pos(maxX, minY, minZ).color(red, green, blue, endalpha).endVertex();
         tessellator.draw();
     }
 
