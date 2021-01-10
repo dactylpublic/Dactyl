@@ -17,6 +17,7 @@ public class PacketLogger extends Module {
     Setting<Boolean> incoming = new Setting<Boolean>("Incoming", true);
     Setting<Boolean> outgoing = new Setting<Boolean>("Outgoing", true);
     Setting<Boolean> chat = new Setting<Boolean>("Chat", true);
+    Setting<Boolean> showCancel = new Setting<Boolean>("ShowCancel", true);
     Setting<Boolean> console = new Setting<Boolean>("Logs", true);
     Setting<Boolean> packetData = new Setting<Boolean>("Data", true);
     public PacketLogger() {

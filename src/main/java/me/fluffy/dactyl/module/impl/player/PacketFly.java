@@ -70,7 +70,7 @@ public class PacketFly extends Module {
         } else if(mc.player.movementInput.sneak) {
             d = -0.062;
         } else {
-            double d2 = !b1 ? (checkCounter(4) ? (antiKick.getValue() ? -0.04 : 0.0) : 0.0) : (d = 0.0);
+            d = !b1 ? (checkCounter(4) ? (antiKick.getValue() ? -0.04 : 0.0) : 0.0) : (0.0);
         }
         if (phaseSetting.getValue() == PhaseMode.FULL && b1 && (mc.player.moveForward != 0.0 || mc.player.moveStrafing != 0.0) && d != 0.0) {
             d /= 2.5;
@@ -114,6 +114,8 @@ public class PacketFly extends Module {
                     final BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
                     if (mc.world.isBlockLoaded(pos, false) && !(mc.currentScreen instanceof GuiDownloadTerrain)) {
                         if(idTimeMap.containsKey(packet.getTeleportId())) {
+                            //mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch(), false));
+                            //event.setCanceled(true);
                             idTimeMap.remove(packet.getTeleportId());
                         }
                     }

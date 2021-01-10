@@ -448,6 +448,48 @@ public class CombatUtil {
         return true;
     }
 
+    public static boolean placeBlockBurrow(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetRotate, boolean doSwitch, boolean silentSwitch, int toSwitch) {
+        if(!checkCanPlaceBurrow(blockPos)) {
+            return false;
+        }
+
+        EnumFacing placeSide = getPlaceSide(blockPos);
+        BlockPos adjacentBlock = blockPos.offset(placeSide);
+        EnumFacing opposingSide = placeSide.getOpposite();
+        if(!mc.world.getBlockState(adjacentBlock).getBlock().canCollideCheck(mc.world.getBlockState(adjacentBlock), false)) {
+            return false;
+        }
+        if(doSwitch) {
+            if(!offhand) {
+                if (silentSwitch) {
+                    mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
+                } else {
+                    if (mc.player.inventory.currentItem != toSwitch) {
+                        mc.player.inventory.currentItem = toSwitch;
+                    }
+                }
+            }
+        }
+        boolean isSneak = false;
+        if(blackList.contains(mc.world.getBlockState(adjacentBlock).getBlock()) || shulkerList.contains(mc.world.getBlockState(adjacentBlock).getBlock())) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+            isSneak = true;
+        }
+        Vec3d hitVector = getHitVector(adjacentBlock, opposingSide);
+        if(rotate) {
+            final float[] angle = getLegitRotations(hitVector);
+            mc.player.connection.sendPacket(new CPacketPlayer.Rotation(angle[0], angle[1], mc.player.onGround));
+        }
+
+        EnumHand actionHand = offhand ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+        mc.playerController.processRightClickBlock(mc.player, mc.world, adjacentBlock, opposingSide, hitVector, actionHand);
+        mc.player.connection.sendPacket(new CPacketAnimation(actionHand));
+        if(isSneak) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+        }
+        return true;
+    }
+
     public static Vec3d getCenterDiff() {
         return new Vec3d(roundToCenter(mc.player.posX), mc.player.posY, roundToCenter(mc.player.posZ)).subtract(mc.player.getPositionVector());
     }
@@ -495,6 +537,18 @@ public class CombatUtil {
             }
         }
         return placeableSide;
+    }
+
+    public static boolean checkCanPlaceBurrow(BlockPos pos) {
+        if (!(mc.world.getBlockState(pos).getBlock() instanceof BlockAir) && !(mc.world.getBlockState(pos).getBlock() instanceof BlockLiquid)) {
+            return false;
+        }
+        for (Entity entity : mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(pos))) {
+            if (!(entity instanceof EntityItem) && !(entity instanceof EntityXPOrb) && !(entity instanceof EntityArrow) && (entity != mc.player)) {
+                return false;
+            }
+        }
+        return getPlaceSide(pos) != null;
     }
 
     public static boolean checkCanPlace(BlockPos pos) {
