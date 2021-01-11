@@ -1,5 +1,7 @@
 package me.fluffy.dactyl.module.impl.player;
 
+import me.fluffy.dactyl.injection.inj.access.IMinecraft;
+import me.fluffy.dactyl.injection.inj.access.ITimer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
@@ -14,9 +16,12 @@ import net.minecraft.util.math.Vec3d;
 public class JumpFill extends Module {
     //Setting<RubberbandMode> rubberbandModeSetting = new Setting<RubberbandMode>("Mode", RubberbandMode.NCP);
     Setting<Priority> prioritySetting = new Setting<Priority>("Prio", Priority.OBI);
-    Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", true);
-    Setting<Integer> timerDelay = new Setting<Integer>("Delay", 300, 25, 1000);
-    Setting<Boolean> rotate = new Setting<Boolean>("Rotate", false);
+    Setting<Boolean> useTimer = new Setting<Boolean>("UseTimer", true);
+    Setting<Boolean> jumpRubberband = new Setting<Boolean>("JRubber", true);
+    Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", false);
+    Setting<Integer> timerDelay = new Setting<Integer>("Delay", 300, 0, 300);
+    Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", true);
+    Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
     public static JumpFill INSTANCE;
     public JumpFill() {
         super("ReverseFill", Category.PLAYER);
@@ -27,6 +32,7 @@ public class JumpFill extends Module {
 
     int oldSlot = -1;
     int blockSlot = -1;
+    boolean hasJumped = false;
 
     @Override
     public void onEnable() {
@@ -74,7 +80,11 @@ public class JumpFill extends Module {
             mc.player.inventory.currentItem = blockSlot;
         }
         mc.player.jump();
+        if(useTimer.getValue()) {
+            ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50 / 20f);
+        }
         timer.reset();
+        hasJumped = true;
     }
 
     @Override
@@ -82,14 +92,19 @@ public class JumpFill extends Module {
         if(mc.player == null || mc.world == null) {
             return;
         }
-        if(timer.hasPassed(timerDelay.getValue().longValue())) {
+        if(timer.hasPassed(timerDelay.getValue().longValue()) && hasJumped) {
             BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, -1, 0);
             boolean placedBlock = CombatUtil.placeBlock(targetPos, false, rotate.getValue(), true, false, false, 0);
             if(placedBlock) {
-                mc.player.onGround = false;
-                mc.player.motionY = 20.0;
+                if(jumpRubberband.getValue()) {
+                    mc.player.jump();
+                } else {
+                    mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1337.0, mc.player.posZ, true));
+                }
             }
-            this.toggle();
+            if(autoDisable.getValue()) {
+                this.toggle();
+            }
         }
     }
 
@@ -104,6 +119,10 @@ public class JumpFill extends Module {
         }
         blockSlot = -1;
         oldSlot = -1;
+        if(useTimer.getValue()) {
+            ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50f);
+        }
+        hasJumped = false;
         timer.reset();
     }
 

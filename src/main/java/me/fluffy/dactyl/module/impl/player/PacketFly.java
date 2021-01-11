@@ -13,6 +13,8 @@ import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.EntityUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.client.gui.GuiDownloadTerrain;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -114,10 +116,12 @@ public class PacketFly extends Module {
                     final BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
                     if (mc.world.isBlockLoaded(pos, false) && !(mc.currentScreen instanceof GuiDownloadTerrain)) {
                         if(idTimeMap.containsKey(packet.getTeleportId())) {
-                            //mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch(), false));
-                            //event.setCanceled(true);
                             idTimeMap.remove(packet.getTeleportId());
                         }
+                        //mc.player.connection.sendPacket(new CPacketConfirmTeleport(packet.getTeleportId()));
+                        //mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(packet.getX(), packet.getY(), packet.getZ(), mc.player.rotationYaw, mc.player.rotationPitch, mc.player.onGround));
+                        //mc.player.setPosition(packet.getX(), packet.getY(), packet.getZ());
+                       // event.setCanceled(true);
                     }
                 }
                 ((ISPacketPlayerPosLook)packet).setYaw(mc.player.rotationYaw);
@@ -126,6 +130,18 @@ public class PacketFly extends Module {
             }
         }
     }
+
+    public void handlePlayerPosLook(SPacketPlayerPosLook packetIn)
+    {
+        EntityPlayer entityplayer = mc.player;
+        double d0 = mc.player.posX;
+        double d1 = mc.player.posY;
+        double d2 = mc.player.posZ;
+        float f = mc.player.rotationYaw;
+        float f1 = mc.player.rotationPitch;
+
+    }
+
 
     @SubscribeEvent
     public void onOpaque(SetOpaqueCubeEvent event) {
