@@ -448,6 +448,17 @@ public class CombatUtil {
         return true;
     }
 
+    public static void switchToSlot(boolean silent, int slot) {
+        if (silent) {
+            mc.player.connection.sendPacket(new CPacketHeldItemChange(slot));
+            mc.player.inventory.currentItem = slot;
+        } else {
+            if (mc.player.inventory.currentItem != slot) {
+                mc.player.inventory.currentItem = slot;
+            }
+        }
+    }
+
     public static boolean placeBlockBurrow(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetRotate, boolean doSwitch, boolean silentSwitch, int toSwitch) {
         if(!checkCanPlaceBurrow(blockPos)) {
             return false;

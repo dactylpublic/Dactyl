@@ -1,38 +1,32 @@
 package me.fluffy.dactyl.module.impl.player;
 
+import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.injection.inj.access.IMinecraft;
 import me.fluffy.dactyl.injection.inj.access.ITimer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class JumpFill extends Module {
-    //Setting<RubberbandMode> rubberbandModeSetting = new Setting<RubberbandMode>("Mode", RubberbandMode.NCP);
     Setting<Priority> prioritySetting = new Setting<Priority>("Prio", Priority.OBI);
-    Setting<Boolean> useTimer = new Setting<Boolean>("UseTimer", true);
-    Setting<Boolean> jumpRubberband = new Setting<Boolean>("JRubber", true);
     Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", false);
-    Setting<Integer> timerDelay = new Setting<Integer>("Delay", 300, 0, 300);
-    Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", true);
-    Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
+    Setting<Boolean> rotate = new Setting<Boolean>("Rotate", false);
     public static JumpFill INSTANCE;
     public JumpFill() {
         super("ReverseFill", Category.PLAYER);
         INSTANCE = this;
     }
-
-    private final TimeUtil timer = new TimeUtil();
-
-    int oldSlot = -1;
-    int blockSlot = -1;
-    boolean hasJumped = false;
 
     @Override
     public void onEnable() {
@@ -43,99 +37,43 @@ public class JumpFill extends Module {
             this.toggle();
             return;
         }
+        double startX = mc.player.posX;
+        double startY = mc.player.posY;
+        double startZ = mc.player.posZ;
+        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.41999998688698, mc.player.posZ, mc.player.onGround));
+        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7531999805212, mc.player.posZ, mc.player.onGround));
+        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.00133597911214, mc.player.posZ, mc.player.onGround));
+        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.166109260938215, mc.player.posZ, mc.player.onGround));
+        BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, 0, 0);
+        int oldslot = mc.player.inventory.currentItem;
+        int switchSlot = CombatUtil.findBlockInHotbar(getBlockSetting());
+        boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), true, (switchSlot != -1), packetSwitch.getValue(), switchSlot);
+        if(switchSlot == -1) {
+            this.toggle();
+        }
+        if(placedBlock) {
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.00133597911214, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7531999805212, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.41999998688698, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(startX, startY, startZ, true));
+        }
+        CombatUtil.switchToSlot(packetSwitch.getValue(), oldslot);
+        this.toggle();
+    }
+
+    private Block getBlockSetting() {
+        if(mc.player.getHeldItemMainhand() != ItemStack.EMPTY && mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock) {
+            return Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem());
+        }
         switch(prioritySetting.getValue()) {
             case OBI:
-                if(CombatUtil.findBlockInHotbar(Blocks.OBSIDIAN) == -1) {
-                    this.toggle();
-                    return;
-                } else {
-                    blockSlot = CombatUtil.findBlockInHotbar(Blocks.OBSIDIAN);
-                }
-                break;
+                return Blocks.OBSIDIAN;
             case STONE:
-                if(CombatUtil.findBlockInHotbar(Blocks.STONE) == -1) {
-                    this.toggle();
-                    return;
-                } else {
-                    blockSlot = CombatUtil.findBlockInHotbar(Blocks.STONE);
-                }
-                break;
+                return Blocks.STONE;
             case COBBLESTONE:
-                if(CombatUtil.findBlockInHotbar(Blocks.COBBLESTONE) == -1) {
-                    this.toggle();
-                    return;
-                } else {
-                    blockSlot = CombatUtil.findBlockInHotbar(Blocks.COBBLESTONE);
-                }
-                break;
+                return Blocks.COBBLESTONE;
         }
-        if(blockSlot == -1) {
-            this.toggle();
-            return;
-        }
-        oldSlot = mc.player.inventory.currentItem;
-        if(packetSwitch.getValue()) {
-            mc.player.connection.sendPacket(new CPacketHeldItemChange(blockSlot));
-        } else {
-            mc.player.inventory.currentItem = blockSlot;
-        }
-        mc.player.jump();
-        if(useTimer.getValue()) {
-            ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50 / 20f);
-        }
-        timer.reset();
-        hasJumped = true;
-    }
-
-    @Override
-    public void onClientUpdate() {
-        if(mc.player == null || mc.world == null) {
-            return;
-        }
-        if(timer.hasPassed(timerDelay.getValue().longValue()) && hasJumped) {
-            BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, -1, 0);
-            boolean placedBlock = CombatUtil.placeBlock(targetPos, false, rotate.getValue(), true, false, false, 0);
-            if(placedBlock) {
-                if(jumpRubberband.getValue()) {
-                    mc.player.jump();
-                } else {
-                    mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1337.0, mc.player.posZ, true));
-                }
-            }
-            if(autoDisable.getValue()) {
-                this.toggle();
-            }
-        }
-    }
-
-    @Override
-    public void onDisable() {
-        if(oldSlot != -1) {
-            if (packetSwitch.getValue()) {
-                mc.player.connection.sendPacket(new CPacketHeldItemChange(oldSlot));
-            } else {
-                mc.player.inventory.currentItem = oldSlot;
-            }
-        }
-        blockSlot = -1;
-        oldSlot = -1;
-        if(useTimer.getValue()) {
-            ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50f);
-        }
-        hasJumped = false;
-        timer.reset();
-    }
-
-    private int getSlot(Priority priority) {
-        switch(priority) {
-            case OBI:
-                return CombatUtil.findBlockInHotbar(Blocks.OBSIDIAN);
-            case STONE:
-                return CombatUtil.findBlockInHotbar(Blocks.STONE);
-            case COBBLESTONE:
-                return CombatUtil.findBlockInHotbar(Blocks.COBBLESTONE);
-        }
-        return -1;
+        return Blocks.ENDER_CHEST;
     }
 
 

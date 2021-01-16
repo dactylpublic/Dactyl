@@ -11,4 +11,9 @@ public interface ISPacketPlayerPosLook {
     public void setYaw(float yaw);
     @Accessor("pitch")
     public void setPitch(float pitch);
+
+    @Accessor("x")
+    public void setX(double x);
+    @Accessor("z")
+    public void setZ(double z);
 }

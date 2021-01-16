@@ -91,7 +91,7 @@ public class PacketLogger extends Module {
         } else {
             if (outgoing.getValue()) {
                 if (console.getValue()) {
-                    Dactyl.logger.log(Level.INFO, "\2477IN: \247r" + event.getPacket().getClass().getSimpleName() + " {");
+                    Dactyl.logger.log(Level.INFO, "\2477OUT: \247r" + event.getPacket().getClass().getSimpleName() + " {");
                     if (packetData.getValue()) {
                         try {
 
