@@ -137,7 +137,7 @@ public class ESP extends Module {
     }
 
     private void drawText(final Entity entityIn) {
-        if(entityIn == null || entityIn.getDisplayName() == null) {
+        if(entityIn == null || entityIn.getDisplayName() == null || mc.getRenderManager() == null || mc.getRenderManager().options == null) {
             return;
         }
         GlStateManager.pushMatrix();

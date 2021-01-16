@@ -358,6 +358,17 @@ public class CombatUtil {
         }
         return slot;
     }
+    public static int findNonBlockInHotbar() {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (!(stack.getItem() instanceof ItemBlock)) {
+                slot = i;
+                break;
+            }
+        }
+        return slot;
+    }
 
     public static int findItemInHotbar(Item it) {
         int slot = -1;
@@ -476,6 +487,7 @@ public class CombatUtil {
                     mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
                 } else {
                     if (mc.player.inventory.currentItem != toSwitch) {
+                        mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
                         mc.player.inventory.currentItem = toSwitch;
                     }
                 }

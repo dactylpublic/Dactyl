@@ -28,6 +28,10 @@ public class JumpFill extends Module {
         INSTANCE = this;
     }
 
+    boolean isHoldingBlock = false;
+    int blockSlot = -1;
+    private final TimeUtil timer = new TimeUtil();
+
     @Override
     public void onEnable() {
         if(mc.player == null || mc.world == null) {
@@ -37,29 +41,63 @@ public class JumpFill extends Module {
             this.disable();
             return;
         }
-        double startX = mc.player.posX;
-        double startY = mc.player.posY;
-        double startZ = mc.player.posZ;
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.41999998688698, mc.player.posZ, mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7531999805212, mc.player.posZ, mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.00133597911214, mc.player.posZ, mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.166109260938215, mc.player.posZ, mc.player.onGround));
-        BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, 0, 0);
-        int oldslot = mc.player.inventory.currentItem;
-        int switchSlot = CombatUtil.findBlockInHotbar(getBlockSetting());
-        boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), true, (switchSlot != -1), packetSwitch.getValue(), switchSlot);
-        if(switchSlot == -1) {
+        timer.reset();
+        isHoldingBlock = false;
+        blockSlot = -1;
+        if(mc.player.getHeldItemMainhand() != ItemStack.EMPTY && mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock) {
+            isHoldingBlock = true;
+            blockSlot = mc.player.inventory.currentItem;
+            CombatUtil.switchToSlot(true, CombatUtil.findNonBlockInHotbar());
+        }
+    }
+
+    @Override
+    public void onClientUpdate() {
+        if(mc.player == null || mc.world == null) {
             this.disable();
             return;
         }
-        if(placedBlock) {
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.00133597911214, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7531999805212, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.41999998688698, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(startX, startY, startZ, true));
+        if(isHoldingBlock && blockSlot == -1) {
+            return;
         }
-        CombatUtil.switchToSlot(packetSwitch.getValue(), oldslot);
-        this.disable();
+        if(timer.hasPassed(75)) {
+            if(!mc.player.onGround) {
+                this.disable();
+                return;
+            }
+            double startX = mc.player.posX;
+            double startY = mc.player.posY;
+            double startZ = mc.player.posZ;
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.41999998688698, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7531999805212, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.00133597911214, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.166109260938215, mc.player.posZ, mc.player.onGround));
+            BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, 0, 0);
+            int oldslot = isHoldingBlock ? blockSlot : mc.player.inventory.currentItem;
+            int switchSlot = (isHoldingBlock ? blockSlot : CombatUtil.findBlockInHotbar(getBlockSetting()));
+            boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), true, (switchSlot != -1), packetSwitch.getValue(), switchSlot);
+            if(switchSlot == -1) {
+                this.disable();
+                return;
+            }
+            if(placedBlock) {
+                mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.00133597911214, mc.player.posZ, mc.player.onGround));
+                mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7531999805212, mc.player.posZ, mc.player.onGround));
+                mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.41999998688698, mc.player.posZ, mc.player.onGround));
+                mc.player.connection.sendPacket(new CPacketPlayer.Position(startX, startY, startZ, true));
+            }
+            if(switchSlot != 420) {
+                CombatUtil.switchToSlot(packetSwitch.getValue(), oldslot);
+            }
+            this.disable();
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        timer.reset();
+        isHoldingBlock = false;
+        blockSlot = -1;
     }
 
     private Block getBlockSetting() {
