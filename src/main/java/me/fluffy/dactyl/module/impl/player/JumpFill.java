@@ -34,7 +34,7 @@ public class JumpFill extends Module {
             return;
         }
         if(!mc.player.onGround) {
-            this.toggle();
+            this.disable();
             return;
         }
         double startX = mc.player.posX;
@@ -49,7 +49,8 @@ public class JumpFill extends Module {
         int switchSlot = CombatUtil.findBlockInHotbar(getBlockSetting());
         boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), true, (switchSlot != -1), packetSwitch.getValue(), switchSlot);
         if(switchSlot == -1) {
-            this.toggle();
+            this.disable();
+            return;
         }
         if(placedBlock) {
             mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.00133597911214, mc.player.posZ, mc.player.onGround));
@@ -58,7 +59,7 @@ public class JumpFill extends Module {
             mc.player.connection.sendPacket(new CPacketPlayer.Position(startX, startY, startZ, true));
         }
         CombatUtil.switchToSlot(packetSwitch.getValue(), oldslot);
-        this.toggle();
+        this.disable();
     }
 
     private Block getBlockSetting() {

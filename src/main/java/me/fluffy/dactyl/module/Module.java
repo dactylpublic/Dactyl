@@ -90,6 +90,21 @@ public class Module {
         onToggle();
     }
 
+    public void disable() {
+        this.enabled = false;
+        if(enabled) {
+            MinecraftForge.EVENT_BUS.register(this);
+        } else {
+            MinecraftForge.EVENT_BUS.unregister(this);
+        }
+        if(this.enabled) {
+            onEnable();
+        } else {
+            onDisable();
+        }
+        onToggle();
+    }
+
     public void onLogout() {}
     public void onToggle() {}
     public void onEnable() {}

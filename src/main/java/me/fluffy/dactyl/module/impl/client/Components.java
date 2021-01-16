@@ -34,7 +34,7 @@ public class Components extends Module {
     public Setting<Boolean> targetArmor = new Setting<Boolean>("TArmor", true, v->targetHud.getValue());
     public Setting<Boolean> targetPing = new Setting<Boolean>("TPing", true, v->targetHud.getValue());
     public Setting<Boolean> targetHealth = new Setting<Boolean>("THealth", true, v->targetHud.getValue());
-    public Setting<Boolean> targetModel = new Setting<Boolean>("TModel", true, v->targetHud.getValue());
+    //public Setting<Boolean> targetModel = new Setting<Boolean>("TModel", true, v->targetHud.getValue());
     public Setting<Boolean> targetPopped = new Setting<Boolean>("TPopped", true, v->targetHud.getValue());
     public Setting<THudPrio> targetHudPrio = new Setting<THudPrio>("TPrio", THudPrio.CAURA, v->targetHud.getValue());
     public Setting<Boolean> targetBackground = new Setting<Boolean>("TBorder", true, v->targetHud.getValue());
@@ -55,7 +55,7 @@ public class Components extends Module {
     }
 
     private void doTargetHud() {
-        if(!targetHud.getValue() || getClosestTarget() == null) {
+        if(mc.world == null || !targetHud.getValue() || getClosestTarget() == null) {
             return;
         }
         int setX = convertString(targetHudX.getValue());
@@ -71,10 +71,10 @@ public class Components extends Module {
             armorY+=renderArmor(setX, setY, (EntityPlayer) targetEntity);
             setX+=20;
         }
-        if(targetModel.getValue()) {
-            GuiInventory.drawEntityOnScreen(setX+35, setY+60, 30, 0, 0, (EntityLivingBase) targetEntity);
-            setX+=35;
-        }
+        //if(targetModel.getValue()) {
+            //drawEntityOnScreen(setX+35, setY+60, 30, 0, 0, (EntityLivingBase) targetEntity);
+        //    setX+=35;
+        //}
         if(targetHealth.getValue()) {
             float health = ((EntityPlayer)targetEntity).getHealth()+((EntityPlayer)targetEntity).getAbsorptionAmount();
             TextFormatting textColor;
@@ -213,6 +213,9 @@ public class Components extends Module {
     }
 
     public void drawEntityOnScreen(int posX, int posY, int scale, float mouseX, float mouseY, EntityLivingBase ent) {
+        if(Minecraft.getMinecraft().getRenderManager() == null) {
+            return;
+        }
         GlStateManager.pushMatrix();
         GlStateManager.translate((float)posX, (float)posY, 50.0F);
         GlStateManager.scale((float)(-scale), (float)scale, (float)scale);
