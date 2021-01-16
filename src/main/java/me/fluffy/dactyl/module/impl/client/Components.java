@@ -37,7 +37,7 @@ public class Components extends Module {
     public Setting<Boolean> targetModel = new Setting<Boolean>("TModel", true, v->targetHud.getValue());
     public Setting<Boolean> targetPopped = new Setting<Boolean>("TPopped", true, v->targetHud.getValue());
     public Setting<THudPrio> targetHudPrio = new Setting<THudPrio>("TPrio", THudPrio.CAURA, v->targetHud.getValue());
-    public Setting<Boolean> targetBackground = new Setting<Boolean>("TBorder", true);
+    public Setting<Boolean> targetBackground = new Setting<Boolean>("TBorder", true, v->targetHud.getValue());
     public Setting<String> targetHudX = new Setting<String>("TargetX", "1", v->targetHud.getValue());
     public Setting<String> targetHudY = new Setting<String>("TargetY", "30", v->targetHud.getValue());
     public Components() {
@@ -72,7 +72,7 @@ public class Components extends Module {
             setX+=20;
         }
         if(targetModel.getValue()) {
-            drawEntityOnScreen(setX+35, setY+60, 30, 0, 0, (EntityLivingBase) targetEntity);
+            GuiInventory.drawEntityOnScreen(setX+35, setY+60, 30, 0, 0, (EntityLivingBase) targetEntity);
             setX+=35;
         }
         if(targetHealth.getValue()) {
