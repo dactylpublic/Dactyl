@@ -69,7 +69,9 @@ public class Components extends Module {
         int armorY = 0;
         if(targetArmor.getValue()) {
             armorY+=renderArmor(setX, setY, (EntityPlayer) targetEntity);
-            setX+=20;
+            if(((EntityPlayer) targetEntity).inventory.armorInventory != null && !((EntityPlayer) targetEntity).inventory.armorInventory.isEmpty()) {
+                setX += 20;
+            }
         }
         //if(targetModel.getValue()) {
             //drawEntityOnScreen(setX+35, setY+60, 30, 0, 0, (EntityLivingBase) targetEntity);
@@ -113,7 +115,8 @@ public class Components extends Module {
             setY+=10;
         }
         if(targetBackground.getValue()) {
-            RenderUtil.drawBetterColoredRect(convertString(targetHudX.getValue()), convertString(targetHudY.getValue()), setX + 63.5 + (EntityUtil.getPing((EntityPlayer) targetEntity) > 100 ? Dactyl.fontUtil.getStringWidth("9") : 0), setY + 52.5, 1.0f, c);
+            double maxLength = setX + 63.5 + (EntityUtil.getPing((EntityPlayer) targetEntity) > 100 ? Dactyl.fontUtil.getStringWidth("9") : 0);
+            RenderUtil.drawBetterColoredRect(convertString(targetHudX.getValue()), convertString(targetHudY.getValue()), maxLength, setY + 52.5, 1.0f, c);
         }
     }
 
