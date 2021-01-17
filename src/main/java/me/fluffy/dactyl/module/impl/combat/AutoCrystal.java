@@ -9,6 +9,7 @@ import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.injection.inj.access.ICPacketPlayer;
 import me.fluffy.dactyl.injection.inj.access.ICPacketUseEntity;
+import me.fluffy.dactyl.injection.inj.access.IVec3i;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
@@ -522,7 +523,24 @@ public class AutoCrystal extends Module {
         }
         if(damageText.getValue()) {
             if (crystalRender != null && CombatUtil.isHoldingCrystal()) {
-                String dmgTextRender = ((Math.floor(damage) == damage) ? Integer.valueOf((int)damage) : String.format("%.1f", damage)) + "";
+                List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+                double highestDMG = 0f;
+                for (Entity entity : playerEnts) {
+                    if (mc.player.getDistance(entity) > enemyRange.getValue()) {
+                        continue;
+                    }
+                    if (entity == mc.player) {
+                        continue;
+                    }
+                    if (((EntityLivingBase) entity).getHealth() <= 0.0f || ((EntityLivingBase) entity).isDead) {
+                        continue;
+                    }
+                    if(CombatUtil.calculateDamage(crystalRender, entity) > highestDMG) {
+                        highestDMG = CombatUtil.calculateDamage(crystalRender, entity);
+                    }
+                }
+                //String dmgTextRender = ((Math.floor(damage) == damage) ? Integer.valueOf((int)damage) : String.format("%.1f", damage)) + "";
+                String dmgTextRender = ((Math.floor(highestDMG) == highestDMG) ? Integer.valueOf((int)highestDMG) : String.format("%.1f", highestDMG)) + "";
                 RenderUtil.drawText(crystalRender, dmgTextRender);
             }
         }
