@@ -89,6 +89,8 @@ public class AutoCrystal extends Module {
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 300, vis->yawStep.getValue()&&settingPage.getValue() == SettingPage.MISC);
     //Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
@@ -133,6 +135,7 @@ public class AutoCrystal extends Module {
     private static BlockPos crystalRender = null;
     private static BlockPos oldPlacePos = null;
     private static double damage = 0.0d;
+    private static int yawTicks = 0;
     private EntityEnderCrystal currentAttacking = null;
     public boolean faceplaceKeyOn = false;
 
@@ -544,7 +547,26 @@ public class AutoCrystal extends Module {
     }
 
     private void setRotations(double newYaw, double newPitch) {
-        yaw = (float) newYaw;
+        if(yawStep.getValue()) {
+            if(newYaw >= 0) {
+                yawTicks += yawStepTicks.getValue();
+                if (yawTicks >= newYaw) {
+                    yaw = (float) newYaw;
+                } else {
+                    yaw = (float) yawTicks;
+                }
+            } else {
+                // negative
+                yawTicks -= yawStepTicks.getValue();
+                if (yawTicks <= newYaw) {
+                    yaw = (float) newYaw;
+                } else {
+                    yaw = (float) yawTicks;
+                }
+            }
+        } else {
+            yaw = (float) newYaw;
+        }
         pitch = (float) newPitch;
         isRotating = true;
     }
@@ -554,6 +576,7 @@ public class AutoCrystal extends Module {
             yaw = mc.player.rotationYaw;
             pitch = mc.player.rotationPitch;
             isRotating = false;
+            yawTicks = 0;
         }
     }
 
