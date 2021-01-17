@@ -61,6 +61,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> antiping = new Setting<Boolean>("AntiMulti", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
+    Setting<Boolean> doublePlace = new Setting<Boolean>("DoublePlace", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue(), "Weird exploit");
     Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
@@ -543,6 +544,23 @@ public class AutoCrystal extends Module {
             this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName()  + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
         }
         Criticals.INSTANCE.ignoring = false;
+        if(doublePlace.getValue() && (attackLogic.getValue() == AttackLogic.CSLOT) && crystalRender != null) {
+            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX+0.5, mc.player.posY + 1.0, mc.player.posZ+0.5), new Vec3d(crystalRender));
+            EnumFacing facing = null;
+            // placing that works on 2b :^)
+            if (rayTraceResult == null || rayTraceResult.sideHit == null) {
+                rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
+                if(rayTraceResult != null) {
+                    if(rayTraceResult.sideHit != null) {
+                        facing = rayTraceResult.sideHit;
+                    }
+                }
+            } else {
+                facing = rayTraceResult.sideHit;
+            }
+            EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(crystalRender, facing, placeHand, (float) rayTraceResult.hitVec.x,  (float) rayTraceResult.hitVec.y,  (float) rayTraceResult.hitVec.z));
+        }
         breakTimer.reset();
     }
 
