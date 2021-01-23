@@ -174,14 +174,16 @@ public class AutoCrystal extends Module {
                             if (e instanceof EntityEnderCrystal) {
                                 if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
                                     e.setDead();
-                                    Iterator<EntityEnderCrystal> crystalIterator = attackedCrystals.keySet().iterator();
-                                    while (crystalIterator.hasNext()) {
-                                        crystalIterator.next();
-                                        if(attackedCrystals.containsKey(e)) {
-                                            crystalIterator.remove();
-                                            //attackedCrystals.remove(e);
+                                    try {
+                                        Iterator<EntityEnderCrystal> crystalIterator = attackedCrystals.keySet().iterator();
+                                        while (crystalIterator.hasNext()) {
+                                            crystalIterator.next();
+                                            if (attackedCrystals.containsKey(e)) {
+                                                crystalIterator.remove();
+                                                //attackedCrystals.remove(e);
+                                            }
                                         }
-                                    }
+                                    } catch(Exception exceeept) {}
                                 }
                             }
                         }
