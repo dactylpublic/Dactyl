@@ -539,8 +539,12 @@ public class AutoCrystal extends Module {
                     if (((EntityLivingBase) entity).getHealth() <= 0.0f || ((EntityLivingBase) entity).isDead) {
                         continue;
                     }
-                    if(CombatUtil.calculateDamage(crystalRender, entity) > highestDMG) {
-                        highestDMG = CombatUtil.calculateDamage(crystalRender, entity);
+                    float dmgCalculation = 0.0f;
+                    try {
+                        dmgCalculation = CombatUtil.calculateDamage(crystalRender, entity);
+                    } catch(NullPointerException exception) {}
+                    if(dmgCalculation > highestDMG) {
+                        highestDMG = dmgCalculation;
                     }
                 }
                 //String dmgTextRender = ((Math.floor(damage) == damage) ? Integer.valueOf((int)damage) : String.format("%.1f", damage)) + "";
