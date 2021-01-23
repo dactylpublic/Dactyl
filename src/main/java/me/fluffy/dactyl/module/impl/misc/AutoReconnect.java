@@ -48,6 +48,9 @@ public class AutoReconnect extends Module {
             super.drawScreen(mouseX, mouseY, partialTicks);
 
             long time = finalTime - System.currentTimeMillis();
+            if(serverData != null) {
+                return;
+            }
             if(time <= 0) mc.displayGuiScreen(new GuiConnecting(this, mc, serverData));
 
             String text = "Reconnecting in " + (time/1000) + "s";

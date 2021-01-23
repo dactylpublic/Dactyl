@@ -215,7 +215,7 @@ public class Nametags extends Module {
 
 
     public static int getTotemPops(String user) {
-        if(Dactyl.totemManager.getPoppedUsers() != null && Dactyl.totemManager.getPoppedUsers().get(user) != null) {
+        if(user != null && Dactyl.totemManager.getPoppedUsers() != null && Dactyl.totemManager.getPoppedUsers().get(user) != null) {
             return (int)Dactyl.totemManager.getPoppedUsers().get(user);
         }
         return 0;
@@ -419,7 +419,7 @@ public class Nametags extends Module {
             pHealth = 1;
         }
         name = name + gm + p + color + " " + String.valueOf(pHealth);
-        if(totemPops.getValue() && getTotemPops(player.getName()) > 0) {
+        if(totemPops.getValue() && player.getName() != null && getTotemPops(player.getName()) > 0) {
             name+= TextFormatting.AQUA + " -" + String.valueOf(getTotemPops(player.getName()));
         }
         return name;
