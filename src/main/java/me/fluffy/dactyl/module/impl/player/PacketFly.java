@@ -44,10 +44,15 @@ public class PacketFly extends Module {
     private int flightCounter;
     private final Set<CPacketPlayer> packetSet = new ConcurrentSet();
     private final Map<Integer, IDTime> idTimeMap = new ConcurrentHashMap<Integer, IDTime>();
+    private final TimeUtil timer = new TimeUtil();
 
     @Override
     public void onClientUpdate() {
         this.idTimeMap.entrySet().removeIf(idTime -> idTime.getValue().getTimer().hasPassed(30L));
+        if(timer.hasPassed(50)) {
+            packetSet.clear();
+            timer.reset();
+        }
     }
 
     @SubscribeEvent
@@ -118,15 +123,11 @@ public class PacketFly extends Module {
                         if(idTimeMap.containsKey(packet.getTeleportId())) {
                             idTimeMap.remove(packet.getTeleportId());
                         }
-                        //mc.player.connection.sendPacket(new CPacketConfirmTeleport(packet.getTeleportId()));
-                        //mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(packet.getX(), packet.getY(), packet.getZ(), mc.player.rotationYaw, mc.player.rotationPitch, mc.player.onGround));
-                        //mc.player.setPosition(packet.getX(), packet.getY(), packet.getZ());
-                       // event.setCanceled(true);
+                        ((ISPacketPlayerPosLook)packet).setYaw(mc.player.rotationYaw);
+                        ((ISPacketPlayerPosLook)packet).setPitch(mc.player.rotationPitch);
+                        this.teleportId = packet.getTeleportId();
                     }
                 }
-                ((ISPacketPlayerPosLook)packet).setYaw(mc.player.rotationYaw);
-                ((ISPacketPlayerPosLook)packet).setPitch(mc.player.rotationPitch);
-                this.teleportId = packet.getTeleportId();
             }
         }
     }
@@ -194,6 +195,7 @@ public class PacketFly extends Module {
         teleportId = 0;
         packetSet.clear();
         idTimeMap.clear();
+        timer.reset();
     }
 
     public static class FlyingType {

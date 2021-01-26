@@ -470,7 +470,7 @@ public class CombatUtil {
         }
     }
 
-    public static boolean placeBlockBurrow(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetRotate, boolean doSwitch, boolean silentSwitch, int toSwitch) {
+    public static boolean placeBlockBurrow(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetSwing, boolean doSwitch, boolean silentSwitch, int toSwitch) {
         if(!checkCanPlaceBurrow(blockPos)) {
             return false;
         }
@@ -506,7 +506,11 @@ public class CombatUtil {
 
         EnumHand actionHand = offhand ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
         mc.playerController.processRightClickBlock(mc.player, mc.world, adjacentBlock, opposingSide, hitVector, actionHand);
-        mc.player.connection.sendPacket(new CPacketAnimation(actionHand));
+        if(packetSwing) {
+            mc.player.connection.sendPacket(new CPacketAnimation(actionHand));
+        } else {
+            mc.player.swingArm(EnumHand.MAIN_HAND);
+        }
         if(isSneak) {
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
         }

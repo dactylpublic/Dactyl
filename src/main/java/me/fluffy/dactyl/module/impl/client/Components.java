@@ -30,16 +30,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Components extends Module {
-    public Setting<Boolean> targetHud = new Setting<Boolean>("TargetHUD", false);
-    public Setting<Boolean> targetArmor = new Setting<Boolean>("TArmor", true, v->targetHud.getValue());
-    public Setting<Boolean> targetPing = new Setting<Boolean>("TPing", true, v->targetHud.getValue());
-    public Setting<Boolean> targetHealth = new Setting<Boolean>("THealth", true, v->targetHud.getValue());
-    //public Setting<Boolean> targetModel = new Setting<Boolean>("TModel", true, v->targetHud.getValue());
-    public Setting<Boolean> targetPopped = new Setting<Boolean>("TPopped", true, v->targetHud.getValue());
-    public Setting<THudPrio> targetHudPrio = new Setting<THudPrio>("TPrio", THudPrio.CAURA, v->targetHud.getValue());
-    public Setting<Boolean> targetBackground = new Setting<Boolean>("TBorder", true, v->targetHud.getValue());
-    public Setting<String> targetHudX = new Setting<String>("TargetX", "1", v->targetHud.getValue());
-    public Setting<String> targetHudY = new Setting<String>("TargetY", "30", v->targetHud.getValue());
+    public Setting<AddonPage> page = new Setting<AddonPage>("Page", AddonPage.TARGETHUD);
+
+    // targethud
+    public Setting<Boolean> targetHud = new Setting<Boolean>("TargetHUD", false, v->page.getValue()==AddonPage.TARGETHUD);
+    public Setting<Boolean> targetArmor = new Setting<Boolean>("TArmor", true, v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+    public Setting<Boolean> targetPing = new Setting<Boolean>("TPing", true, v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+    public Setting<Boolean> targetHealth = new Setting<Boolean>("THealth", true, v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+    public Setting<Boolean> targetPopped = new Setting<Boolean>("TPopped", true, v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+    public Setting<THudPrio> targetHudPrio = new Setting<THudPrio>("TPrio", THudPrio.CAURA, v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+    public Setting<Boolean> targetBackground = new Setting<Boolean>("TBorder", true, v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+    public Setting<String> targetHudX = new Setting<String>("TargetX", "1", v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+    public Setting<String> targetHudY = new Setting<String>("TargetY", "30", v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
+
     public Components() {
         super("Addons", Category.CLIENT, true);
     }
@@ -264,6 +267,23 @@ public class Components extends Module {
             i = 0;
         }
         return i;
+    }
+
+    public enum AddonPage {
+        TARGETHUD("THud"),
+        PVPINFO("PvP");
+
+        private final String name;
+        private AddonPage(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+
+
     }
 
 

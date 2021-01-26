@@ -37,6 +37,9 @@ public class JumpFill extends Module {
         if(mc.player == null || mc.world == null) {
             return;
         }
+        if(!CombatUtil.checkCanPlaceBurrow(new BlockPos(mc.player.getPositionVector()))) {
+            return;
+        }
         if(!mc.player.onGround) {
             this.disable();
             return;
@@ -75,7 +78,7 @@ public class JumpFill extends Module {
             BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, 0, 0);
             int oldslot = isHoldingBlock ? blockSlot : mc.player.inventory.currentItem;
             int switchSlot = (isHoldingBlock ? blockSlot : CombatUtil.findBlockInHotbar(getBlockSetting()));
-            boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), true, (switchSlot != -1), packetSwitch.getValue(), switchSlot);
+            boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), false, (switchSlot != -1), packetSwitch.getValue(), switchSlot);
             if(switchSlot == -1) {
                 this.disable();
                 return;
