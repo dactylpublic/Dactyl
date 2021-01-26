@@ -406,8 +406,8 @@ public class AutoCrystal extends Module {
             oldPlacePos = placePosition;
             damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] rots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
+            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
             if(placeRotate.getValue()) {
-                double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
                 if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                     if(constRotate.getValue()) {
                         eventUpdateWalkingPlayer.setYaw((float) constRots[0]);
@@ -458,6 +458,17 @@ public class AutoCrystal extends Module {
                 boolean finalizePlace = true;
                 if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer.getStage() != ForgeEvent.Stage.POST) {
                     finalizePlace = false;
+                }
+                if(yawStep.getValue() && isRotating) {
+                    if(constRotate.getValue()) {
+                        if(yaw != constRots[0]) {
+                            finalizePlace = false;
+                        }
+                    } else {
+                        if(yaw != rots[0]) {
+                            finalizePlace = false;
+                        }
+                    }
                 }
                 if(finalizePlace) {
                     if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
@@ -555,6 +566,12 @@ public class AutoCrystal extends Module {
     }
 
     private void attackCrystal(Entity entity) {
+        double[] rots = CombatUtil.calculateLookAt(entity.posX, entity.posY, entity.posZ);
+        if(yawStep.getValue() && isRotating) {
+            if(yaw != rots[0]) {
+                return;
+            }
+        }
         Criticals.INSTANCE.ignoring = true;
         mc.playerController.attackEntity(mc.player, entity);
         if(swingSetting.getValue() == SwingLogic.BREAK || swingSetting.getValue() == SwingLogic.BOTH) {

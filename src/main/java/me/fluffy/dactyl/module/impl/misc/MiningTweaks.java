@@ -39,6 +39,7 @@ public class MiningTweaks extends Module {
     public Setting<MiningMode> modeSetting = new Setting<MiningMode>("Mode", MiningMode.PACKET);
     public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v->modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> reset = new Setting<Boolean>("Reset", true);
+    public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v->modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 20, 1, 50, v->modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
@@ -59,6 +60,11 @@ public class MiningTweaks extends Module {
         if(mc.player == null || mc.world == null) {
             return;
         }
+
+        if (noBreakDelay.getValue()) {
+            mc.playerController.blockHitDelay = 0;
+        }
+
         if(currentPos != null) {
             if (mc.player != null && mc.player.getDistanceSq(this.currentPos) > ((resetRange.getValue())^2)) {
                 this.currentPos = null;
@@ -153,6 +159,13 @@ public class MiningTweaks extends Module {
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     event.setCanceled(true);
                     break;
+                case INSTANT:
+                    mc.player.swingArm(EnumHand.MAIN_HAND);
+                    mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), event.getFacing()));
+                    mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(), event.getFacing()));
+                    mc.playerController.onPlayerDestroyBlock(event.getPos());
+                    mc.world.setBlockToAir(event.getPos());
+                    break;
             }
         }
     }
@@ -243,6 +256,7 @@ public class MiningTweaks extends Module {
     public enum MiningMode {
         PACKET("Packet"),
         NONE("None"),
+        INSTANT("Instant"),
         SPEED("Speed");
 
         private final String name;

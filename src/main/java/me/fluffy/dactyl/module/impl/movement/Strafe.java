@@ -2,13 +2,20 @@ package me.fluffy.dactyl.module.impl.movement;
 
 import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
+import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.injection.inj.access.IMinecraft;
 import me.fluffy.dactyl.injection.inj.access.ITimer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.ChatUtil;
+import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.MathUtil;
 import me.fluffy.dactyl.util.TimeUtil;
+import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.MobEffects;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Objects;
@@ -19,6 +26,7 @@ public class Strafe extends Module {
     Setting<Boolean> addSpeed = new Setting<Boolean>("Custom", false);
     Setting<String> speedAddition = new Setting<String>("SpeedAddition", "0.272", v->addSpeed.getValue());
     Setting<Boolean> extraSpeed = new Setting<Boolean>("Extra", false);
+    Setting<Boolean> damageBoost = new Setting<Boolean>("DMGBoost", false);
     Setting<Double> vanillaSpeed = new Setting<Double>("VanillaSpeed", 6.0d, 0.1d, 10.0d, vis->extraSpeed.getValue());
     Setting<SkipMode> skipModeSetting = new Setting<SkipMode>("Skips", SkipMode.TICK);
     Setting<Integer> skipTickHops = new Setting<Integer>("SkipTicks", 1, 1, 10, vis->skipModeSetting.getValue() == SkipMode.TICK);
@@ -38,19 +46,58 @@ public class Strafe extends Module {
     private int stage = 0;
     private int cooldown = 0;
     private double moveSpeed, lastDist;
+    private double damageMultiplier = 0;
 
     private final TimeUtil timer = new TimeUtil();
+    private final TimeUtil damageTimer = new TimeUtil();
+
+    @SubscribeEvent
+    public void onEntityRemove(EntityRemovedEvent event) {
+        if(mc.world != null && mc.player != null && damageBoost.getValue() && event.getEntity() != null && event.getEntity() instanceof EntityEnderCrystal) {
+            EntityEnderCrystal crystal = (EntityEnderCrystal) event.getEntity();
+            if(mc.player.getDistance(crystal) >= 13) {
+                return;
+            }
+            float playerDMG = CombatUtil.calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player);
+            if(playerDMG >= 3.5f && ((1+(playerDMG/36) > damageMultiplier))) {
+                damageMultiplier = 1+(playerDMG/36);
+                damageTimer.reset();
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onDamageTaken(LivingAttackEvent event) {
+        if(mc.player == null || mc.world == null || event.getEntity() != mc.player) {
+            return;
+        }
+        if(!(event.getAmount() >= 36) && event.getAmount() >= 3.5f && ((1+(event.getAmount()/36) > damageMultiplier))) {
+            damageMultiplier = 1+(event.getAmount()/36);
+            damageTimer.reset();
+        }
+    }
+
 
     @Override
     public void onClientUpdate() {
         if(mc == null || mc.player == null) {
             return;
         }
+
+        if(damageTimer.hasPassed(1750)) {
+            damageMultiplier = 1.0d;
+            damageTimer.reset();
+        }
+
         lastDist = Math.sqrt(((mc.player.posX - mc.player.prevPosX) * (mc.player.posX - mc.player.prevPosX)) + ((mc.player.posZ - mc.player.prevPosZ) * (mc.player.posZ - mc.player.prevPosZ)));
         if(canSprint() && autoSprint.getValue()) {
             mc.player.setSprinting(true);
         }
-        this.setModuleInfo(skipModeSetting.getValue() != SkipMode.NONE ? "Skips" : "Rapid");
+        String setModInfo = (skipModeSetting.getValue() != SkipMode.NONE ? "Skips" : "Rapid");
+        if(damageBoost.getValue()) {
+            setModInfo = "Boost";
+        }
+        this.setModuleInfo(setModInfo);
     }
 
     @SubscribeEvent
@@ -160,6 +207,7 @@ public class Strafe extends Module {
     public void onToggle() {
         ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50);
         cooldown = 0;
+        damageMultiplier = 1.0d;
         timer.reset();
     }
 
@@ -187,6 +235,9 @@ public class Strafe extends Module {
         }
         if(useTimer.getValue()) {
             ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50 / 1.088f);
+        }
+        if(damageBoost.getValue()) {
+            baseSpeed*=damageMultiplier;
         }
         return baseSpeed;
     }
