@@ -463,17 +463,6 @@ public class AutoCrystal extends Module {
                 if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer.getStage() != ForgeEvent.Stage.POST) {
                     finalizePlace = false;
                 }
-                if(yawStep.getValue() && isRotating) {
-                    if(constRotate.getValue()) {
-                        if(yaw != constRots[0]) {
-                            finalizePlace = false;
-                        }
-                    } else {
-                        if(yaw != rots[0]) {
-                            finalizePlace = false;
-                        }
-                    }
-                }
                 if(finalizePlace) {
                     if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
                         this.setModuleInfo("");
@@ -570,12 +559,6 @@ public class AutoCrystal extends Module {
     }
 
     private void attackCrystal(Entity entity) {
-        double[] rots = CombatUtil.calculateLookAt(entity.posX, entity.posY, entity.posZ);
-        if(yawStep.getValue() && isRotating) {
-            if(yaw != rots[0]) {
-                return;
-            }
-        }
         Criticals.INSTANCE.ignoring = true;
         mc.playerController.attackEntity(mc.player, entity);
         if(swingSetting.getValue() == SwingLogic.BREAK || swingSetting.getValue() == SwingLogic.BOTH) {
