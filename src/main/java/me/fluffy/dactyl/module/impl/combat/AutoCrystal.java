@@ -69,6 +69,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> facePlaceHold = new Setting<Boolean>("FPHold", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Bind> facePlaceKey = new Setting<Bind>("FacePlaceKey", new Bind(Keyboard.KEY_NONE), vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
 
     // break
@@ -223,9 +224,13 @@ public class AutoCrystal extends Module {
             return;
         }
         if(facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
-            if(event.getKey() == facePlaceKey.getValue().getKey()) {
-                faceplaceKeyOn = !faceplaceKeyOn;
+            if(!facePlaceHold.getValue()) {
+                if (event.getKey() == facePlaceKey.getValue().getKey()) {
+                    faceplaceKeyOn = !faceplaceKeyOn;
+                }
             }
+        } else {
+            faceplaceKeyOn = false;
         }
     }
 
@@ -259,6 +264,15 @@ public class AutoCrystal extends Module {
         }
         if(placeResetTimer.hasPassed(5000)) {
             placedCrystals.clear();
+        }
+        if(facePlaceHold.getValue()) {
+            if(facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
+                if(Keyboard.isKeyDown(facePlaceKey.getValue().getKey())) {
+                    faceplaceKeyOn = true;
+                } else {
+                    faceplaceKeyOn = false;
+                }
+            }
         }
         if(auraOrder.getValue() == AuraLogic.BREAKPLACE) {
             doBreak(eventUpdateWalkingPlayer);
