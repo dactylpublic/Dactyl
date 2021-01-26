@@ -171,6 +171,7 @@ public class AutoCrystal extends Module {
                     SPacketSoundEffect packet = (SPacketSoundEffect) event.getPacket();
                     if (packet.getCategory() == SoundCategory.BLOCKS && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
                         for (Entity e : mc.world.loadedEntityList) {
+                            if(e == null) continue;
                             if (e instanceof EntityEnderCrystal) {
                                 if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
                                     e.setDead();
@@ -231,6 +232,9 @@ public class AutoCrystal extends Module {
 
     @SubscribeEvent
     public void onRemoveEntity(EntityRemovedEvent event) {
+        if(event.getEntity() == null) {
+            return;
+        }
         if(event.getEntity() instanceof EntityEnderCrystal) {
             /*if(attackedCrystals.containsKey(event.getEntity())) {
                 attackedCrystals.remove(event.getEntity());
