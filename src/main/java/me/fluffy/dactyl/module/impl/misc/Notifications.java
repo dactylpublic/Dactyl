@@ -123,6 +123,7 @@ public class Notifications extends Module {
 
     @SubscribeEvent
     public void onEntityRemoved(EntityRemovedEvent event) throws AWTException {
+        if(event.getEntity() == null || event.getEntity().getName() == null) return;
         if(visualRange.getValue()) {
             if (event.getEntity() instanceof EntityPlayer && event.getEntity() != mc.player) {
                 EntityPlayer entityPlayer = (EntityPlayer)event.getEntity();
