@@ -4,6 +4,7 @@ import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.injection.inj.access.IMinecraft;
 import me.fluffy.dactyl.injection.inj.access.ITimer;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.combat.Surround;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
@@ -14,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -38,6 +40,7 @@ public class JumpFill extends Module {
             return;
         }
         if(!CombatUtil.checkCanPlaceBurrow(new BlockPos(mc.player.getPositionVector()))) {
+            this.disable();
             return;
         }
         if(!mc.player.onGround) {

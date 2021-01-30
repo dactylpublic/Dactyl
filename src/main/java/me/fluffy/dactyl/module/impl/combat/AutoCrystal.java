@@ -53,7 +53,7 @@ public class AutoCrystal extends Module {
     // place
     Setting<Boolean> doCaPlace = new Setting<Boolean>("Place", true, vis->settingPage.getValue() == SettingPage.PLACE);
     Setting<Boolean> tracePlace = new Setting<Boolean>("PlaceTrace", false, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
-    Setting<Integer> placeDelay = new Setting<Integer>("PlaceDelay", 45, 1, 250, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Integer> placeDelay = new Setting<Integer>("PlaceDelay", 45, 0, 250, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
     Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0D, 1.0D, 13.5D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiSuiPlace.getValue());
     Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
@@ -77,7 +77,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> offhandSwing = new Setting<Boolean>("OffhandSwing", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Boolean> traceBreak = new Setting<Boolean>("BreakTrace", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<AttackLogic> attackLogic = new Setting<AttackLogic>("AttackLogic", AttackLogic.CSLOT, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Integer> breakDelay = new Setting<Integer>("BreakDelay", 65, 1, 350, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Integer> breakDelay = new Setting<Integer>("BreakDelay", 65, 0, 350, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Boolean> antiStuck = new Setting<Boolean>("AntiStuck", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Integer> hitAttempts = new Setting<Integer>("HitAttempts", 5, 1, 15, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue()&&antiStuck.getValue());
     Setting<BreakLogic> breakLogic = new Setting<BreakLogic>("BreakLogic", BreakLogic.DOESDMG, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());

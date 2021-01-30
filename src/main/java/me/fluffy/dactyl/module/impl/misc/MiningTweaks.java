@@ -157,6 +157,7 @@ public class MiningTweaks extends Module {
                     mc.player.swingArm(EnumHand.MAIN_HAND);
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(), event.getFacing()));
+                    //mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     event.setCanceled(true);
                     break;
                 case INSTANT:
