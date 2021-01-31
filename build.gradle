@@ -11,7 +11,7 @@ buildscript {
         }
         maven {
             name = 'SpongePowered'
-            url = 'http://repo.spongepowered.org/maven'
+            url = 'https://repo.spongepowered.org/repository/maven-public'
         }
     }
     dependencies {
@@ -26,7 +26,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = 'v1.2.8'
+version = 'v1.2.9'
 group = 'me.fluffy.dactyl' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'Dactyl'
 
@@ -42,7 +42,7 @@ minecraft {
 repositories {
     maven {
         name = 'spongepowered-repo'
-        url = 'http://repo.spongepowered.org/maven/'
+        url = 'https://repo.spongepowered.org/repository/maven-public'
     }
     maven {
         name = "jitpack.io"
