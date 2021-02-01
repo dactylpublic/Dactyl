@@ -3,6 +3,7 @@ package me.fluffy.dactyl.module.impl.render;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -56,7 +57,7 @@ public class NewChunks extends Module {
 
                 if (frustum.isBoundingBoxInFrustum(bb)) {
                     RenderUtil.drawPlane(chunkData.x - mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY,
-                            chunkData.z - mc.getRenderManager().viewerPosZ, new AxisAlignedBB(0, 0, 0, 16, 1, 16), 1, 0xFF9900EE);
+                            chunkData.z - mc.getRenderManager().viewerPosZ, new AxisAlignedBB(0, 0, 0, 16, 1, 16), 1, Colors.INSTANCE.getColor(1, false));
                 }
             }
         }
