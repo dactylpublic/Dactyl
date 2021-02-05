@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 public class Step extends Module {
     public Setting<StepMode> stepModeSetting = new Setting<StepMode>("Mode", StepMode.AAC);
     public Setting<Double> height = new Setting<Double>("Height", 2.0D, 0.5D, 10.0D);
+    public Setting<Boolean> entityStep = new Setting<Boolean>("EntityStep", true);
 
 
     public static Step INSTANCE;
@@ -17,6 +18,8 @@ public class Step extends Module {
         super("Step", Category.MOVEMENT);
         INSTANCE = this;
     }
+
+
 
     @Override
     public void onClientUpdate() {
@@ -93,6 +96,9 @@ public class Step extends Module {
     }
 
     private void doStepVanilla() {
+        if(mc.player.getRidingEntity() != null && entityStep.getValue()) {
+            mc.player.getRidingEntity().stepHeight = height.getValue().floatValue();
+        }
         mc.player.stepHeight = height.getValue().floatValue();
     }
 
@@ -132,6 +138,9 @@ public class Step extends Module {
     public void onDisable() {
         if(mc.player == null) {
             return;
+        }
+        if(mc.player.getRidingEntity() != null) {
+            mc.player.getRidingEntity().stepHeight = 1f;
         }
         mc.player.stepHeight = 0.5f;
     }
