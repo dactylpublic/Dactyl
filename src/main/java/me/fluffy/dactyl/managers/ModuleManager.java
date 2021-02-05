@@ -58,6 +58,7 @@ public class ModuleManager {
         modules.add(new TimerModule());
         modules.add(new Notifications());
         modules.add(new PacketLogger());
+        modules.add(new AutoDupe());
 
         // movement
         modules.add(new Strafe());

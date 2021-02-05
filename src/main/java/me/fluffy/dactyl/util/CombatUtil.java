@@ -4,6 +4,7 @@ import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.injection.inj.access.IBlock;
 import me.fluffy.dactyl.injection.inj.access.IVec3i;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
+import me.fluffy.dactyl.module.impl.misc.Chat;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockLiquid;
@@ -23,6 +24,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemShulkerBox;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketEntityAction;
@@ -215,6 +217,107 @@ public class CombatUtil {
             }
         }
         return stack1.getDisplayName().equals(stack2.getDisplayName()) && stack1.getItemDamage() == stack2.getItemDamage();
+    }
+
+    public static int getShulkerCountInInv() {
+        int size = 0;
+        if (mc.player == null) {
+            return 0;
+        }
+        for (int x = 0; x < mc.player.openContainer.getInventory().size(); x++) {
+            ItemStack stack = mc.player.openContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(x >= 2 || x <= 16) {
+                continue;
+            }
+            if(stack.getItem() instanceof ItemShulkerBox) {
+                size++;
+            }
+        }
+        return size;
+    }
+
+    public static ArrayList<Integer> findShulkersOpenInv() {
+        ArrayList<Integer> shulkerList = new ArrayList<Integer>();
+        if (mc.player == null) {
+            return null;
+        }
+        for (int x = 0; x < mc.player.openContainer.getInventory().size(); x++) {
+            ItemStack stack = mc.player.openContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(stack.getItem() instanceof ItemShulkerBox) {
+                shulkerList.add(x);
+            }
+        }
+        if(shulkerList.size() == 0) {
+            return null;
+        }
+        return shulkerList;
+    }
+
+    public static ArrayList<Integer> findShulkersDonkeyInv() {
+        ArrayList<Integer> shulkerList = new ArrayList<Integer>();
+        if (mc.player == null) {
+            return null;
+        }
+        for (int x = 0; x < mc.player.openContainer.getInventory().size(); x++) {
+            ItemStack stack = mc.player.openContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(x < 2 || x > 16) {
+                continue;
+            }
+            if(stack.getItem() instanceof ItemShulkerBox) {
+                shulkerList.add(x);
+            }
+        }
+        if(shulkerList.size() == 0) {
+            return null;
+        }
+        return shulkerList;
+    }
+
+    public static int findShulkerContainerInv() {
+        if (mc.player == null) {
+            return -1;
+        }
+        for (int x = 0; x < mc.player.openContainer.getInventory().size(); x++) {
+            ItemStack stack = mc.player.openContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(!(x >= 2) && !(x <= 16)) {
+                continue;
+            }
+            if(stack.getItem() instanceof ItemShulkerBox) {
+                return x;
+            }
+        }
+        return -1;
+    }
+
+    public static int findShulkerOpenInv() {
+        if (mc.player == null) {
+            return -1;
+        }
+        for (int x = 0; x < mc.player.openContainer.getInventory().size(); x++) {
+            if(invalidSlots.contains(x)) {
+                continue;
+            }
+            ItemStack stack = mc.player.openContainer.getInventory().get(x);
+            if(stack.isEmpty()) {
+                continue;
+            }
+            if(stack.getItem() instanceof ItemShulkerBox) {
+                return x;
+            }
+        }
+        return -1;
     }
 
     public static int findItemSlot(Item i) {

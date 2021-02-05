@@ -43,6 +43,7 @@
     "access.IEntityRenderer",
     "access.IGuiDisconnected",
     "access.IItemRenderer",
+    "access.IKeyBinding",
     "access.IMinecraft",
     "access.IRenderManager",
     "access.ISPacketPlayerPosLook",

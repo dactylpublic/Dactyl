@@ -67,7 +67,7 @@ public class JumpFill extends Module {
         if(isHoldingBlock && blockSlot == -1) {
             return;
         }
-        if(timer.hasPassed(75)) {
+        if(timer.hasPassed((isHoldingBlock ? (75) : 0))) {
             if(!mc.player.onGround) {
                 this.disable();
                 return;

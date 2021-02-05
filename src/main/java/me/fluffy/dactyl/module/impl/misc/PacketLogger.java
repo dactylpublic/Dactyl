@@ -6,6 +6,9 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.ChatUtil;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.CPacketInput;
+import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Level;
@@ -18,6 +21,7 @@ public class PacketLogger extends Module {
     Setting<Boolean> outgoing = new Setting<Boolean>("Outgoing", true);
     Setting<Boolean> chat = new Setting<Boolean>("Chat", true);
     Setting<Boolean> showCancel = new Setting<Boolean>("ShowCancel", true);
+    Setting<Boolean> ignorePosPackets = new Setting<Boolean>("IgnorePos", false, v->outgoing.getValue());
     Setting<Boolean> console = new Setting<Boolean>("Logs", true);
     Setting<Boolean> packetData = new Setting<Boolean>("Data", true);
     public PacketLogger() {
@@ -90,6 +94,11 @@ public class PacketLogger extends Module {
             }
         } else {
             if (outgoing.getValue()) {
+                if(ignorePosPackets.getValue()) {
+                    if(event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.Rotation || event.getPacket() instanceof CPacketVehicleMove || event.getPacket() instanceof CPacketInput) {
+                        return;
+                    }
+                }
                 if (console.getValue()) {
                     Dactyl.logger.log(Level.INFO, "\2477OUT: \247r" + event.getPacket().getClass().getSimpleName() + " {");
                     if (packetData.getValue()) {
