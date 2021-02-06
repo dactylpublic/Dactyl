@@ -39,6 +39,11 @@ public class Offhand extends Module {
     Setting<Double> obiHealth = new Setting<Double>("ObiHealth", 15.0D, 1.0D, 36.0D);
     Setting<Double> obiHoleHealth = new Setting<Double>("O-H-Health", 10.0, 1.0D, 36.0D);
 
+    // enderchest
+    Setting<Bind> echestBind = new Setting<Bind>("EChest", new Bind(Keyboard.KEY_NONE));
+    Setting<Double> echestHealth = new Setting<Double>("EChestHealth", 15.0D, 1.0D, 36.0D);
+    Setting<Double> echestHoleHealth = new Setting<Double>("E-H-Health", 10.0, 1.0D, 36.0D);
+
     // other
     Setting<Integer> modeUpdates = new Setting<Integer>("Updates", 2, 1, 2);
     Setting<EmergencyMode> emergencyMode = new Setting<EmergencyMode>("ZeroKey", EmergencyMode.EGAP);
@@ -183,7 +188,7 @@ public class Offhand extends Module {
         }
         Item targetToSwitch = null;
         double requiredSwitchHealth = 0.0D;
-        if (!(targetKey == gappleBind.getValue().getKey() || targetKey == crystalBind.getValue().getKey() || targetKey == obiBind.getValue().getKey())) {
+        if (!(targetKey == echestBind.getValue().getKey() || targetKey == gappleBind.getValue().getKey() || targetKey == crystalBind.getValue().getKey() || targetKey == obiBind.getValue().getKey())) {
             return;
         }
 
@@ -205,6 +210,10 @@ public class Offhand extends Module {
             targetToSwitch = Item.getItemFromBlock(Blocks.OBSIDIAN);
             requiredSwitchHealth = HoleUtil.isInHole() ? obiHoleHealth.getValue() : obiHealth.getValue();
             nextOffhand = OffhandMode.OBI;
+        } else if(targetKey == echestBind.getValue().getKey()) {
+            targetToSwitch = Item.getItemFromBlock(Blocks.ENDER_CHEST);
+            requiredSwitchHealth = HoleUtil.isInHole() ? echestHoleHealth.getValue() : echestHealth.getValue();
+            nextOffhand = OffhandMode.ECHEST;
         }
         if(mc.player.getHeldItemOffhand().getItem() == targetToSwitch) {
             nextOffhand = (CombatUtil.getItemCount(Items.TOTEM_OF_UNDYING) == 0) ? emergencyToOffhand(emergencyMode.getValue()) : OffhandMode.TOTEM;
@@ -228,6 +237,8 @@ public class Offhand extends Module {
             return OffhandMode.CRYSTAL;
         } else if(mode == EmergencyMode.OBI) {
             return OffhandMode.OBI;
+        } else if(mode == EmergencyMode.ECHEST) {
+            return OffhandMode.ECHEST;
         }
         return OffhandMode.GAPPLE;
     }
@@ -249,6 +260,8 @@ public class Offhand extends Module {
                 return Items.GOLDEN_APPLE;
             case OBI:
                 return Item.getItemFromBlock(Blocks.OBSIDIAN);
+            case ECHEST:
+                return Item.getItemFromBlock(Blocks.ENDER_CHEST);
             case CRYSTAL:
                 return Items.END_CRYSTAL;
         }
@@ -265,6 +278,8 @@ public class Offhand extends Module {
                 return CombatUtil.findCrapple();
             case OBI:
                 return CombatUtil.findItemSlot(Item.getItemFromBlock(Blocks.OBSIDIAN));
+            case ECHEST:
+                return CombatUtil.findItemSlot(Item.getItemFromBlock(Blocks.ENDER_CHEST));
             case CRYSTAL:
                 return CombatUtil.findItemSlot(Items.END_CRYSTAL);
         }
@@ -279,6 +294,8 @@ public class Offhand extends Module {
             return "Crystal";
         } else if(heldItemOffhand == Item.getItemFromBlock(Blocks.OBSIDIAN)) {
             return "Obsidian Block";
+        } else if(heldItemOffhand == Item.getItemFromBlock(Blocks.ENDER_CHEST)) {
+            return "Ender Chest";
         }
         return "Totem";
     }
@@ -292,6 +309,8 @@ public class Offhand extends Module {
             relativeHealth = HoleUtil.isInHole() ? crystalHoleHealth.getValue() : crystalHealth.getValue();
         } else if(heldItemOffhand == Item.getItemFromBlock(Blocks.OBSIDIAN)) {
             relativeHealth = HoleUtil.isInHole() ? obiHoleHealth.getValue() : obiHealth.getValue();
+        } else if(heldItemOffhand == Item.getItemFromBlock(Blocks.ENDER_CHEST)) {
+            relativeHealth = HoleUtil.isInHole() ? echestHoleHealth.getValue() : echestHealth.getValue();
         }
         return relativeHealth;
     }
@@ -310,6 +329,8 @@ public class Offhand extends Module {
             } else if (Items.END_CRYSTAL.equals(item)) {
                 return "OffhandCrystal";
             } else if (Item.getItemFromBlock(Blocks.OBSIDIAN).equals(item)) {
+                return "OffhandObi";
+            } else if (Item.getItemFromBlock(Blocks.ENDER_CHEST).equals(item)) {
                 return "OffhandObi";
             }
         }
@@ -344,6 +365,7 @@ public class Offhand extends Module {
 
     public enum EmergencyMode {
         EGAP("EGap"),
+        ECHEST("EChest"),
         CRAPPLE("Crapple"),
         CRYSTAL("Crystal"),
         OBI("Obi");
@@ -364,6 +386,7 @@ public class Offhand extends Module {
         GAPPLE,
         CRAPPLE,
         CRYSTAL,
+        ECHEST,
         OBI,
         TOTEM
     }

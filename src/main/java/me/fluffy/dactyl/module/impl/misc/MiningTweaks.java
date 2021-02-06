@@ -10,6 +10,7 @@ import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.event.impl.world.ResetBlockRemovingEvent;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.ChatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.block.Block;
@@ -24,6 +25,7 @@ import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -37,36 +39,56 @@ import java.awt.*;
 public class MiningTweaks extends Module {
     public Setting<Boolean> noBreakAnimation = new Setting<Boolean>("NoBreakAnim", true);
     public Setting<MiningMode> modeSetting = new Setting<MiningMode>("Mode", MiningMode.PACKET);
-    public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v->modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v -> modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> reset = new Setting<Boolean>("Reset", true);
+    public Setting<Integer> exploitDelay = new Setting<Integer>("EDelay", 100, 10, 1000, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
-    public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v->modeSetting.getValue() == MiningMode.PACKET);
-    public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 20, 1, 50, v->modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 20, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
+
     public MiningTweaks() {
         super("BreakTweaks", Category.MISC);
     }
 
     private boolean isMining = false;
+    private boolean blockWasBroken = false;
     private BlockPos lastPos = null;
+    private BlockPos lastBrokenPos = null;
+    private Block lastBrokenBlock = null;
     private EnumFacing lastFacing = null;
     public BlockPos currentPos = null;
     public IBlockState currentBlockState = null;
     private final TimeUtil timer = new TimeUtil();
+    private final TimeUtil popbobTimer = new TimeUtil();
+    boolean shit = false;
 
     @Override
     public void onClientUpdate() {
         this.setModuleInfo(modeSetting.getValue() == MiningMode.SPEED ? "Speed" : "Util");
-        if(mc.player == null || mc.world == null) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
 
         if (noBreakDelay.getValue()) {
             mc.playerController.blockHitDelay = 0;
         }
+        if(modeSetting.getValue() == MiningMode.BYPASS) {
+            if (shit == true && timer.hasPassed(exploitDelay.getValue().longValue()) && this.lastBrokenPos != null) {
+                mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, this.lastBrokenPos, EnumFacing.DOWN));
+                blockWasBroken = false;
+                shit = false;
+            }
+            if (currentPos != null) {
+                if (mc.world.getBlockState(currentPos).getBlock() == Blocks.AIR) {
+                    this.lastBrokenPos = this.currentPos;
+                    blockWasBroken = true;
+                }
+            }
+        }
 
-        if(currentPos != null) {
-            if (mc.player != null && mc.player.getDistanceSq(this.currentPos) > ((resetRange.getValue())^2)) {
+        if (currentPos != null) {
+            if (mc.player != null && mc.player.getDistanceSq(this.currentPos) > ((resetRange.getValue()) ^ 2)) {
                 this.currentPos = null;
                 this.currentBlockState = null;
                 return;
@@ -79,11 +101,27 @@ public class MiningTweaks extends Module {
     }
 
     @SubscribeEvent
+    public void onBlockPlace(PacketEvent event) {
+        if(event.getType() == PacketEvent.PacketType.OUTGOING) {
+            if(modeSetting.getValue() == MiningMode.BYPASS) {
+                if(event.getPacket() instanceof CPacketPlayerTryUseItemOnBlock) {
+                    CPacketPlayerTryUseItemOnBlock p = (CPacketPlayerTryUseItemOnBlock)event.getPacket();
+                    BlockPos placedPos = p.getPos().up();
+                    if(lastBrokenPos != null &&  placedPos.getX() == lastBrokenPos.getX() && placedPos.getY() == lastBrokenPos.getY() && placedPos.getZ() == lastBrokenPos.getZ()) {
+                        popbobTimer.reset();
+                        shit = true;
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        if(mc.player == null || mc.world == null) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
-        if(noBreakAnimation.getValue()) {
+        if (noBreakAnimation.getValue()) {
             if (event.getPacket() instanceof CPacketPlayerDigging) {
                 CPacketPlayerDigging cPacketPlayerDigging = (CPacketPlayerDigging) event.getPacket();
                 if (mc.world.getBlockState(cPacketPlayerDigging.getPosition()).getBlock() == Blocks.PORTAL)
@@ -111,8 +149,8 @@ public class MiningTweaks extends Module {
 
     @Override
     public void onRender3D(Render3DEvent event) {
-        if(renderPacketBlock.getValue() && this.currentPos != null && modeSetting.getValue() == MiningMode.PACKET) {
-            Color color = new Color(this.timer.hasPassed((int)(2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 0 : 255, this.timer.hasPassed((int)(2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 255 : 0, 0, 255);
+        if (renderPacketBlock.getValue() && this.currentPos != null && modeSetting.getValue() == MiningMode.PACKET) {
+            Color color = new Color(this.timer.hasPassed((int)(2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 0 : 255, this.timer.hasPassed((int) (2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 255 : 0, 0, 255);
             RenderUtil.drawBoxESP(this.currentPos, color, 1.0f, true, true, 44);
         }
     }
@@ -158,6 +196,19 @@ public class MiningTweaks extends Module {
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     //mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, event.getPos(), event.getFacing()));
+                    event.setCanceled(true);
+                    break;
+                case BYPASS:
+                    if (this.currentPos == null) {
+                        this.currentPos = event.getPos();
+                        this.currentBlockState = mc.world.getBlockState(this.currentPos);
+                        this.timer.reset();
+                    }
+                    this.lastBrokenBlock = mc.world.getBlockState(currentPos).getBlock();
+                    mc.player.swingArm(EnumHand.MAIN_HAND);
+                    mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), EnumFacing.UP));
+                    mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), EnumFacing.DOWN));
+                    mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(), EnumFacing.UP));
                     event.setCanceled(true);
                     break;
                 case INSTANT:
@@ -237,6 +288,15 @@ public class MiningTweaks extends Module {
         }
     }
 
+    @Override
+    public void onDisable() {
+        blockWasBroken = false;
+        lastBrokenPos = null;
+        lastBrokenBlock = null;
+        shit = false;
+        popbobTimer.reset();
+    }
+
     private void setMiningInfo(BlockPos lastPos, EnumFacing lastFacing) {
         this.lastPos = lastPos;
         this.lastFacing = lastFacing;
@@ -256,6 +316,7 @@ public class MiningTweaks extends Module {
 
     public enum MiningMode {
         PACKET("Packet"),
+        BYPASS("Bypass"),
         NONE("None"),
         INSTANT("Instant"),
         SPEED("Speed");
