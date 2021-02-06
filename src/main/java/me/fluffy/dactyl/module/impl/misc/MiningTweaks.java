@@ -149,7 +149,7 @@ public class MiningTweaks extends Module {
 
     @Override
     public void onRender3D(Render3DEvent event) {
-        if (renderPacketBlock.getValue() && this.currentPos != null && modeSetting.getValue() == MiningMode.PACKET) {
+        if (renderPacketBlock.getValue() && this.currentPos != null && (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
             Color color = new Color(this.timer.hasPassed((int)(2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 0 : 255, this.timer.hasPassed((int) (2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 255 : 0, 0, 255);
             RenderUtil.drawBoxESP(this.currentPos, color, 1.0f, true, true, 44);
         }

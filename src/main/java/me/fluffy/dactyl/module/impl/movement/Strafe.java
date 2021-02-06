@@ -93,7 +93,7 @@ public class Strafe extends Module {
         if(canSprint() && autoSprint.getValue()) {
             mc.player.setSprinting(true);
         }
-        String setModInfo = (skipModeSetting.getValue() != SkipMode.NONE ? "Skips" : "Rapid");
+        String setModInfo = (skipModeSetting.getValue() != SkipMode.NONE ? "Skips" : "Fast");
         if(damageBoost.getValue()) {
             setModInfo = "Boost";
         }
