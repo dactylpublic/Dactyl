@@ -6,6 +6,7 @@ import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.injection.inj.access.IMinecraft;
 import me.fluffy.dactyl.injection.inj.access.ITimer;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.ChatUtil;
 import me.fluffy.dactyl.util.CombatUtil;
@@ -103,6 +104,9 @@ public class Strafe extends Module {
     @SubscribeEvent
     public void onMove(MoveEvent event) {
         if(event.getStage() != ForgeEvent.Stage.PRE) {
+            return;
+        }
+        if(Freecam.INSTANCE.isEnabled()) {
             return;
         }
         if(LongJump.INSTANCE.isEnabled()) {
