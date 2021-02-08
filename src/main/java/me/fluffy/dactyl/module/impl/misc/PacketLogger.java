@@ -9,6 +9,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketVehicleMove;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Level;
@@ -21,7 +22,7 @@ public class PacketLogger extends Module {
     Setting<Boolean> outgoing = new Setting<Boolean>("Outgoing", true);
     Setting<Boolean> chat = new Setting<Boolean>("Chat", true);
     Setting<Boolean> showCancel = new Setting<Boolean>("ShowCancel", true);
-    Setting<Boolean> ignorePosPackets = new Setting<Boolean>("IgnorePos", false, v->outgoing.getValue());
+    Setting<Boolean> ignorePosPackets = new Setting<Boolean>("IgnorePos", false);
     Setting<Boolean> console = new Setting<Boolean>("Logs", true);
     Setting<Boolean> packetData = new Setting<Boolean>("Data", true);
     public PacketLogger() {
@@ -37,6 +38,11 @@ public class PacketLogger extends Module {
     public void onPacket(PacketEvent event) {
         if(event.getType() == PacketEvent.PacketType.INCOMING) {
             if(incoming.getValue()) {
+                if(ignorePosPackets.getValue()) {
+                    if(event.getPacket() instanceof SPacketPlayerPosLook) {
+                        return;
+                    }
+                }
                 if(console.getValue()) {
                     Dactyl.logger.log(Level.INFO, "\2477IN: \247r" + event.getPacket().getClass().getSimpleName() + " {");
                     if (packetData.getValue()) {

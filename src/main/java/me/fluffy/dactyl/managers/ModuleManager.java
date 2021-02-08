@@ -41,10 +41,10 @@ public class ModuleManager {
         modules.add(new AntiInteract());
         modules.add(new Vanish());
         modules.add(new Blink());
-        modules.add(new PacketFly());
         modules.add(new AntiHunger());
         modules.add(new MultiTask());
         modules.add(new HotbarRefill());
+        modules.add(new PacketFly());
 
         // misc
         modules.add(new FakePlayer());
