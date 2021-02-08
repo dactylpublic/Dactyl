@@ -21,6 +21,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.event.PlayerSPPushOutOfBlocksEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -29,7 +30,8 @@ import java.util.concurrent.TimeUnit;
 
 public class PacketFly extends Module {
     public Setting<Mode> mode = new Setting<Mode>("Mode", Mode.FACTOR);
-    public Setting<Integer> tickCount = new Setting<Integer>("Factor", 1, 1, 10, v->mode.getValue().equals(Mode.FACTOR));
+    public Setting<Double> tickCount = new Setting<Double>("Factor", 1d, 1d, 10d, v->mode.getValue().equals(Mode.FACTOR));
+    public Setting<Integer> factorAddition = new Setting<Integer>("Addition", 0, 0, 5, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
@@ -39,6 +41,7 @@ public class PacketFly extends Module {
 
     private int packetCounter = 0;
     private int currentTeleportId = 0;
+    private int bypassCounter = 0;
     private final Map<Integer, TimeVec3d> posLooks = new ConcurrentHashMap<Integer, TimeVec3d>();
     private final Set<CPacketPlayer> playerPackets = new ConcurrentSet<>();
 
@@ -51,6 +54,9 @@ public class PacketFly extends Module {
     public void onUpdateWalking(EventUpdateWalkingPlayer event) {
         if(mc.player == null || mc.world == null) {
             return;
+        }
+        if(bypassCounter >= 10) {
+            bypassCounter = 0;
         }
         this.setModuleInfo(mode.getValue().toString());
         double ySpeed;
@@ -84,11 +90,25 @@ public class PacketFly extends Module {
             ySpeed /= 2.5;
         }
         double[] dirSpeed = getSpeed(phaseSetting.getValue().equals(PhaseMode.FULL) && isPhasing ? 0.031 : 0.26);
-        for (int i = 1; i <= (mode.getValue() == Mode.FACTOR ? tickCount.getValue() : 1); ++i) {
-            mc.player.motionX = dirSpeed[0] * (double) i;
-            mc.player.motionY = ySpeed * (double) i;
-            mc.player.motionZ = dirSpeed[1] * (double) i;
-            sendPackets(mc.player.motionX, mc.player.motionY, mc.player.motionZ, !mode.getValue().equals(Mode.SETBACK));
+        bypassCounter++;
+        if(mode.getValue().equals(Mode.FACTOR)) {
+            BigDecimal bigDecimal = BigDecimal.valueOf(tickCount.getValue());
+            int intPart = bigDecimal.intValue();
+            int timesTicks = (int) ((tickCount.getValue()-intPart)*10);
+            int factorTicks = (bypassCounter <= timesTicks ? ((int)Math.ceil(tickCount.getValue().doubleValue())) : ((int)(tickCount.getValue().doubleValue())));
+            for (int i = 1; i <= factorTicks+factorAddition.getValue(); ++i) {
+                mc.player.motionX = dirSpeed[0] * (double) i;
+                mc.player.motionY = ySpeed * (double) i;
+                mc.player.motionZ = dirSpeed[1] * (double) i;
+                sendPackets(mc.player.motionX, mc.player.motionY, mc.player.motionZ, !mode.getValue().equals(Mode.SETBACK));
+            }
+        } else {
+            for (int i = 1; i <= 1; ++i) {
+                mc.player.motionX = dirSpeed[0] * (double) i;
+                mc.player.motionY = ySpeed * (double) i;
+                mc.player.motionZ = dirSpeed[1] * (double) i;
+                sendPackets(mc.player.motionX, mc.player.motionY, mc.player.motionZ, !mode.getValue().equals(Mode.SETBACK));
+            }
         }
     }
 
@@ -184,6 +204,7 @@ public class PacketFly extends Module {
 
     private void clearValues() {
         this.packetCounter = 0;
+        this.bypassCounter = 0;
         this.currentTeleportId = 0;
         this.playerPackets.clear();
         this.posLooks.clear();
