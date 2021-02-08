@@ -34,7 +34,7 @@ public class PacketFly extends Module {
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
     public PacketFly() {
-        super("PacketFlyR", Category.PLAYER);
+        super("PacketFly", Category.PLAYER);
     }
 
     private int packetCounter = 0;
