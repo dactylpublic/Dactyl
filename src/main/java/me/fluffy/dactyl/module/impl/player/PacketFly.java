@@ -30,8 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PacketFly extends Module {
     public Setting<Mode> mode = new Setting<Mode>("Mode", Mode.FACTOR);
-    public Setting<Double> tickCountFly = new Setting<Double>("FlyFactor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
-    public Setting<Double> tickCountPhase = new Setting<Double>("PhaseFactor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
+    public Setting<Double> tickCountFly = new Setting<Double>("Factor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
@@ -92,7 +91,8 @@ public class PacketFly extends Module {
         double[] dirSpeed = getSpeed(phaseSetting.getValue().equals(PhaseMode.FULL) && isPhasing ? 0.031 : 0.26);
         bypassCounter++;
         if(mode.getValue().equals(Mode.FACTOR)) {
-            double currentFlyingFactor = (isPhasing ? tickCountPhase.getValue() : tickCountFly.getValue());
+            //double currentFlyingFactor = (isPhasing ? tickCountPhase.getValue() : tickCountFly.getValue());
+            double currentFlyingFactor = tickCountFly.getValue();
             BigDecimal bigDecimal = BigDecimal.valueOf(currentFlyingFactor);
             int intPart = bigDecimal.intValue();
             int timesTicks = (int) ((currentFlyingFactor-intPart)*10);
