@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 
 public class PacketFly extends Module {
     public Setting<Mode> mode = new Setting<Mode>("Mode", Mode.FACTOR);
-    public Setting<Double> tickCount = new Setting<Double>("Factor", 1d, 1d, 10d, v->mode.getValue().equals(Mode.FACTOR));
-    public Setting<Integer> factorAddition = new Setting<Integer>("Addition", 0, 0, 5, v->mode.getValue().equals(Mode.FACTOR));
+    public Setting<Double> tickCountFly = new Setting<Double>("FlyFactor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
+    public Setting<Double> tickCountPhase = new Setting<Double>("PhaseFactor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
@@ -92,11 +92,12 @@ public class PacketFly extends Module {
         double[] dirSpeed = getSpeed(phaseSetting.getValue().equals(PhaseMode.FULL) && isPhasing ? 0.031 : 0.26);
         bypassCounter++;
         if(mode.getValue().equals(Mode.FACTOR)) {
-            BigDecimal bigDecimal = BigDecimal.valueOf(tickCount.getValue());
+            double currentFlyingFactor = (isPhasing ? tickCountPhase.getValue() : tickCountFly.getValue());
+            BigDecimal bigDecimal = BigDecimal.valueOf(currentFlyingFactor);
             int intPart = bigDecimal.intValue();
-            int timesTicks = (int) ((tickCount.getValue()-intPart)*10);
-            int factorTicks = (bypassCounter <= timesTicks ? ((int)Math.ceil(tickCount.getValue().doubleValue())) : ((int)(tickCount.getValue().doubleValue())));
-            for (int i = 1; i <= factorTicks+factorAddition.getValue(); ++i) {
+            int timesTicks = (int) ((currentFlyingFactor-intPart)*10);
+            int factorTicks = (bypassCounter <= timesTicks ? ((int)Math.ceil(currentFlyingFactor)) : ((int)(currentFlyingFactor)));
+            for (int i = 1; i <= factorTicks; ++i) {
                 mc.player.motionX = dirSpeed[0] * (double) i;
                 mc.player.motionY = ySpeed * (double) i;
                 mc.player.motionZ = dirSpeed[1] * (double) i;
@@ -306,10 +307,18 @@ public class PacketFly extends Module {
     }
 
     public enum Type {
-        UP,
-        DOWN,
-        PRESERVE,
-        LIMITJITTER
+        UP("Up"),
+        DOWN("Down"),
+        PRESERVE("Preserve"),
+        LIMITJITTER("LimitJitter");
+        private final String name;
+        private Type(String name) {
+            this.name = name;
+        }
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 
     public enum PhaseMode {
