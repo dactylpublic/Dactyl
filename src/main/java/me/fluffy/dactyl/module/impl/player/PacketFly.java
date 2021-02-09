@@ -262,7 +262,7 @@ public class PacketFly extends Module {
                     }
                     return -n;
                 case LIMITJITTER:
-                    int j = rand.nextInt(70) + 22;
+                    int j = rand.nextInt(22) + 70;
                     if(rand.nextBoolean()) {
                         return j;
                     }
