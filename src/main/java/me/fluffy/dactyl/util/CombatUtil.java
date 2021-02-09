@@ -817,9 +817,15 @@ public class CombatUtil {
     }
 
     public static boolean placePosStillSatisfies(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
+        if(blockPos == null) {
+            return false;
+        }
         final List<Entity> playerEntities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         EntityPlayer satisfiedTarget = null;
         for (Entity entity : playerEntities) {
+            if(entity == null) {
+                continue;
+            }
             if(mc.player.getDistance(entity) > enemyRange) {
                 continue;
             }
