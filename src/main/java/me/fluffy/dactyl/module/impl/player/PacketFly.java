@@ -261,6 +261,12 @@ public class PacketFly extends Module {
                         return n;
                     }
                     return -n;
+                case LIMITJITTER:
+                    int j = rand.nextInt(70) + 22;
+                    if(rand.nextBoolean()) {
+                        return j;
+                    }
+                    return -j;
             }
             return 0.0D;
         }
@@ -302,7 +308,8 @@ public class PacketFly extends Module {
     public enum Type {
         UP,
         DOWN,
-        PRESERVE
+        PRESERVE,
+        LIMITJITTER
     }
 
     public enum PhaseMode {
