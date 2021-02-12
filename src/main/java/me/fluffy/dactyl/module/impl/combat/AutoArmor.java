@@ -74,18 +74,20 @@ public class AutoArmor extends Module {
         }
 
         if(bestSlot != -1) {
-            if(timer.hasPassed(delay.getValue())) {
-                if (lessPackets.getValue()) {
-                    mc.playerController.windowClick(0, getSlotByType(armorType), 0, ClickType.QUICK_MOVE, mc.player);
-                } else {
-                    if (getSlotByType(armorType) != -1) {
-                        mc.playerController.windowClick(0, getSlotByType(armorType), 0, ClickType.PICKUP, mc.player);
-                        mc.playerController.windowClick(0, bestSlot, 0, ClickType.PICKUP, mc.player);
-                        mc.playerController.windowClick(0, getSlotByType(armorType), 0, ClickType.PICKUP, mc.player);
-                        mc.playerController.updateController();
+            if(armorType != null) {
+                if (timer.hasPassed(delay.getValue())) {
+                    if (lessPackets.getValue()) {
+                        mc.playerController.windowClick(0, getSlotByType(armorType), 0, ClickType.QUICK_MOVE, mc.player);
+                    } else {
+                        if (getSlotByType(armorType) != -1) {
+                            mc.playerController.windowClick(0, getSlotByType(armorType), 0, ClickType.PICKUP, mc.player);
+                            mc.playerController.windowClick(0, bestSlot, 0, ClickType.PICKUP, mc.player);
+                            mc.playerController.windowClick(0, getSlotByType(armorType), 0, ClickType.PICKUP, mc.player);
+                            mc.playerController.updateController();
+                        }
                     }
+                    timer.reset();
                 }
-                timer.reset();
             }
         }
     }
