@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.module.impl.combat;
 
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.movement.Strafe;
 import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
@@ -21,6 +22,7 @@ public class Surround extends Module {
     public Setting<Boolean> echestPriority = new Setting<Boolean>("EChestPrio", true);
     public Setting<Boolean> autoCenter = new Setting<Boolean>("AutoCenter", true);
     public Setting<Boolean> jumpDisable = new Setting<Boolean>("JumpDisable", true);
+    public Setting<Boolean> strafeDisable = new Setting<Boolean>("StrafeDisable", true);
     public Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", false);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
@@ -67,9 +69,17 @@ public class Surround extends Module {
 
         this.setModuleInfo(HoleUtil.isInHole() ? TextFormatting.GREEN + "Safe" : TextFormatting.RED + "Unsafe");
 
+            if(Strafe.INSTANCE.isEnabled()) {
+                if (mc.player.moveForward != 0.0F || mc.player.moveStrafing != 0.0F) {
+                    this.toggle();
+                    return;
+                }
+            }
+        }
         if(jumpDisable.getValue()) {
             if(mc.player.movementInput.jump) {
                 this.toggle();
+                return;
             }
         }
 
