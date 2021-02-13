@@ -44,6 +44,7 @@ public class ESP extends Module {
     public Setting<Boolean> pearlFill = new Setting<Boolean>("PearlFill", false, v->pearls.getValue());
     public Setting<Boolean> xpBottles = new Setting<Boolean>("XPBottles", true);
     public Setting<Boolean> xpFill = new Setting<Boolean>("XPFill", false, v->xpBottles.getValue());
+    public Setting<Boolean> colorSyncPlayer = new Setting<Boolean>("SyncPlayer", true, v->players.getValue());
     public Setting<Double> lineWidth = new Setting<Double>("Width", 1.0d, 0.1d, 3.0d);
 
     public static ESP INSTANCE;
@@ -246,6 +247,9 @@ public class ESP extends Module {
 
     private Color getColorOfEntity(Entity entity) {
         if(entity instanceof EntityPlayer) {
+            if(colorSyncPlayer.getValue()) {
+                return Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false));
+            }
             if(Dactyl.friendManager.isFriend(((EntityPlayer)entity).getName())) {
                 return new Color(85, 255, 255);
             } else {

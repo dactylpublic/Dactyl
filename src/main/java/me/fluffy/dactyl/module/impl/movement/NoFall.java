@@ -23,16 +23,16 @@ public class NoFall extends Module {
             CPacketPlayer packet = (CPacketPlayer)event.getPacket();
             switch(modeSetting.getValue()) {
                 case PACKET:
-                    ((ICPacketPlayer)packet).setOnGround(true);
+                    packet.onGround = true;
                     break;
                 case FUTURE:
-                    ((ICPacketPlayer)packet).setY(mc.player.posY + 0.1d);
+                    packet.y = (mc.player.posY + 0.1d);
                     break;
                 case PEDRO:
                     mc.player.onGround = true;
                     mc.player.capabilities.isFlying = true;
                     mc.player.capabilities.allowFlying = true;
-                    ((ICPacketPlayer)packet).setOnGround(false);
+                    packet.onGround = false;
                     mc.player.velocityChanged = true;
                     mc.player.capabilities.isFlying = false;
                     mc.player.jump();
