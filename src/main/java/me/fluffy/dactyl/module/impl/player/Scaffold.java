@@ -4,10 +4,12 @@ import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.ChatUtil;
 import me.fluffy.dactyl.util.PlaceUtil;
 import me.fluffy.dactyl.util.RotationUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
@@ -91,7 +93,8 @@ public class Scaffold extends Module {
             }
             BlockPos blockBelow = new BlockPos(x, y - downDistance, z);
             this.pos = blockBelow;
-            if (mc.world.getBlockState(blockBelow).getBlock() == Blocks.AIR) {
+            if (mc.world.getBlockState(blockBelow).getBlock() == Blocks.AIR || (mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.WATER) || mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.FLOWING_WATER) || mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.LAVA) || mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.FLOWING_LAVA))) {
+                ChatUtil.printMsg("can place", true, false);
                 this.blockData = getBlockData2(blockBelow);
                 if (this.blockData != null) {
                     float yaw1 = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[0];

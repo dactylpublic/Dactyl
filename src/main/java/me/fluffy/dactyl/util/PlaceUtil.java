@@ -21,7 +21,7 @@ import java.util.List;
 public class PlaceUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
-    public static final List<Block> invalid = Arrays.asList(Blocks.ANVIL, Blocks.AIR, (Block)Blocks.FIRE, (Block)Blocks.CHEST, Blocks.ENCHANTING_TABLE, Blocks.TRAPPED_CHEST,
+    public static final List<Block> invalid = Arrays.asList(Blocks.WATER, Blocks.FLOWING_WATER, Blocks.LAVA, Blocks.FLOWING_LAVA, Blocks.ANVIL, Blocks.AIR, (Block)Blocks.FIRE, (Block)Blocks.CHEST, Blocks.ENCHANTING_TABLE, Blocks.TRAPPED_CHEST,
             Blocks.ENDER_CHEST, Blocks.GRAVEL, Blocks.LADDER, Blocks.VINE, (Block)Blocks.BEACON, Blocks.JUKEBOX, (Block)Blocks.ACACIA_DOOR, (Block)Blocks.BIRCH_DOOR, (Block)Blocks.DARK_OAK_DOOR, (Block)Blocks.IRON_DOOR,
             (Block)Blocks.JUNGLE_DOOR, (Block)Blocks.OAK_DOOR, (Block)Blocks.SPRUCE_DOOR, Blocks.IRON_TRAPDOOR, Blocks.TRAPDOOR, Blocks.BLACK_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX, Blocks.BROWN_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX,
             Blocks.GREEN_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.SILVER_SHULKER_BOX, Blocks.WHITE_SHULKER_BOX,
@@ -65,7 +65,7 @@ public class PlaceUtil {
     }
 
     public static boolean canPlace(Block block) {
-        return ((block instanceof net.minecraft.block.BlockAir || block instanceof BlockLiquid) && mc.world != null && mc.player != null && Scaffold.INSTANCE.pos != null && mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(Scaffold.INSTANCE.pos)).isEmpty());
+        return ((block instanceof net.minecraft.block.BlockAir || (block.equals(Blocks.WATER) || block.equals(Blocks.FLOWING_WATER) || block.equals(Blocks.LAVA) || block.equals(Blocks.FLOWING_LAVA))) && mc.world != null && mc.player != null && Scaffold.INSTANCE.pos != null && mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(Scaffold.INSTANCE.pos)).isEmpty());
     }
 
     public static int getBlockCountHotbar() {
