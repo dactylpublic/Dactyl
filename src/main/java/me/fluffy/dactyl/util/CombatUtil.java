@@ -473,6 +473,18 @@ public class CombatUtil {
         return slot;
     }
 
+    public static int findShulkerInHotbar() {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack != ItemStack.EMPTY && stack.getItem() instanceof ItemShulkerBox) {
+                slot = i;
+                break;
+            }
+        }
+        return slot;
+    }
+
     public static int findItemInHotbar(Item it) {
         int slot = -1;
         for (int i = 0; i < 9; i++) {
