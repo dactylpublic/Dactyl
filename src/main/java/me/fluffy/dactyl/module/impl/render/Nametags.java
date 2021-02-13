@@ -43,6 +43,7 @@ public class Nametags extends Module {
     Setting<Boolean> durability = new Setting<Boolean>("Durability", true);
     Setting<Boolean> itemName = new Setting<Boolean>("ItemName", true);
     Setting<Boolean> totemPops = new Setting<Boolean>("TotemPops", true);
+    Setting<Boolean> shortEnchants = new Setting<Boolean>("Enchants", true);
     Setting<Integer> scaling = new Setting<Integer>("Scaling", 3, 1, 5);
     Setting<Boolean> border = new Setting<Boolean>("Border", true);
     Setting<Double> borderWidth = new Setting<Double>("BorderWidth", 1.0d, 0.1d, 3.0d, v->border.getValue());
@@ -284,6 +285,9 @@ public class Nametags extends Module {
                 }
             }
         }
+        if(!shortEnchants.getValue()) {
+            biggestEncCount = 1;
+        }
         return biggestEncCount*8;
     }
 
@@ -356,6 +360,9 @@ public class Nametags extends Module {
                 int armorBarPercent = (int)Math.min(armorPercent, 999.0f);
                 Dactyl.fontUtil.drawStringWithShadow(String.valueOf(armorBarPercent)+"%", x * 2, y - 10, stack.getItem().getRGBDurabilityForDisplay(stack));
             }
+        }
+        if(!shortEnchants.getValue()) {
+            return;
         }
 
         if(stack.getItem() != null && !(stack.getItem() instanceof ItemAir)) {
