@@ -51,11 +51,20 @@ public class NumberElement extends SettingElement {
         float percent = ((float)mouseX - this.getX()) / ((float)100);
         if (this.getSetting().getValue() instanceof Double) {
             double result = (Double)this.getSetting().getMinimum() + (double)((float)this.difference * percent);
+            if((((double)Math.round(10.0f * result) / 10.0f)) > ((Number)getSetting().getMaximum()).doubleValue()) {
+                return;
+            }
             this.getSetting().setValue((double)Math.round(10.0 * result) / 10.0);
         } else if (this.getSetting().getValue() instanceof Float) {
             float result = ((Float)this.getSetting().getMinimum()).floatValue() + (float)this.difference * percent;
+            if((Float.valueOf((float)Math.round(10.0f * result) / 10.0f)) > ((Number)getSetting().getMaximum()).floatValue()) {
+                return;
+            }
             this.getSetting().setValue(Float.valueOf((float)Math.round(10.0f * result) / 10.0f));
         } else if (this.getSetting().getValue() instanceof Integer) {
+            if((Integer)this.getSetting().getMinimum() + (int)((float)this.difference * percent) > ((Number)this.getSetting().getMaximum()).intValue()) {
+                return;
+            }
             this.getSetting().setValue((Integer)this.getSetting().getMinimum() + (int)((float)this.difference * percent));
         }
         /*double diff = Math.min(100, Math.max(0, mouseX - this.getX()));
