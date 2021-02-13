@@ -11,4 +11,10 @@ public interface ICPacketPlayer {
 
     @Accessor("pitch")
     public void setPitch(float pitch);
+
+    @Accessor("onGround")
+    public void setOnGround(boolean onGround);
+
+    @Accessor("y")
+    public void setY(double y);
 }

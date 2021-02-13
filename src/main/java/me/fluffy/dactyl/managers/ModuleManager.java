@@ -79,6 +79,7 @@ public class ModuleManager {
         modules.add(new AntiLevitation());
         modules.add(new AutoPearl());
         modules.add(new Flight());
+        modules.add(new NoFall());
 
         // render
         modules.add(new HoleESP());
