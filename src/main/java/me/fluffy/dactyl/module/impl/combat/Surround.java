@@ -68,7 +68,7 @@ public class Surround extends Module {
         }
 
         this.setModuleInfo(HoleUtil.isInHole() ? TextFormatting.GREEN + "Safe" : TextFormatting.RED + "Unsafe");
-
+        if(strafeDisable.getValue()) {
             if(Strafe.INSTANCE.isEnabled()) {
                 if (mc.player.moveForward != 0.0F || mc.player.moveStrafing != 0.0F) {
                     this.toggle();
