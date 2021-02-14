@@ -154,7 +154,7 @@ public class HoleFill extends Module {
             if(ent.getDistanceSq(pos) > enemyRange.getValue()) {
                 continue;
             }
-            p = null;
+            p = (EntityPlayer) ent;
         }
 
         if(p == null && smart.getValue()) {
