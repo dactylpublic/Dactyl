@@ -44,13 +44,13 @@ public class ModuleManager {
         modules.add(new AntiHunger());
         modules.add(new MultiTask());
         modules.add(new HotbarRefill());
+        modules.add(new PingSpoof());
         modules.add(new PacketFly());
 
         // misc
         modules.add(new FakePlayer());
         modules.add(new MCF());
         modules.add(new PortalGodMode());
-        modules.add(new PingSpoof());
         modules.add(new AutoReconnect());
         modules.add(new MiningTweaks());
         modules.add(new AutoRespawn());
