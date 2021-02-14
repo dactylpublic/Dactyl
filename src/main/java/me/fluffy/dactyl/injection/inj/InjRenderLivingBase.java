@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.injection.inj;
 
+import me.fluffy.dactyl.module.impl.render.Chams;
 import me.fluffy.dactyl.module.impl.render.ESP;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
@@ -19,6 +20,11 @@ public abstract class InjRenderLivingBase<T extends EntityLivingBase> extends Re
 
     @Redirect(method = "renderModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelBase;render(Lnet/minecraft/entity/Entity;FFFFFF)V"))
     private void onRenderModel(ModelBase modelBase, Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+        if(Chams.INSTANCE.isEnabled()) {
+            if (Chams.INSTANCE.onRenderEntity(modelBase, entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale)) {
+                return;
+            }
+        }
         if (ESP.INSTANCE.isEnabled()) {
             if (ESP.INSTANCE.onRenderEntity(modelBase, entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale)) {
                 return;

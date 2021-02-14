@@ -1,7 +1,18 @@
 package me.fluffy.dactyl.module.impl.render;
 
+import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.EntityUtil;
+import me.fluffy.dactyl.util.render.OutlineUtils;
+import me.fluffy.dactyl.util.render.RenderUtil;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+
+import java.awt.*;
 
 public class Chams extends Module {
     public Setting<ChamsPage> page = new Setting<ChamsPage>("Setting", ChamsPage.CRYSTALS);
@@ -16,10 +27,90 @@ public class Chams extends Module {
     public Setting<Integer> crystalFillOpacity = new Setting<Integer>("FillAlpha", 100, 1, 255, v->page.getValue() == ChamsPage.CRYSTALS&&crystalESPMode.getValue() == CrystalMode.WIREFRAME&&crystalChamFill.getValue());
     public Setting<Boolean> crystalColorSync = new Setting<Boolean>("CrystalCSync", true, v->page.getValue() == ChamsPage.CRYSTALS);
 
+    // players
+    public Setting<Boolean> renderEntity = new Setting<Boolean>("RenderEntity", false, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> entityExtraOutline = new Setting<Boolean>("ExtraOutline", false, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> players = new Setting<Boolean>("Players", true, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> monsters = new Setting<Boolean>("Monsters", true, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> animals = new Setting<Boolean>("Animals", false, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> invisibles = new Setting<Boolean>("Invisibles", true, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> selfESP = new Setting<Boolean>("Self", false, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Integer> entityFillOutline = new Setting<Integer>("FillAlpha", 100, 1, 255, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> colorSyncPlayer = new Setting<Boolean>("SyncAll", true, v->page.getValue() == ChamsPage.OTHER);
+
     public static Chams INSTANCE;
     public Chams() {
         super("Chams", Category.RENDER);
         INSTANCE = this;
+    }
+
+    public boolean onRenderEntity(ModelBase modelBase, Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+        if(!passesSettingsCheck(entityIn)) {
+            return false;
+        }
+        if(!RenderUtil.isInView(entityIn)) {
+            return false;
+        }
+        boolean fancyGraphics = mc.gameSettings.fancyGraphics;
+        mc.gameSettings.fancyGraphics = false;
+        if(renderEntity.getValue()) {
+            modelBase.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+        }
+        float gamma = mc.gameSettings.gammaSetting;
+        mc.gameSettings.gammaSetting = 10000.0F;
+        Color entityESPColor = getColorOfEntity(entityIn);
+        if(entityExtraOutline.getValue()) {
+            RenderUtil.renderWireFrame(entityESPColor, lineWidth.getValue().floatValue(), modelBase, entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, 0.0f);
+        }
+        RenderUtil.renderWireFrameFill(entityESPColor, entityFillOutline.getValue(), lineWidth.getValue().floatValue(), modelBase, entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, 0.0f);
+        try {
+            mc.gameSettings.fancyGraphics = fancyGraphics;
+            mc.gameSettings.gammaSetting = gamma;
+        } catch (Exception exception) {}
+        return true;
+    }
+
+    private boolean passesSettingsCheck(Entity entity) {
+        boolean doesPass = true;
+        if(entity == null) {
+            doesPass = false;
+        }
+        if(entity.isInvisible() && !invisibles.getValue()) {
+            doesPass = false;
+        }
+        if(entity.equals(mc.player) && !selfESP.getValue()) {
+            doesPass = false;
+        }
+        if(entity instanceof EntityPlayer && !players.getValue()) {
+            doesPass = false;
+        }
+        if(EntityUtil.isPassiveEntity(entity) && !animals.getValue()) {
+            doesPass = false;
+        }
+        if(!EntityUtil.isPassiveEntity(entity) && !(entity instanceof EntityPlayer) && !monsters.getValue()) {
+            doesPass = false;
+        }
+        return doesPass;
+    }
+
+    private Color getColorOfEntity(Entity entity) {
+        if(colorSyncPlayer.getValue()) {
+            return Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false));
+        }
+        if(entity instanceof EntityPlayer) {
+            if(Dactyl.friendManager.isFriend(((EntityPlayer)entity).getName())) {
+                return new Color(85, 255, 255);
+            } else {
+                return new Color(255, 85, 85);
+            }
+        }
+        if(EntityUtil.isPassiveEntity(entity)) {
+            return new Color(85, 255, 85, 255);
+        }
+        if(!EntityUtil.isPassiveEntity(entity) && !(entity instanceof EntityPlayer)) {
+            return new Color(255, 85, 85);
+        }
+        return new Color(85, 255, 85, 255);
     }
 
     public enum CrystalMode {
@@ -29,7 +120,7 @@ public class Chams extends Module {
 
 
     public enum ChamsPage {
-        PLAYERS,
+        OTHER,
         CRYSTALS
     }
 }

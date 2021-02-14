@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.util.render;
 
 import me.fluffy.dactyl.Dactyl;
+import me.fluffy.dactyl.injection.inj.InjRenderEnderCrystal;
 import me.fluffy.dactyl.injection.inj.access.IRenderManager;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
@@ -20,6 +21,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -182,6 +185,25 @@ public class RenderUtil {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glTranslatef(offset, offset, offset);
         GlStateManager.color(espColor.getRed() / 255f, espColor.getGreen() / 255f, espColor.getBlue() / 255f, espColor.getAlpha() / 255f);
+        GlStateManager.glLineWidth(width);
+        modelBase.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+        GlStateManager.resetColor();
+        GL11.glPopAttrib();
+        GL11.glPopMatrix();
+    }
+
+    public static void renderWireFrameFill(Color espColor, int alpha, float width, ModelBase modelBase, Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale, float offset) {
+        GL11.glPushMatrix();
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glTranslatef(offset, offset, offset);
+        GlStateManager.color(espColor.getRed() / 255f, espColor.getGreen() / 255f, espColor.getBlue() / 255f, alpha / 255f);
         GlStateManager.glLineWidth(width);
         modelBase.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
         GlStateManager.resetColor();
