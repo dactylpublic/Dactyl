@@ -19,6 +19,7 @@ public class CommandManager {
         commandList.add(new XRayCommand());
         commandList.add(new IgnoreCommand());
         commandList.add(new PluginsCommand());
+        commandList.add(new SpammerCommand());
     }
 
     public List<Command> getCommandList() {

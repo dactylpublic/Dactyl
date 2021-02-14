@@ -121,6 +121,10 @@ public class Configuration {
         if(!dirFile.exists()) {
             dirFile.mkdir();
         }
+        File spammerDir = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"spammer");
+        if(!spammerDir.exists()) {
+            spammerDir.mkdir();
+        }
         ConfigUtil.createDirsIfNotExists(new String[] {"config", "config"+File.separator+(isMainConfig ? "Loaded Config" : configName)});
         for(Module mod : Dactyl.moduleManager.getModules()) {
             ConfigUtil.createDirIfNotExistsRaw(File.separator+"config"+File.separator+(isMainConfig ? "Loaded Config" : configName)+File.separator+mod.getCategory().toString()+File.separator);
