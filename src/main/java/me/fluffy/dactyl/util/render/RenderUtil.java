@@ -146,7 +146,8 @@ public class RenderUtil {
         glBillboardDistanceScaled(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, Minecraft.getMinecraft().player, 1.0f);
         GlStateManager.disableDepth();
         GlStateManager.translate(-(Dactyl.fontUtil.getStringWidth(text) / 2.0), 0.0, 0.0);
-        Dactyl.fontUtil.drawStringWithShadow(text, 0, 0, -5592406);
+        //Dactyl.fontUtil.drawStringWithShadow(text, 0, 0, -5592406);
+        Dactyl.fontUtil.drawStringWithShadow(text, 0, 0, 0xffffffff);
         GlStateManager.popMatrix();
     }
 
