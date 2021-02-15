@@ -54,9 +54,20 @@ public class Configuration {
                                         }
                                     }
                                 }
-                            } else {
+                            } else if(setting.getValue() instanceof Integer) {
+                                mod.getSetting(pathEntry.getKey()).setValue(Integer.valueOf(String.valueOf(pathEntry.getValue())));
+                            } else if(setting.getValue() instanceof Double) {
+                                mod.getSetting(pathEntry.getKey()).setValue(Double.valueOf(String.valueOf(pathEntry.getValue())));
+                            } else if(setting.getValue() instanceof Float) {
+                                mod.getSetting(pathEntry.getKey()).setValue(Float.valueOf(String.valueOf(pathEntry.getValue())));
+                            } else if(setting.getValue() instanceof Boolean) {
+                                mod.getSetting(pathEntry.getKey()).setValue(Boolean.valueOf(String.valueOf(pathEntry.getValue())));
+                            } else if(setting.getValue() instanceof String) {
                                 mod.getSetting(pathEntry.getKey()).setValue(pathEntry.getValue());
                             }
+                            //else {
+                            //    mod.getSetting(pathEntry.getKey()).setValue(pathEntry.getValue());
+                            //}
                         }
                         if (pathEntry.getKey().equalsIgnoreCase("Enabled")) {
                             if (mod.isEnabled() != Boolean.parseBoolean(String.valueOf(pathEntry.getValue()))) {
