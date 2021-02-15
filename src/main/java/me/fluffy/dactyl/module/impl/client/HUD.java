@@ -15,6 +15,7 @@ import me.fluffy.dactyl.util.TimeUtil;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Items;
@@ -42,6 +43,7 @@ public class HUD extends Module {
     public Setting<Boolean> speed = new Setting<Boolean>("Speed", true, v->renderHud.getValue());
     public Setting<Boolean> ping = new Setting<Boolean>("Ping", true, v->renderHud.getValue());
     public Setting<Boolean> clock = new Setting<Boolean>("Clock", true, v->renderHud.getValue());
+    public Setting<Boolean> playerCount = new Setting<Boolean>("PlayerCount", false, v->renderHud.getValue());
     public Setting<Boolean> grayColor = new Setting<Boolean>("GrayColor", false, v->renderHud.getValue());
     public Setting<Boolean> direction = new Setting<Boolean>("Direction", true, v->renderHud.getValue());
     public Setting<Boolean> coords = new Setting<Boolean>("Coords", true, v->renderHud.getValue());
@@ -315,6 +317,20 @@ public class HUD extends Module {
             } else {
                 String textGrayTime = ChatFormatting.GRAY + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "")+String.valueOf(mins) + (isAfternoon ? "pm" : "am");
                 normal.add(new TextElement(textGrayTime, 0xffffffff, false));
+            }
+        }
+
+        if(playerCount.getValue()) {
+            int count = 0;
+            if(mc.player == null || mc.player.connection == null || mc.player.connection.getPlayerInfoMap() == null || mc.isSingleplayer()) {
+                count = 1;
+            } else {
+                count = mc.player.connection.getPlayerInfoMap().size();
+            }
+            if(!grayColor.getValue()) {
+                normal.add(new TextElement(TextFormatting.RESET + "Players " + TextFormatting.WHITE + String.valueOf(count), 0xffffffff, false));
+            } else {
+                normal.add(new TextElement(TextFormatting.GRAY + "Players " + TextFormatting.WHITE + String.valueOf(count), 0xffffffff, false));
             }
         }
 

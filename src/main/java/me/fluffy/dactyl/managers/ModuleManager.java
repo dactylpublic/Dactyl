@@ -60,6 +60,7 @@ public class ModuleManager {
         modules.add(new PacketLogger());
         modules.add(new AutoDupe());
         modules.add(new Spammer());
+        modules.add(new ExtraTab());
 
         // movement
         modules.add(new Strafe());

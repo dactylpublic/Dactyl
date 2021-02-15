@@ -20,6 +20,7 @@ public class CommandManager {
         commandList.add(new IgnoreCommand());
         commandList.add(new PluginsCommand());
         commandList.add(new SpammerCommand());
+        commandList.add(new GrabCommand());
     }
 
     public List<Command> getCommandList() {

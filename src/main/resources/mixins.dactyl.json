@@ -18,6 +18,7 @@
     "InjGuiChat",
     "InjGuiIngame",
     "InjGuiNewChat",
+    "InjGuiPlayerTabOverlay",
     "InjGuiScreen",
     "InjItemRenderer",
     "InjLayerArmorBase",
