@@ -46,6 +46,7 @@ public class ModuleManager {
         modules.add(new HotbarRefill());
         modules.add(new PingSpoof());
         modules.add(new PacketFly());
+        modules.add(new AutoDupe());
 
         // misc
         modules.add(new FakePlayer());
@@ -58,9 +59,9 @@ public class ModuleManager {
         modules.add(new TimerModule());
         modules.add(new Notifications());
         modules.add(new PacketLogger());
-        modules.add(new AutoDupe());
         modules.add(new Spammer());
         modules.add(new ExtraTab());
+        modules.add(new Locator());
 
         // movement
         modules.add(new Strafe());

@@ -1,4 +1,4 @@
-package me.fluffy.dactyl.module.impl.misc;
+package me.fluffy.dactyl.module.impl.player;
 
 import me.fluffy.dactyl.injection.inj.access.IKeyBinding;
 import me.fluffy.dactyl.module.Module;
@@ -31,7 +31,7 @@ public class AutoDupe extends Module {
     public Setting<Double> mountDelay = new Setting<Double>("MountDelay", 0.5d, 0.1d, 5d, "How long to wait for mount after dropping");
     public Setting<Double> delay = new Setting<Double>("DupeDelay", 1d, 0.1d, 5d, "Delay per dupe (in seconds)");
     public AutoDupe() {
-        super("AutoDupe", Category.MISC, "Best AutoDupe in the wild wild west");
+        super("AutoDupe", Category.PLAYER, "Best AutoDupe in the wild wild west");
     }
     private final TimeUtil delayTimer = new TimeUtil();
     private final TimeUtil startDropTimer = new TimeUtil();
