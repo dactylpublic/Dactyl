@@ -148,10 +148,10 @@ public class HoleFill extends Module {
         List<Entity> playerEntities = new ArrayList<>(mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         EntityPlayer p = null;
         for(Entity ent : playerEntities) {
-            if(mc.player.getDistance(ent) >= 30.0d) {
+            if(mc.player.getDistance(ent) >= 20.0d) {
                 continue;
             }
-            if(ent.getDistanceSq(pos) > enemyRange.getValue()) {
+            if(ent.getDistanceSq(pos) > (enemyRange.getValue()*enemyRange.getValue())) {
                 continue;
             }
             p = (EntityPlayer) ent;
