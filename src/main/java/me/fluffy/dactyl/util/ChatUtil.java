@@ -3,6 +3,7 @@ package me.fluffy.dactyl.util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

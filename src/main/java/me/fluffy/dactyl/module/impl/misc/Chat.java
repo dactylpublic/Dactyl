@@ -18,6 +18,7 @@ public class Chat extends Module {
     public Setting<Boolean> noBorder = new Setting<Boolean>("NoBorder", false);
     public Setting<Boolean> customFont = new Setting<Boolean>("CustomFont", true);
     public Setting<Boolean> chatSuffix = new Setting<Boolean>("Suffix", true);
+    public Setting<Boolean> gradientWatermark = new Setting<Boolean>("CoolWatermark", true);
     public Setting<Boolean> fancySuffix = new Setting<Boolean>("FancySuffix", true, v->chatSuffix.getValue());
     public Setting<String> customChatSuffix = new Setting<String>("CustomSuffix", "Dactyl", v->!fancySuffix.getValue());
     public Setting<Boolean> commands = new Setting<Boolean>("Commands", false, v->chatSuffix.getValue());
