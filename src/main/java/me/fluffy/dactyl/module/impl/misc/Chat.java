@@ -91,6 +91,8 @@ public class Chat extends Module {
                     SPacketChat packet = (SPacketChat) event.getPacket();
                     String username = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[0]);
                     String toDecrypt = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[1]);
+                    toDecrypt =  toDecrypt.replaceAll("\\P{InBasic_Latin}", "");
+                    toDecrypt = toDecrypt.replaceAll(" ", "");
                     if (toDecrypt.startsWith("+-")) {
                             toDecrypt = toDecrypt.replace("+-","");
                             BigInteger ilovecreepy = new BigInteger(toDecrypt);
