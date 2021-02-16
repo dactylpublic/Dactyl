@@ -88,25 +88,26 @@ public class Chat extends Module {
             if(creepyDecrypt.getValue()) {
                 if (event.getPacket() instanceof SPacketChat) {
                     try {
-                    SPacketChat packet = (SPacketChat) event.getPacket();
-                    String username = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[0]);
-                    String toDecrypt = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[1]);
-                    toDecrypt =  toDecrypt.replaceAll("\\P{InBasic_Latin}", "");
-                    toDecrypt = toDecrypt.replaceAll(" ", "");
-                    if (toDecrypt.startsWith("+-")) {
-                            toDecrypt = toDecrypt.replace("+-","");
-                            BigInteger ilovecreepy = new BigInteger(toDecrypt);
-                            BigInteger dogwater = ilovecreepy.divide(new BigInteger("69"));
-                            String everyThree = dogwater.toString().replaceAll("...", "$0,");
-                            String[] threeSplit = everyThree.split(",");
-                            String out = "";
-                            for(String x : threeSplit) {
-                                Integer valueInt = Integer.valueOf(x);
-                                out += (char)(valueInt-100);
+                        SPacketChat packet = (SPacketChat) event.getPacket();
+                        String username = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[0]);
+                        String toDecrypt = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[1]);
+                        //toDecrypt =  toDecrypt.replaceAll("\\P{InBasic_Latin}", "");
+                        toDecrypt = toDecrypt.replaceAll("[^\\d+-]", "");
+                        System.out.println(toDecrypt);
+                        if (toDecrypt.startsWith("+-")) {
+                                toDecrypt = toDecrypt.replace("+-","");
+                                BigInteger ilovecreepy = new BigInteger(toDecrypt);
+                                BigInteger dogwater = ilovecreepy.divide(new BigInteger("69"));
+                                String everyThree = dogwater.toString().replaceAll("...", "$0,");
+                                String[] threeSplit = everyThree.split(",");
+                                String out = "";
+                                for(String x : threeSplit) {
+                                    Integer valueInt = Integer.valueOf(x);
+                                    out += (char)(valueInt-100);
+                                }
+                                ((ISPacketChat)packet).setChatComponent(new ChatUtil.FormattedMessage("&6"+username+"> " + out.replaceAll("[^\\p{ASCII}]", "")));
                             }
-                            ((ISPacketChat)packet).setChatComponent(new ChatUtil.FormattedMessage("&6"+username+"> " + out));
-                        }
-                    } catch (Exception exception) {
+                        } catch (Exception exception) {
                     }
                 }
             }
