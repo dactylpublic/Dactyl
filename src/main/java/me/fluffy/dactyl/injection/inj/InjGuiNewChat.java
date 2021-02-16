@@ -4,6 +4,7 @@ import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.client.Media;
 import me.fluffy.dactyl.module.impl.misc.Chat;
+import me.fluffy.dactyl.module.impl.misc.ChatTimestamps;
 import me.fluffy.dactyl.util.StringUtil;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -46,6 +47,22 @@ public class InjGuiNewChat {
                     }
                     Dactyl.fontUtil.drawStringFloatShadow(restOfText, currentX, y, color);
                     return 1;
+                }
+                if(ChatTimestamps.INSTANCE.isEnabled() && text.startsWith(TextFormatting.BLUE + "" + TextFormatting.RED + "" + TextFormatting.GREEN)) {
+                    String leftAppend = "<";
+                    String rightAppend = ">";
+                    String extraSpace = (ChatTimestamps.INSTANCE.space.getValue() ? " " : "");
+                    String normalTime = leftAppend + text.substring(text.indexOf(leftAppend) + 1, text.indexOf(rightAppend)) + rightAppend + extraSpace;
+                    String hacker = TextFormatting.BLUE + "" + TextFormatting.RED + "" + TextFormatting.GREEN;
+                    String restOfNormalText = text.replace(hacker + normalTime, "");
+                    char[] characters = normalTime.toCharArray();
+                    float currentX = x;
+                    for (char ch : characters) {
+                        Dactyl.fontUtil.drawStringFloatShadow(String.valueOf(ch), currentX, y, Colors.INSTANCE.getColor((int) currentX, true));
+                        currentX += Dactyl.fontUtil.getStringWidth(String.valueOf(ch));
+                    }
+                    Dactyl.fontUtil.drawStringFloatShadow(restOfNormalText, currentX, y, color);
+                    return 1;
                 } else {
                     Dactyl.fontUtil.drawStringFloatShadow(text, x - 0.5f, y - 0.5f, color);
                     return 1;
@@ -61,6 +78,22 @@ public class InjGuiNewChat {
                         currentX += fontRenderer.getStringWidth(String.valueOf(ch));
                     }
                     fontRenderer.drawStringWithShadow(restOfText, currentX, y, color);
+                    return 1;
+                }
+                if(ChatTimestamps.INSTANCE.isEnabled() && text.startsWith(TextFormatting.BLUE + "" + TextFormatting.RED + "" + TextFormatting.GREEN)) {
+                    String leftAppend = "<";
+                    String rightAppend = ">";
+                    String extraSpace = (ChatTimestamps.INSTANCE.space.getValue() ? " " : "");
+                    String normalTime = leftAppend + text.substring(text.indexOf(leftAppend) + 1, text.indexOf(rightAppend)) + rightAppend + extraSpace;
+                    String hacker = TextFormatting.BLUE + "" + TextFormatting.RED + "" + TextFormatting.GREEN;
+                    String restOfNormalText = text.replace(hacker + normalTime, "");
+                    char[] characters = normalTime.toCharArray();
+                    float currentX = x;
+                    for (char ch : characters) {
+                        fontRenderer.drawStringWithShadow(String.valueOf(ch), currentX, y, Colors.INSTANCE.getColor((int) currentX, true));
+                        currentX += fontRenderer.getStringWidth(String.valueOf(ch));
+                    }
+                    fontRenderer.drawStringWithShadow(restOfNormalText, currentX, y, color);
                     return 1;
                 } else {
                     fontRenderer.drawStringWithShadow(text, x - 0.5f, y - 0.5f, color);

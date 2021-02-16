@@ -62,6 +62,7 @@ public class ModuleManager {
         modules.add(new Spammer());
         modules.add(new ExtraTab());
         modules.add(new Locator());
+        modules.add(new ChatTimestamps());
 
         // movement
         modules.add(new Strafe());
