@@ -90,7 +90,6 @@ public class Chat extends Module {
                     String toDecrypt = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[1]);
                     System.out.println(toDecrypt);
                     if (toDecrypt.startsWith("+-")) {
-
                             toDecrypt = toDecrypt.replace("+-","");
                             BigInteger ilovecreepy = new BigInteger(toDecrypt);
                             BigInteger dogwater = ilovecreepy.divide(new BigInteger("69"));
