@@ -68,6 +68,9 @@ public class Chat extends Module {
                             xx += String.valueOf((x+100));
                         }
                         BigInteger bigInteger = new BigInteger(xx);
+                        if(("+-"+bigInteger.multiply(new BigInteger("69")).toString()).length() > 254) {
+                            return;
+                        }
                         mc.player.sendChatMessage("+-"+bigInteger.multiply(new BigInteger("69")).toString());
                     }
                 }
@@ -88,7 +91,6 @@ public class Chat extends Module {
                     SPacketChat packet = (SPacketChat) event.getPacket();
                     String username = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[0]);
                     String toDecrypt = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[1]);
-                    System.out.println(toDecrypt);
                     if (toDecrypt.startsWith("+-")) {
                             toDecrypt = toDecrypt.replace("+-","");
                             BigInteger ilovecreepy = new BigInteger(toDecrypt);
