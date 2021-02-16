@@ -29,6 +29,8 @@ import java.util.ArrayList;
 public class AutoDupe extends Module {
     public Setting<Integer> moveDelay = new Setting<Integer>("MoveDelay", 100, 1, 500, "Delay in between moving items");
     public Setting<Double> mountDelay = new Setting<Double>("MountDelay", 0.5d, 0.1d, 5d, "How long to wait for mount after dropping");
+    public Setting<Boolean> lockYaw = new Setting<Boolean>("LockYaw", true);
+    public Setting<Double> pitchLock = new Setting<Double>("Pitch", -45d, -90d, 90d);
     public Setting<Double> delay = new Setting<Double>("DupeDelay", 1d, 0.1d, 5d, "Delay per dupe (in seconds)");
     public AutoDupe() {
         super("AutoDupe", Category.PLAYER, "Best AutoDupe in the wild wild west");
@@ -44,6 +46,7 @@ public class AutoDupe extends Module {
     int step = 0;
     int droppedItems = -1;
     int movedItems = -1;
+    float startYaw = 0f;
     int shulkerSlot = CombatUtil.findShulkerOpenInv();
     ArrayList<Integer> shulkerSlots = new ArrayList<>();
 
@@ -58,6 +61,7 @@ public class AutoDupe extends Module {
         mc.player.sendHorseInventory();
         step++;
         moveTimer.reset();
+        startYaw = mc.player.rotationYaw;
     }
 
     @SubscribeEvent
@@ -166,6 +170,10 @@ public class AutoDupe extends Module {
         if(step == 3) {
             if(!startDropTimer.hasPassed(700)) {
                 return;
+            }
+            mc.player.rotationPitch = pitchLock.getValue().floatValue();
+            if(lockYaw.getValue()) {
+                mc.player.rotationYaw = startYaw;
             }
             // drop the items
             if(!(mc.currentScreen instanceof GuiScreenHorseInventory)) return;
