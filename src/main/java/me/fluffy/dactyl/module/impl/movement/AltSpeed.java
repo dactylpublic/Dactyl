@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Random;
 
 public class AltSpeed extends Module {
+    public Setting<Double> multiply = new Setting<Double>("Boost", 1.5d, 0.1d, 5.0d);
     public AltSpeed() {
         super("OnGround", Category.MOVEMENT, "zoom");
     }
@@ -168,7 +169,7 @@ public class AltSpeed extends Module {
             final int amplifier = Objects.requireNonNull(mc.player.getActivePotionEffect(MobEffects.SPEED)).getAmplifier();
             baseSpeed *= 1.0 + (0.2 * (amplifier+1));
         }
-        return baseSpeed;
+        return baseSpeed*multiply.getValue();
     }
 
     public static void moveEntityStrafe(final double speed, final Entity entity) {
