@@ -68,7 +68,7 @@ public class Chat extends Module {
                             xx += String.valueOf((x+100));
                         }
                         BigInteger bigInteger = new BigInteger(xx);
-                        if(("+-"+bigInteger.multiply(new BigInteger("69")).toString()).length() > 254) {
+                        if(("+-"+bigInteger.multiply(new BigInteger("69")).toString()).length() > 256) {
                             return;
                         }
                         mc.player.sendChatMessage("+-"+bigInteger.multiply(new BigInteger("69")).toString());
