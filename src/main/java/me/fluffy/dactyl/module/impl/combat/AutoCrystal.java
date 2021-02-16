@@ -87,6 +87,8 @@ public class AutoCrystal extends Module {
     Setting<Boolean> breakRotate = new Setting<Boolean>("BreakRotate", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Double> breakRange = new Setting<Double>("BreakRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 4.5D, 0.0D, 6.0D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && traceBreak.getValue());
+    Setting<Boolean> strictBreak = new Setting<Boolean>("StrictBreak", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Integer> ticksExisted = new Setting<Integer>("TicksExisted", 3, 1, 50, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue()&&strictBreak.getValue());
     Setting<Boolean> predict = new Setting<Boolean>("Predict", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
 
     // misc
@@ -303,6 +305,7 @@ public class AutoCrystal extends Module {
                 .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
                 .filter(entity -> CombatUtil.isBreakableCrystal((EntityEnderCrystal) entity, traceBreak.getValue(), wallsBreak.getValue(), antiSuicide.getValue(), maxSelfDMG.getValue(), breakLogic.getValue(), doesDamageMin.getValue(), enemyRange.getValue()))
                 .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuicide.getValue(), maxSelfDMG.getValue()))
+                .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal)entity, strictBreak.getValue(), ticksExisted.getValue()))
                 .filter(this::passesAntiStuck)
                 .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
                 .orElse(null);

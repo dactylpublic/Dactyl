@@ -1257,6 +1257,18 @@ public class CombatUtil {
         return (List<BlockPos>)positions;
     }
 
+    public static boolean passesStrictBreak(EntityEnderCrystal crystal, boolean strictBreak, int ticksExisted) {
+        if(!strictBreak) {
+            return true;
+        }
+        if(strictBreak) {
+            if(crystal.ticksExisted < ticksExisted) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static boolean wontSelfPop(EntityEnderCrystal crystal, boolean antiSui, double maxSelfDMG) {
         if(antiSui) {
             double dmg = calculateDamage(crystal, mc.player);
