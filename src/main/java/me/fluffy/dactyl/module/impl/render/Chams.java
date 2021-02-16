@@ -35,7 +35,7 @@ public class Chams extends Module {
     public Setting<Boolean> animals = new Setting<Boolean>("Animals", false, v->page.getValue() == ChamsPage.OTHER);
     public Setting<Boolean> invisibles = new Setting<Boolean>("Invisibles", true, v->page.getValue() == ChamsPage.OTHER);
     public Setting<Boolean> selfESP = new Setting<Boolean>("Self", false, v->page.getValue() == ChamsPage.OTHER);
-    public Setting<Integer> entityFillOutline = new Setting<Integer>("FillAlpha", 100, 1, 255, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Integer> entityFillOutline = new Setting<Integer>("EntityAlpha", 100, 1, 255, v->page.getValue() == ChamsPage.OTHER);
     public Setting<Boolean> colorSyncPlayer = new Setting<Boolean>("SyncAll", true, v->page.getValue() == ChamsPage.OTHER);
 
     public static Chams INSTANCE;
