@@ -139,8 +139,10 @@ public class Scaffold extends Module {
                     if (this.teleported && this.center)
                         this.teleported = false;
                 }
+            Vec3d hitVec = new Vec3d(this.blockData.position).add(0.5, 0.5, 0.5)
+                    .add(new Vec3d(this.blockData.face.getDirectionVec()).scale(0.5));
             //if (mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, new Vec3d(this.blockData.position.getX() + Math.random(), this.blockData.position.getY() + Math.random(), this.blockData.position.getZ() + Math.random()), EnumHand.MAIN_HAND) != EnumActionResult.FAIL) {
-            mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, new Vec3d(this.blockData.position.getX() + Math.random(), this.blockData.position.getY() + Math.random(), this.blockData.position.getZ() + Math.random()), EnumHand.MAIN_HAND);
+            mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, hitVec, EnumHand.MAIN_HAND);
             mc.player.connection.sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
             //}
             if(packetSwitch.getValue()) {
