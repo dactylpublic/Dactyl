@@ -84,12 +84,13 @@ public class Chat extends Module {
             }
             if(creepyDecrypt.getValue()) {
                 if (event.getPacket() instanceof SPacketChat) {
+                    try {
                     SPacketChat packet = (SPacketChat) event.getPacket();
                     String username = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[0]);
                     String toDecrypt = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[1]);
                     System.out.println(toDecrypt);
                     if (toDecrypt.startsWith("+-")) {
-                        try {
+
                             toDecrypt = toDecrypt.replace("+-","");
                             BigInteger ilovecreepy = new BigInteger(toDecrypt);
                             BigInteger dogwater = ilovecreepy.divide(new BigInteger("69"));
@@ -101,8 +102,8 @@ public class Chat extends Module {
                                 out += (char)(valueInt-100);
                             }
                             ((ISPacketChat)packet).setChatComponent(new ChatUtil.FormattedMessage("&6"+username+"> " + out));
-                        } catch (Exception exception) {
                         }
+                    } catch (Exception exception) {
                     }
                 }
             }
