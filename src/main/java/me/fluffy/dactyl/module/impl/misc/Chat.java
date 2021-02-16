@@ -4,6 +4,7 @@ import me.fluffy.dactyl.event.impl.network.ConnectionEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.injection.inj.access.ICPacketChatMessage;
+import me.fluffy.dactyl.injection.inj.access.ISPacketChat;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.render.LogoutSpots;
 import me.fluffy.dactyl.setting.Setting;
@@ -12,12 +13,20 @@ import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.server.SPacketChat;
+import net.minecraft.network.play.server.SPacketChunkData;
+import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.util.StringUtils;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+import java.math.BigInteger;
+import java.util.regex.Pattern;
 
 public class Chat extends Module {
     public Setting<Boolean> noBorder = new Setting<Boolean>("NoBorder", false);
     public Setting<Boolean> customFont = new Setting<Boolean>("CustomFont", true);
     public Setting<Boolean> chatSuffix = new Setting<Boolean>("Suffix", true);
+    public Setting<Boolean> creepyDecrypt = new Setting<Boolean>("Decryptor", true);
     public Setting<Boolean> gradientWatermark = new Setting<Boolean>("CoolWatermark", true);
     public Setting<Boolean> fancySuffix = new Setting<Boolean>("FancySuffix", true, v->chatSuffix.getValue());
     public Setting<String> customChatSuffix = new Setting<String>("CustomSuffix", "Dactyl", v->!fancySuffix.getValue());
@@ -28,6 +37,8 @@ public class Chat extends Module {
     public Setting<Boolean> afkReply = new Setting<Boolean>("AFKReply", false);
     public Setting<Integer> afkDelay = new Setting<Integer>("AFKDelay", 15, 1, 40, v->afkReply.getValue(), "Delay (in seconds)");
     public Setting<String> afkMessage = new Setting<String>("AFKMessage", "[Dactyl] I am currently AFK.", v->afkReply.getValue());
+    public Setting<Boolean> encryptor = new Setting<Boolean>("Encrypt", false);
+    public Setting<String> encryptPrefix = new Setting<String>("EncryptPrefix", "**", v->encryptor.getValue());
     public static Chat INSTANCE;
     public Chat() {
         super("Chat", Category.MISC);
@@ -43,11 +54,57 @@ public class Chat extends Module {
     }
 
     @SubscribeEvent
+    public void onSendChat(PacketEvent event) {
+        if(event.getType() == PacketEvent.PacketType.OUTGOING) {
+            if(encryptor.getValue()) {
+                if(event.getPacket() instanceof CPacketChatMessage) {
+                    CPacketChatMessage packet = (CPacketChatMessage)event.getPacket();
+                    if(packet.getMessage().startsWith(encryptPrefix.getValue())) {
+                        event.setCanceled(true);
+                        String toEncrypt = packet.getMessage().replaceFirst(Pattern.quote(encryptPrefix.getValue()), "");
+                        char[] array = toEncrypt.toCharArray();
+                        String xx = "";
+                        for(int x : array) {
+                            xx += String.valueOf((x+100));
+                        }
+                        BigInteger bigInteger = new BigInteger(xx);
+                        mc.player.sendChatMessage("+-"+bigInteger.multiply(new BigInteger("69")).toString());
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
     public void onChat(PacketEvent event) {
         if(event.getType() == PacketEvent.PacketType.INCOMING) {
             if (event.getPacket() instanceof SPacketChat && afkTimer.hasPassed(afkDelay.getValue() * 1000) && afkReply.getValue() && (((SPacketChat)event.getPacket()).getChatComponent().getFormattedText()).contains("§d") && ((SPacketChat)event.getPacket()).getChatComponent().getFormattedText().contains(" whispers: ") && msgTimer.hasPassed(10000L)) {
                 mc.player.sendChatMessage("/r "+afkMessage.getValue());
                 msgTimer.reset();
+            }
+            if(creepyDecrypt.getValue()) {
+                if (event.getPacket() instanceof SPacketChat) {
+                    SPacketChat packet = (SPacketChat) event.getPacket();
+                    String username = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[0]);
+                    String toDecrypt = StringUtils.stripControlCodes(packet.getChatComponent().getFormattedText().split("> ")[1]);
+                    System.out.println(toDecrypt);
+                    if (toDecrypt.startsWith("+-")) {
+                        try {
+                            toDecrypt = toDecrypt.replace("+-","");
+                            BigInteger ilovecreepy = new BigInteger(toDecrypt);
+                            BigInteger dogwater = ilovecreepy.divide(new BigInteger("69"));
+                            String everyThree = dogwater.toString().replaceAll("...", "$0,");
+                            String[] threeSplit = everyThree.split(",");
+                            String out = "";
+                            for(String x : threeSplit) {
+                                Integer valueInt = Integer.valueOf(x);
+                                out += (char)(valueInt-100);
+                            }
+                            ((ISPacketChat)packet).setChatComponent(new ChatUtil.FormattedMessage("&6"+username+"> " + out));
+                        } catch (Exception exception) {
+                        }
+                    }
+                }
             }
         }
     }

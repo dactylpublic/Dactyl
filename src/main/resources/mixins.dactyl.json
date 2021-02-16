@@ -47,6 +47,7 @@
     "access.IKeyBinding",
     "access.IMinecraft",
     "access.IRenderManager",
+    "access.ISPacketChat",
     "access.ISPacketPlayerPosLook",
     "access.ITimer",
     "access.IVec3i"
