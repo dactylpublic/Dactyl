@@ -22,6 +22,7 @@ public class HoleESP extends Module {
     Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.5d, 3.0d, vi->outline.getValue());
     Setting<Boolean> box = new Setting<Boolean>("Box", true);
     Setting<Boolean> betterBox = new Setting<Boolean>("BetterBox", false, v->box.getValue());
+    Setting<Boolean> reverseBox = new Setting<Boolean>("ReverseBox", false, v->box.getValue()&&betterBox.getValue());
     Setting<Integer> endOpacity = new Setting<Integer>("EndAlpha", 120, 1, 255, v->box.getValue()&&betterBox.getValue());
     Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vi->box.getValue()&&!betterBox.getValue());
     Setting<Double> renderRange = new Setting<Double>("RenderRange", 8.0d, 1.0d, 20.0d);
@@ -68,9 +69,9 @@ public class HoleESP extends Module {
             double extY = negativeExtrude.getValue() ? (-yExtrude.getValue()) : yExtrude.getValue();
             if(box.getValue() && betterBox.getValue()) {
                 if (isBedrock) {
-                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), endOpacity.getValue(), 0);
+                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, bedrockSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(bedrockRed.getValue(), bedrockGreen.getValue(), bedrockBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), endOpacity.getValue(), 0, reverseBox.getValue());
                 } else {
-                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), endOpacity.getValue(), 0);
+                    RenderUtil.drawOffsetBoxOpacity(pos, transY, extY, obiSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(obiRed.getValue(), obiGreen.getValue(), obiBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), box.getValue(), endOpacity.getValue(), 0, reverseBox.getValue());
                 }
             } else {
                 if (isBedrock) {

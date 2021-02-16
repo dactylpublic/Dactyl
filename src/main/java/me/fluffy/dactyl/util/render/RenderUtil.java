@@ -920,7 +920,7 @@ public class RenderUtil {
         GlStateManager.popMatrix();
     }
 
-    public static void drawOffsetBoxOpacity(BlockPos pos, double translateY, double extrudeY, Color color, float lineWidth, boolean outline, boolean box, int startalpha, int endalpha) {
+    public static void drawOffsetBoxOpacity(BlockPos pos, double translateY, double extrudeY, Color color, float lineWidth, boolean outline, boolean box, int startalpha, int endalpha, boolean reverseBox) {
         AxisAlignedBB bb = new AxisAlignedBB(pos.getX() - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, pos.getY() + translateY - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, pos.getZ() - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, (pos.getX() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, (pos.getY() + extrudeY + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, (pos.getZ() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ);
         AxisAlignedBB boxbb = new AxisAlignedBB(pos.getX() - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, pos.getY() - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, pos.getZ() - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ, (pos.getX() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosX, (pos.getY() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosY, (pos.getZ() + 1) - (Minecraft.getMinecraft().getRenderManager()).viewerPosZ);
         camera.setPosition(((Entity) Objects.requireNonNull(Minecraft.getMinecraft().getRenderViewEntity())).posX, (Minecraft.getMinecraft().getRenderViewEntity()).posY, (Minecraft.getMinecraft().getRenderViewEntity()).posZ);
@@ -941,10 +941,9 @@ public class RenderUtil {
             GL11.glLineWidth(lineWidth);
             if (outline) {
                 RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
-
             }
             if (box) {
-                drawOpenGradientBox(pos, new Color(color.getRed(), color.getGreen(), color.getBlue(), endalpha), new Color(color.getRed(), color.getGreen(), color.getBlue(), startalpha), 0.0f);
+                drawOpenGradientBox(pos, new Color(color.getRed(), color.getGreen(), color.getBlue(), (reverseBox ? endalpha : startalpha)), new Color(color.getRed(), color.getGreen(), color.getBlue(), (reverseBox ? startalpha : endalpha)), 0.0f);
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);
