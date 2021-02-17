@@ -29,7 +29,7 @@ public class Chams extends Module {
 
     // players
     public Setting<Boolean> renderEntity = new Setting<Boolean>("RenderEntity", false, v->page.getValue() == ChamsPage.OTHER);
-    public Setting<Boolean> entityExtraOutline = new Setting<Boolean>("ExtraOutline", false, v->page.getValue() == ChamsPage.OTHER);
+    public Setting<Boolean> entityExtraOutline = new Setting<Boolean>("EExtraOutline", false, v->page.getValue() == ChamsPage.OTHER);
     public Setting<Boolean> players = new Setting<Boolean>("Players", true, v->page.getValue() == ChamsPage.OTHER);
     public Setting<Boolean> monsters = new Setting<Boolean>("Monsters", true, v->page.getValue() == ChamsPage.OTHER);
     public Setting<Boolean> animals = new Setting<Boolean>("Animals", false, v->page.getValue() == ChamsPage.OTHER);

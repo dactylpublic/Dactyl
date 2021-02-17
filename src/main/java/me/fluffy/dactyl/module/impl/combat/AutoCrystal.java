@@ -90,6 +90,7 @@ public class AutoCrystal extends Module {
     Setting<Boolean> strictBreak = new Setting<Boolean>("StrictBreak", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Integer> ticksExisted = new Setting<Integer>("TicksExisted", 3, 1, 50, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue()&&strictBreak.getValue());
     Setting<Boolean> predict = new Setting<Boolean>("Predict", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Boolean> waitPredict = new Setting<Boolean>("WaitPredict", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && predict.getValue());
 
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
@@ -101,6 +102,7 @@ public class AutoCrystal extends Module {
     Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BREAK, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> fasterResetRot = new Setting<Boolean>("FastRReset", false, v->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> africanMode = new Setting<Boolean>("AfricanMode", false, vis->settingPage.getValue() == SettingPage.MISC);
@@ -133,12 +135,16 @@ public class AutoCrystal extends Module {
 
 
     private static float yaw;
+    private static float updateYaw;
     private static float pitch;
+    private static float updatePitch;
     private static boolean isRotating;
     private float oldYaw, oldPitch;
     private static boolean togglePitch = false;
+    private CPacketUseEntity predictPacket = null;
     private static BlockPos crystalRender = null;
     private static BlockPos oldPlacePos = null;
+    private static boolean hasReachedYaw = false;
     private static double damage = 0.0d;
     private static int yawTicks = 0;
     private EntityEnderCrystal currentAttacking = null;
@@ -212,6 +218,10 @@ public class AutoCrystal extends Module {
                             CPacketUseEntity attackPacket = new CPacketUseEntity();
                             ((ICPacketUseEntity)attackPacket).setEntityId(packetSpawnObject.getEntityID());
                             ((ICPacketUseEntity)attackPacket).setAction(CPacketUseEntity.Action.ATTACK);
+                            if(waitPredict.getValue()) {
+                                predictPacket = attackPacket;
+                                return;
+                            }
                             mc.player.connection.sendPacket(attackPacket);
                         }
                     }
@@ -427,17 +437,22 @@ public class AutoCrystal extends Module {
             oldPlacePos = placePosition;
             damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] rots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
-            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
+            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY(), placePosition.getZ() + 0.5);
+
             if(placeRotate.getValue()) {
                 if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                     if(constRotate.getValue()) {
                         eventUpdateWalkingPlayer.setYaw((float) constRots[0]);
                         eventUpdateWalkingPlayer.setPitch((float) constRots[1]);
                         eventUpdateWalkingPlayer.rotationUsed = true;
+                        updateYaw = (float)constRots[0];
+                        updatePitch = (float)constRots[1];
                     } else {
                         eventUpdateWalkingPlayer.setYaw((float) rots[0]);
                         eventUpdateWalkingPlayer.setPitch((float) rots[1]);
                         eventUpdateWalkingPlayer.rotationUsed = true;
+                        updateYaw = (float)rots[0];
+                        updatePitch = (float)rots[1];
                     }
                 } else if(updateLogic.getValue() == UpdateLogic.PACKET){
                     if(constRotate.getValue()) {
@@ -486,6 +501,10 @@ public class AutoCrystal extends Module {
                         resetRots();
                         return;
                     }
+                    if(waitPredict.getValue() && predictPacket != null) {
+                        mc.player.connection.sendPacket(predictPacket);
+                        predictPacket = null;
+                    }
                     //if(extraRotPackets.getValue()) {
                     //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
                     //}
@@ -526,6 +545,16 @@ public class AutoCrystal extends Module {
                 damage = 0.0d;
                 if(!fasterResetRot.getValue()) {
                     resetRots();
+                }
+            } else {
+                if(!fasterResetRot.getValue()) {
+                    if(updateLogic.getValue() == UpdateLogic.WALKING) {
+                        if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
+                            eventUpdateWalkingPlayer.setYaw(updateYaw);
+                            eventUpdateWalkingPlayer.setPitch(updatePitch);
+                            eventUpdateWalkingPlayer.rotationUsed = true;
+                        }
+                    }
                 }
             }
             if(fasterResetRot.getValue()) {
@@ -617,6 +646,7 @@ public class AutoCrystal extends Module {
                 yawTicks += yawStepTicks.getValue();
                 if (yawTicks >= newYaw) {
                     yaw = (float) newYaw;
+                    hasReachedYaw = true;
                 } else {
                     yaw = (float) yawTicks;
                 }
@@ -625,6 +655,7 @@ public class AutoCrystal extends Module {
                 yawTicks -= yawStepTicks.getValue();
                 if (yawTicks <= newYaw) {
                     yaw = (float) newYaw;
+                    hasReachedYaw = true;
                 } else {
                     yaw = (float) yawTicks;
                 }
@@ -633,10 +664,20 @@ public class AutoCrystal extends Module {
             yaw = (float) newYaw;
         }
         pitch = (float) newPitch;
+        if(debugRotate.getValue()) {
+            mc.player.rotationYaw = yaw;
+            mc.player.rotationPitch = pitch;
+        }
         isRotating = true;
+        if(!yawStep.getValue()) {
+            hasReachedYaw = true;
+        }
     }
 
     private static void resetRots() {
+        if(!hasReachedYaw) {
+            return;
+        }
         if (isRotating) {
             yaw = mc.player.rotationYaw;
             pitch = mc.player.rotationPitch;
@@ -760,10 +801,12 @@ public class AutoCrystal extends Module {
         placedCrystals.clear();
         attackedCrystals.clear();
         crystalRender = null;
+        predictPacket = null;
         oldPlacePos = null;
         currentAttacking = null;
         damage = 0.0d;
         faceplaceKeyOn = false;
+        hasReachedYaw = false;
         resetRots();
     }
 
