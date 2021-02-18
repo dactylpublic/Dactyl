@@ -13,10 +13,7 @@ import me.fluffy.dactyl.injection.inj.access.IVec3i;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
-import me.fluffy.dactyl.util.Bind;
-import me.fluffy.dactyl.util.CombatUtil;
-import me.fluffy.dactyl.util.RotationUtil;
-import me.fluffy.dactyl.util.TimeUtil;
+import me.fluffy.dactyl.util.*;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
@@ -36,6 +33,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
@@ -51,73 +49,74 @@ import java.util.stream.Collectors;
 public class AutoCrystal extends Module {
     Setting<SettingPage> settingPage = new Setting<SettingPage>("Setting", SettingPage.PLACE);
     // place
-    Setting<Boolean> doCaPlace = new Setting<Boolean>("Place", true, vis->settingPage.getValue() == SettingPage.PLACE);
-    Setting<Boolean> tracePlace = new Setting<Boolean>("PlaceTrace", false, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
-    Setting<Integer> placeDelay = new Setting<Integer>("PlaceDelay", 45, 0, 250, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
-    Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0D, 1.0D, 13.5D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiSuiPlace.getValue());
-    Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> antiMultiLethal = new Setting<Boolean>("LethalNoMulti", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> lethalMin = new Setting<Double>("LethalMin", 10.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue()&&antiMultiLethal.getValue());
-    Setting<Boolean> antiping = new Setting<Boolean>("AntiMulti", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
-    Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis->settingPage.getValue() == SettingPage.PLACE&&doCaPlace.getValue());
-    Setting<Boolean> doublePlace = new Setting<Boolean>("PlaceExploit", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue(), "Weird exploit");
-    Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 0.0D, 6.0D, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
-    Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> facePlaceHold = new Setting<Boolean>("FPHold", true, vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Bind> facePlaceKey = new Setting<Bind>("FacePlaceKey", new Bind(Keyboard.KEY_NONE), vis->settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> doCaPlace = new Setting<Boolean>("Place", true, vis -> settingPage.getValue() == SettingPage.PLACE);
+    Setting<Boolean> tracePlace = new Setting<Boolean>("PlaceTrace", false, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Integer> placeDelay = new Setting<Integer>("PlaceDelay", 45, 0, 250, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0D, 1.0D, 13.5D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && antiSuiPlace.getValue());
+    Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> antiMultiLethal = new Setting<Boolean>("LethalNoMulti", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> lethalMin = new Setting<Double>("LethalMin", 10.0D, 1.0D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && antiMultiLethal.getValue());
+    Setting<Boolean> antiping = new Setting<Boolean>("AntiMulti", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> doublePlace = new Setting<Boolean>("PlaceExploit", false, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue(), "Weird exploit");
+    Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 5.5D, 1.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 0.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
+    Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Boolean> facePlaceHold = new Setting<Boolean>("FPHold", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Bind> facePlaceKey = new Setting<Bind>("FacePlaceKey", new Bind(Keyboard.KEY_NONE), vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
 
     // break
-    Setting<Boolean> doCaBreak = new Setting<Boolean>("Break", true, vis->settingPage.getValue() == SettingPage.BREAK);
-    Setting<Boolean> offhandSwing = new Setting<Boolean>("OffhandSwing", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Boolean> traceBreak = new Setting<Boolean>("BreakTrace", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<AttackLogic> attackLogic = new Setting<AttackLogic>("AttackLogic", AttackLogic.CSLOT, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Integer> breakDelay = new Setting<Integer>("BreakDelay", 65, 0, 350, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Boolean> antiStuck = new Setting<Boolean>("AntiStuck", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Integer> hitAttempts = new Setting<Integer>("HitAttempts", 5, 1, 15, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue()&&antiStuck.getValue());
-    Setting<BreakLogic> breakLogic = new Setting<BreakLogic>("BreakLogic", BreakLogic.DOESDMG, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> doesDamageMin = new Setting<Double>("DoesDMGMin", 2.3D, 0.1D, 13.5D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && (breakLogic.getValue() == BreakLogic.DOESDMG || breakLogic.getValue() == BreakLogic.BOTH));
-    Setting<Boolean> antiSuicide = new Setting<Boolean>("AntiSuicide", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> maxSelfDMG = new Setting<Double>("MaxSelfDMG", 8.0D, 1.0D, 13.5D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiSuicide.getValue());
-    Setting<Boolean> breakRotate = new Setting<Boolean>("BreakRotate", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> breakRange = new Setting<Double>("BreakRange", 5.5D, 1.0D, 6.0D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 4.5D, 0.0D, 6.0D, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && traceBreak.getValue());
-    Setting<Boolean> strictBreak = new Setting<Boolean>("StrictBreak", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Integer> ticksExisted = new Setting<Integer>("TicksExisted", 3, 1, 50, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue()&&strictBreak.getValue());
-    Setting<Boolean> predict = new Setting<Boolean>("Predict", true, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Boolean> waitPredict = new Setting<Boolean>("WaitPredict", false, vis->settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && predict.getValue());
+    Setting<Boolean> doCaBreak = new Setting<Boolean>("Break", true, vis -> settingPage.getValue() == SettingPage.BREAK);
+    Setting<Boolean> offhandSwing = new Setting<Boolean>("OffhandSwing", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Boolean> traceBreak = new Setting<Boolean>("BreakTrace", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<AttackLogic> attackLogic = new Setting<AttackLogic>("AttackLogic", AttackLogic.CSLOT, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Integer> breakDelay = new Setting<Integer>("BreakDelay", 65, 0, 350, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Boolean> antiStuck = new Setting<Boolean>("AntiStuck", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Integer> hitAttempts = new Setting<Integer>("HitAttempts", 5, 1, 15, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiStuck.getValue());
+    Setting<BreakLogic> breakLogic = new Setting<BreakLogic>("BreakLogic", BreakLogic.DOESDMG, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Double> doesDamageMin = new Setting<Double>("DoesDMGMin", 2.3D, 0.1D, 13.5D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && (breakLogic.getValue() == BreakLogic.DOESDMG || breakLogic.getValue() == BreakLogic.BOTH));
+    Setting<Boolean> antiSuicide = new Setting<Boolean>("AntiSuicide", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Double> maxSelfDMG = new Setting<Double>("MaxSelfDMG", 8.0D, 1.0D, 13.5D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiSuicide.getValue());
+    Setting<Boolean> breakRotate = new Setting<Boolean>("BreakRotate", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Double> breakRange = new Setting<Double>("BreakRange", 5.5D, 1.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 4.5D, 0.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && traceBreak.getValue());
+    Setting<Boolean> strictBreak = new Setting<Boolean>("StrictBreak", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Integer> ticksExisted = new Setting<Integer>("TicksExisted", 3, 1, 50, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && strictBreak.getValue());
+    Setting<Boolean> predict = new Setting<Boolean>("Predict", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Boolean> waitPredict = new Setting<Boolean>("WaitPredict", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && predict.getValue());
 
     // misc
-    Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 300, vis->yawStep.getValue()&&settingPage.getValue() == SettingPage.MISC);
+    Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 300, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> cancelUntilYaw = new Setting<Boolean>("CancelUntilYaw", true, v->yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
     //Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", false, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BREAK, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> fasterResetRot = new Setting<Boolean>("FastRReset", false, v->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> africanMode = new Setting<Boolean>("AfricanMode", false, vis->settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BREAK, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> fasterResetRot = new Setting<Boolean>("FastRReset", false, v -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis -> settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> africanMode = new Setting<Boolean>("AfricanMode", false, vis -> settingPage.getValue() == SettingPage.MISC);
 
     // render
-    Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, vis->settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, vis->settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, vis->settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> outline = new Setting<Boolean>("Outline", true, vis->settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> slowerClear = new Setting<Boolean>("SlowerReset", true, vis->settingPage.getValue() == SettingPage.RENDER);
-    Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, vis->settingPage.getValue() == SettingPage.RENDER&&outline.getValue());
-    Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER);
-    Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER&&!colorSync.getValue());
-    Setting<Integer> colorGreen = new Setting<Integer>("Green", 175, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER&&!colorSync.getValue());
-    Setting<Integer> colorBlue = new Setting<Integer>("Blue", 255, 1, 255, vis->settingPage.getValue() == SettingPage.RENDER&&!colorSync.getValue());
+    Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, vis -> settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, vis -> settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, vis -> settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> outline = new Setting<Boolean>("Outline", true, vis -> settingPage.getValue() == SettingPage.RENDER);
+    Setting<Boolean> slowerClear = new Setting<Boolean>("SlowerReset", true, vis -> settingPage.getValue() == SettingPage.RENDER);
+    Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, vis -> settingPage.getValue() == SettingPage.RENDER && outline.getValue());
+    Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER);
+    Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER && !colorSync.getValue());
+    Setting<Integer> colorGreen = new Setting<Integer>("Green", 175, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER && !colorSync.getValue());
+    Setting<Integer> colorBlue = new Setting<Integer>("Blue", 255, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER && !colorSync.getValue());
 
 
     public static AutoCrystal INSTANCE;
@@ -145,6 +144,10 @@ public class AutoCrystal extends Module {
     private static BlockPos crystalRender = null;
     private static BlockPos oldPlacePos = null;
     private static boolean hasReachedYaw = false;
+    private static float lastTargetYaw = -1f;
+    private static float currentRotationYaw = -1f;
+    private static float targetRotationYaw = -1f;
+    private static float currentRotationPitch = -1f;
     private static double damage = 0.0d;
     private static int yawTicks = 0;
     private EntityEnderCrystal currentAttacking = null;
@@ -162,25 +165,25 @@ public class AutoCrystal extends Module {
 
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
-        if(updateLogic.getValue() == UpdateLogic.PACKET) {
+        if (updateLogic.getValue() == UpdateLogic.PACKET) {
             if (event.getType() == PacketEvent.PacketType.OUTGOING) {
                 if (event.getPacket() instanceof CPacketPlayer && isRotating) {
                     CPacketPlayer packet = (CPacketPlayer) event.getPacket();
                     ((ICPacketPlayer) packet).setYaw(yaw);
-                    if(rotateHead.getValue()) {
+                    if (rotateHead.getValue()) {
                         mc.player.rotationYawHead = yaw;
                     }
                     ((ICPacketPlayer) packet).setPitch(pitch);
                 }
             }
         }
-        if(event.getType() == PacketEvent.PacketType.INCOMING) {
-            if(antiStuck.getValue()) {
+        if (event.getType() == PacketEvent.PacketType.INCOMING) {
+            if (antiStuck.getValue()) {
                 if (event.getPacket() instanceof SPacketSoundEffect) {
                     SPacketSoundEffect packet = (SPacketSoundEffect) event.getPacket();
                     if (packet.getCategory() == SoundCategory.BLOCKS && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
                         for (Entity e : mc.world.loadedEntityList) {
-                            if(e == null) continue;
+                            if (e == null) continue;
                             if (e instanceof EntityEnderCrystal) {
                                 if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
                                     e.setDead();
@@ -193,32 +196,33 @@ public class AutoCrystal extends Module {
                                                 //attackedCrystals.remove(e);
                                             }
                                         }
-                                    } catch(Exception exceeept) {}
+                                    } catch (Exception exceeept) {
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-            if(event.getPacket() instanceof SPacketSpawnObject) {
-                SPacketSpawnObject packetSpawnObject = (SPacketSpawnObject)event.getPacket();
-                if(doCaBreak.getValue() && predict.getValue()) {
-                    if(packetSpawnObject.getType() == 51) {
+            if (event.getPacket() instanceof SPacketSpawnObject) {
+                SPacketSpawnObject packetSpawnObject = (SPacketSpawnObject) event.getPacket();
+                if (doCaBreak.getValue() && predict.getValue()) {
+                    if (packetSpawnObject.getType() == 51) {
                         BlockPos pos = new BlockPos(packetSpawnObject.getX(), packetSpawnObject.getY(), packetSpawnObject.getZ());
                         if (placedCrystals.contains(pos.down())) {
                             for (EntityPlayer p : mc.world.playerEntities) {
-                                if (p == null || mc.player.equals(p) || p.getDistanceSq(pos) > (((enemyRange.getValue() + placeRange.getValue()))*((enemyRange.getValue() + placeRange.getValue()))) || !Dactyl.friendManager.isFriend(p.getName())) {
+                                if (p == null || mc.player.equals(p) || p.getDistanceSq(pos) > (((enemyRange.getValue() + placeRange.getValue())) * ((enemyRange.getValue() + placeRange.getValue()))) || !Dactyl.friendManager.isFriend(p.getName())) {
                                     continue;
                                 }
                                 float playerHealth = p.getHealth() + p.getAbsorptionAmount();
-                                if (CombatUtil.calculateDamage(pos, (Entity)p) > playerHealth + 0.5D) {
+                                if (CombatUtil.calculateDamage(pos, (Entity) p) > playerHealth + 0.5D) {
                                     return;
                                 }
                             }
                             CPacketUseEntity attackPacket = new CPacketUseEntity();
-                            ((ICPacketUseEntity)attackPacket).setEntityId(packetSpawnObject.getEntityID());
-                            ((ICPacketUseEntity)attackPacket).setAction(CPacketUseEntity.Action.ATTACK);
-                            if(waitPredict.getValue()) {
+                            ((ICPacketUseEntity) attackPacket).setEntityId(packetSpawnObject.getEntityID());
+                            ((ICPacketUseEntity) attackPacket).setAction(CPacketUseEntity.Action.ATTACK);
+                            if (waitPredict.getValue()) {
                                 predictPacket = attackPacket;
                                 return;
                             }
@@ -232,11 +236,11 @@ public class AutoCrystal extends Module {
 
     @SubscribeEvent
     public void onKeyPress(EventKeyPress event) {
-        if(mc.player == null || mc.world == null) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
-        if(facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
-            if(!facePlaceHold.getValue()) {
+        if (facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
+            if (!facePlaceHold.getValue()) {
                 if (event.getKey() == facePlaceKey.getValue().getKey()) {
                     faceplaceKeyOn = !faceplaceKeyOn;
                 }
@@ -249,10 +253,10 @@ public class AutoCrystal extends Module {
 
     @SubscribeEvent
     public void onRemoveEntity(EntityRemovedEvent event) {
-        if(event.getEntity() == null) {
+        if (event.getEntity() == null) {
             return;
         }
-        if(event.getEntity() instanceof EntityEnderCrystal) {
+        if (event.getEntity() instanceof EntityEnderCrystal) {
             /*if(attackedCrystals.containsKey(event.getEntity())) {
                 attackedCrystals.remove(event.getEntity());
             }*/
@@ -265,28 +269,29 @@ public class AutoCrystal extends Module {
                         //attackedCrystals.remove(e);
                     }
                 }
-            } catch(Exception fuckyou){}
+            } catch (Exception fuckyou) {
+            }
         }
     }
 
 
     public void doAutoCrystal(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
-        if(antiStuckTimer.hasPassed(1000)) {
+        if (antiStuckTimer.hasPassed(1000)) {
             attackedCrystals.clear();
         }
-        if(placeResetTimer.hasPassed(5000)) {
+        if (placeResetTimer.hasPassed(5000)) {
             placedCrystals.clear();
         }
-        if(facePlaceHold.getValue()) {
-            if(facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
-                if(Keyboard.isKeyDown(facePlaceKey.getValue().getKey())) {
+        if (facePlaceHold.getValue()) {
+            if (facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
+                if (Keyboard.isKeyDown(facePlaceKey.getValue().getKey())) {
                     faceplaceKeyOn = true;
                 } else {
                     faceplaceKeyOn = false;
                 }
             }
         }
-        if(auraOrder.getValue() == AuraLogic.BREAKPLACE) {
+        if (auraOrder.getValue() == AuraLogic.BREAKPLACE) {
             doBreak(eventUpdateWalkingPlayer);
             doPlace(eventUpdateWalkingPlayer);
         } else {
@@ -296,17 +301,17 @@ public class AutoCrystal extends Module {
     }
 
     private void doBreak(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
-        if(!doCaBreak.getValue()) {
+        if (!doCaBreak.getValue()) {
             return;
         }
-        if(attackLogic.getValue() == AttackLogic.CSLOT) {
-            if(mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
+        if (attackLogic.getValue() == AttackLogic.CSLOT) {
+            if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
                 this.setModuleInfo("");
                 resetRots();
                 checkTimer.reset();
                 return;
             }
-            if(!checkTimer.hasPassed(75L)) {
+            if (!checkTimer.hasPassed(75L)) {
                 return;
             }
         }
@@ -315,7 +320,7 @@ public class AutoCrystal extends Module {
                 .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
                 .filter(entity -> CombatUtil.isBreakableCrystal((EntityEnderCrystal) entity, traceBreak.getValue(), wallsBreak.getValue(), antiSuicide.getValue(), maxSelfDMG.getValue(), breakLogic.getValue(), doesDamageMin.getValue(), enemyRange.getValue()))
                 .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuicide.getValue(), maxSelfDMG.getValue()))
-                .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal)entity, strictBreak.getValue(), ticksExisted.getValue()))
+                .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal) entity, strictBreak.getValue(), ticksExisted.getValue()))
                 .filter(this::passesAntiStuck)
                 .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
                 .orElse(null);
@@ -324,25 +329,23 @@ public class AutoCrystal extends Module {
             currentAttacking = null;
             return;
         }
-        if(!breakTimer.hasPassed(breakDelay.getValue())) {
+        if (!breakTimer.hasPassed(breakDelay.getValue())) {
             currentAttacking = null;
             return;
         }
-        if(updateLogic.getValue() == UpdateLogic.WALKING) {
-            if(eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
+        boolean finalizeBreak = true;
+        if (updateLogic.getValue() == UpdateLogic.WALKING) {
+            double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
+            if (eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                 if (breakRotate.getValue()) {
-                    double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
                     eventUpdateWalkingPlayer.setYaw((float) rots[0]);
                     eventUpdateWalkingPlayer.setPitch((float) rots[1]);
-                    eventUpdateWalkingPlayer.rotationUsed = true;
                 }
-            }
-            if(eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.POST) {
                 currentAttacking = crystal;
                 attackCrystal(crystal);
             }
-        } else if(updateLogic.getValue() == UpdateLogic.PACKET){
-            if(breakRotate.getValue()) {
+        } else if (updateLogic.getValue() == UpdateLogic.PACKET) {
+            if (breakRotate.getValue()) {
                 //if(extraRotPackets.getValue()) {
                 //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
                 //}
@@ -352,10 +355,10 @@ public class AutoCrystal extends Module {
             }
             currentAttacking = crystal;
             attackCrystal(crystal);
-        } else if(updateLogic.getValue() == UpdateLogic.FIELD){
-            if(breakRotate.getValue()) {
+        } else if (updateLogic.getValue() == UpdateLogic.FIELD) {
+            if (breakRotate.getValue()) {
                 double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
-                RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
+                RotationUtil.setPlayerRotations((float) rots[0], (float) rots[1]);
             }
             currentAttacking = crystal;
             attackCrystal(crystal);
@@ -368,13 +371,13 @@ public class AutoCrystal extends Module {
     }
 
     private void doPlace(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
-        if(!doCaPlace.getValue()) {
+        if (!doCaPlace.getValue()) {
             this.setModuleInfo("");
             resetRots();
             return;
         }
 
-        if(mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
+        if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
             this.setModuleInfo("");
             crystalRender = null;
             damage = 0.0d;
@@ -382,16 +385,16 @@ public class AutoCrystal extends Module {
             checkTimer.reset();
             return;
         }
-        if(!checkTimer.hasPassed(125L)) {
+        if (!checkTimer.hasPassed(125L)) {
             return;
         }
         boolean doRecalc = true;
-        if(antiRecalc.getValue()) {
+        if (antiRecalc.getValue()) {
             doRecalc = false;
-            if(oldPlacePos == null) {
+            if (oldPlacePos == null) {
                 doRecalc = true;
             } else {
-                if(CombatUtil.placePosStillSatisfies(oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                if (CombatUtil.placePosStillSatisfies(oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                     doRecalc = false;
                 } else {
                     doRecalc = true;
@@ -400,33 +403,33 @@ public class AutoCrystal extends Module {
         }
         BlockPos placePosition = CombatUtil.getBestPlacePosition(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
 
-        if(oldPlacePos != null && !doRecalc) {
+        if (oldPlacePos != null && !doRecalc) {
             placePosition = oldPlacePos;
         }
 
 
         EnumHand placeHand = null;
 
-        if(CombatUtil.getBestPlacePosIgnoreAlreadyPlaced(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
+        if (CombatUtil.getBestPlacePosIgnoreAlreadyPlaced(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
             this.setModuleInfo("");
         }
 
-        if(mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL) {
+        if (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL) {
             placeHand = EnumHand.MAIN_HAND;
-        } else if(mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL) {
+        } else if (mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL) {
             placeHand = EnumHand.OFF_HAND;
         }
-        if(placePosition != null) {
-            if(getCrystalsInRange() >= maxInRange.getValue()) {
+        if (placePosition != null) {
+            if (getCrystalsInRange() >= maxInRange.getValue()) {
                 boolean doReset = true;
-                if(slowerClear.getValue()) {
-                    if(crystalRender != null) {
-                        if(CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                if (slowerClear.getValue()) {
+                    if (crystalRender != null) {
+                        if (CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                             doReset = false;
                         }
                     }
                 }
-                if(doReset) {
+                if (doReset) {
                     crystalRender = null;
                     damage = 0.0d;
                 }
@@ -435,73 +438,54 @@ public class AutoCrystal extends Module {
             }
             crystalRender = placePosition;
             oldPlacePos = placePosition;
+            boolean finalizePlace = true;
             damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
-            double[] rots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
-            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX()+ 0.5, placePosition.getY(), placePosition.getZ() + 0.5);
-
-            if(placeRotate.getValue()) {
-                if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
-                    if(constRotate.getValue()) {
-                        eventUpdateWalkingPlayer.setYaw((float) constRots[0]);
-                        eventUpdateWalkingPlayer.setPitch((float) constRots[1]);
-                        eventUpdateWalkingPlayer.rotationUsed = true;
-                        updateYaw = (float)constRots[0];
-                        updatePitch = (float)constRots[1];
-                    } else {
-                        eventUpdateWalkingPlayer.setYaw((float) rots[0]);
-                        eventUpdateWalkingPlayer.setPitch((float) rots[1]);
-                        eventUpdateWalkingPlayer.rotationUsed = true;
-                        updateYaw = (float)rots[0];
-                        updatePitch = (float)rots[1];
-                    }
-                } else if(updateLogic.getValue() == UpdateLogic.PACKET){
-                    if(constRotate.getValue()) {
-                        setRotations(constRots[0], constRots[1]);
-                    } else {
-                        setRotations(rots[0], rots[1]);
-                    }
-                } else if(updateLogic.getValue() == UpdateLogic.FIELD) {
-                    if(constRotate.getValue()) {
-                        RotationUtil.setPlayerRotations((float)constRots[0], (float)constRots[1]);
-                    } else {
-                        RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
-                    }
+            double[] rots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
+            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY(), placePosition.getZ() + 0.5);
+            double[] finalRotations = (constRotate.getValue() ? constRots : rots);
+            if (placeRotate.getValue()) {
+                if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
+                     doWalkingRotationsAndCanDo(eventUpdateWalkingPlayer, finalRotations);
+                } else if (updateLogic.getValue() != UpdateLogic.WALKING) {
+                    doRotations(updateLogic.getValue(), finalRotations);
                 }
             }
-            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX+0.5, mc.player.posY + 1.0, mc.player.posZ+0.5), new Vec3d(placePosition.getX()+ 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5));
+            if(updateLogic.getValue() == UpdateLogic.WALKING) {
+                finalizePlace = canFinalizePlace();
+            }
+            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5));
             EnumFacing facing = null;
             // placing that works on 2b :^)
             if (rayTraceResult == null || rayTraceResult.sideHit == null) {
                 rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
-                if(rayTraceResult != null) {
-                    if(rayTraceResult.sideHit != null) {
+                if (rayTraceResult != null) {
+                    if (rayTraceResult.sideHit != null) {
                         facing = rayTraceResult.sideHit;
                     }
                 }
             } else {
                 facing = rayTraceResult.sideHit;
             }
-            if(placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
+            if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
                 this.setModuleInfo("");
                 resetRots();
                 return;
             } else {
-                if(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition) != null) {
+                if (CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition) != null) {
                     this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition).getName() + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
                 }
             }
-            if(placeTimer.hasPassed(placeDelay.getValue())) {
-                boolean finalizePlace = true;
-                if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer.getStage() != ForgeEvent.Stage.POST) {
+            if (placeTimer.hasPassed(placeDelay.getValue())) {
+                if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer.getStage() != ForgeEvent.Stage.POST) {
                     finalizePlace = false;
                 }
-                if(finalizePlace) {
+                if (finalizePlace) {
                     if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
                         this.setModuleInfo("");
                         resetRots();
                         return;
                     }
-                    if(waitPredict.getValue() && predictPacket != null) {
+                    if (waitPredict.getValue() && predictPacket != null) {
                         mc.player.connection.sendPacket(predictPacket);
                         predictPacket = null;
                     }
@@ -509,13 +493,13 @@ public class AutoCrystal extends Module {
                     //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
                     //}
                     if (africanMode.getValue()) {
-                        for(int i = 0; i < 10; i++) {
+                        for (int i = 0; i < 10; i++) {
                             mc.player.connection.sendPacket(new CPacketPlayer(false));
                         }
                     }
                     placedCrystals.add(placePosition);
                     mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
-                    if(swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
+                    if (swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
                         mc.player.swingArm(placeHand);
                     }
                     placeTimer.reset();
@@ -533,31 +517,32 @@ public class AutoCrystal extends Module {
         } else {
             //this.setModuleInfo("");
             boolean doReset = true;
-            if(slowerClear.getValue()) {
-                if(crystalRender != null) {
-                    if(CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+            if (slowerClear.getValue()) {
+                if (crystalRender != null) {
+                    if (CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                         doReset = false;
                     }
                 }
             }
-            if(doReset) {
+            if (doReset) {
                 crystalRender = null;
                 damage = 0.0d;
-                if(!fasterResetRot.getValue()) {
+                if (!fasterResetRot.getValue()) {
                     resetRots();
                 }
             } else {
-                if(!fasterResetRot.getValue()) {
-                    if(updateLogic.getValue() == UpdateLogic.WALKING) {
-                        if(updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
-                            eventUpdateWalkingPlayer.setYaw(updateYaw);
-                            eventUpdateWalkingPlayer.setPitch(updatePitch);
-                            eventUpdateWalkingPlayer.rotationUsed = true;
+                if (!fasterResetRot.getValue()) {
+                    if(currentRotationYaw != -1f && currentRotationPitch != -1f) {
+                        if (updateLogic.getValue() == UpdateLogic.WALKING) {
+                            if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
+                                eventUpdateWalkingPlayer.setYaw(currentRotationYaw);
+                                eventUpdateWalkingPlayer.setPitch(currentRotationPitch);
+                            }
                         }
                     }
                 }
             }
-            if(fasterResetRot.getValue()) {
+            if (fasterResetRot.getValue()) {
                 resetRots();
             }
         }
@@ -565,9 +550,9 @@ public class AutoCrystal extends Module {
 
     @Override
     public void onRender3D(Render3DEvent event) {
-        if(renderESP.getValue()) {
+        if (renderESP.getValue()) {
             if (crystalRender != null && CombatUtil.isHoldingCrystal()) {
-                if(!colorSync.getValue()) {
+                if (!colorSync.getValue()) {
                     RenderUtil.drawBoxESP(crystalRender, new Color(colorRed.getValue(), colorGreen.getValue(), colorBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
                 } else {
                     Color syncColor = Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false));
@@ -575,7 +560,7 @@ public class AutoCrystal extends Module {
                 }
             }
         }
-        if(damageText.getValue()) {
+        if (damageText.getValue()) {
             if (crystalRender != null && CombatUtil.isHoldingCrystal()) {
                 List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
                 double highestDMG = 0f;
@@ -592,22 +577,77 @@ public class AutoCrystal extends Module {
                     float dmgCalculation = 0.0f;
                     try {
                         dmgCalculation = CombatUtil.calculateDamage(crystalRender, entity);
-                    } catch(NullPointerException exception) {}
-                    if(dmgCalculation > highestDMG) {
+                    } catch (NullPointerException exception) {
+                    }
+                    if (dmgCalculation > highestDMG) {
                         highestDMG = dmgCalculation;
                     }
                 }
                 //String dmgTextRender = ((Math.floor(damage) == damage) ? Integer.valueOf((int)damage) : String.format("%.1f", damage)) + "";
-                String dmgTextRender = ((Math.floor(highestDMG) == highestDMG) ? Integer.valueOf((int)highestDMG) : String.format("%.1f", highestDMG)) + "";
+                String dmgTextRender = ((Math.floor(highestDMG) == highestDMG) ? Integer.valueOf((int) highestDMG) : String.format("%.1f", highestDMG)) + "";
                 RenderUtil.drawText(crystalRender, dmgTextRender);
             }
         }
     }
 
+    private boolean canFinalizePlace() {
+        if(!hasReachedYaw && cancelUntilYaw.getValue()) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean doWalkingRotationsAndCanDo(EventUpdateWalkingPlayer walking, double[] rots) {
+        boolean doNewYaw = true;
+        if(targetRotationYaw == -1f) {
+            currentRotationYaw = mc.player.rotationYaw;
+            targetRotationYaw = (float)rots[0];
+            if(lastTargetYaw == targetRotationYaw) {
+                currentRotationYaw = (float)rots[0];
+                doNewYaw = false;
+            }
+        }
+        if(yawStep.getValue() && doNewYaw) {
+            currentRotationYaw = RotationUtil.properYawStep(currentRotationYaw, targetRotationYaw, yawStepTicks.getValue().floatValue());
+        } else if(yawStep.getValue()){
+            currentRotationYaw = (float)rots[0];
+        }
+        if(rotateHead.getValue()) {
+            mc.player.rotationYawHead = currentRotationYaw;
+        }
+        walking.setYaw(currentRotationYaw);
+        walking.setPitch((float)rots[1]);
+        currentRotationPitch = (float) rots[1];
+        if(RotationUtil.yawReached(currentRotationYaw, targetRotationYaw) || !yawStep.getValue()) {
+            hasReachedYaw = true;
+            lastTargetYaw = currentRotationYaw;
+        } else {
+            hasReachedYaw = false;
+        }
+        if(!hasReachedYaw && cancelUntilYaw.getValue()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void doRotations(UpdateLogic logic, double[] rots) {
+        switch(logic) {
+            case FIELD:
+                RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
+                break;
+            case PACKET:
+                setRotations(rots[0], rots[1]);
+                break;
+        }
+    }
+
+
+
     private void attackCrystal(Entity entity) {
         Criticals.INSTANCE.ignoring = true;
         mc.playerController.attackEntity(mc.player, entity);
-        if(swingSetting.getValue() == SwingLogic.BREAK || swingSetting.getValue() == SwingLogic.BOTH) {
+        if (swingSetting.getValue() == SwingLogic.BREAK || swingSetting.getValue() == SwingLogic.BOTH) {
             mc.player.swingArm(offhandSwing.getValue() ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
         }
         if (attackedCrystals.containsKey(entity)) {
@@ -616,18 +656,18 @@ public class AutoCrystal extends Module {
             attackedCrystals.put((EntityEnderCrystal) entity, 1);
         }
         BlockPos brokenPos = new BlockPos(entity.posX, entity.posY, entity.posZ);
-        if(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos) != null) {
-            this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName()  + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
+        if (CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos) != null) {
+            this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName() + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
         }
         Criticals.INSTANCE.ignoring = false;
-        if(doublePlace.getValue() && (attackLogic.getValue() == AttackLogic.CSLOT) && crystalRender != null) {
-            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX+0.5, mc.player.posY + 1.0, mc.player.posZ+0.5), new Vec3d(crystalRender));
+        if (doublePlace.getValue() && (attackLogic.getValue() == AttackLogic.CSLOT) && crystalRender != null) {
+            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(crystalRender));
             EnumFacing facing = null;
             // placing that works on 2b :^)
             if (rayTraceResult == null || rayTraceResult.sideHit == null) {
                 rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
-                if(rayTraceResult != null) {
-                    if(rayTraceResult.sideHit != null) {
+                if (rayTraceResult != null) {
+                    if (rayTraceResult.sideHit != null) {
                         facing = rayTraceResult.sideHit;
                     }
                 }
@@ -635,14 +675,14 @@ public class AutoCrystal extends Module {
                 facing = rayTraceResult.sideHit;
             }
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
-            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(crystalRender, facing, placeHand, (float) rayTraceResult.hitVec.x,  (float) rayTraceResult.hitVec.y,  (float) rayTraceResult.hitVec.z));
+            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(crystalRender, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
         }
         breakTimer.reset();
     }
 
     private void setRotations(double newYaw, double newPitch) {
-        if(yawStep.getValue()) {
-            if(newYaw >= 0) {
+        if (yawStep.getValue()) {
+            if (newYaw >= 0) {
                 yawTicks += yawStepTicks.getValue();
                 if (yawTicks >= newYaw) {
                     yaw = (float) newYaw;
@@ -664,20 +704,23 @@ public class AutoCrystal extends Module {
             yaw = (float) newYaw;
         }
         pitch = (float) newPitch;
-        if(debugRotate.getValue()) {
+        if (debugRotate.getValue()) {
             mc.player.rotationYaw = yaw;
             mc.player.rotationPitch = pitch;
         }
         isRotating = true;
-        if(!yawStep.getValue()) {
+        if (!yawStep.getValue()) {
             hasReachedYaw = true;
         }
     }
 
     private static void resetRots() {
-        if(!hasReachedYaw) {
+        if (!hasReachedYaw) {
             return;
         }
+        currentRotationYaw = -1f;
+        currentRotationPitch = -1f;
+        targetRotationYaw = -1f;
         if (isRotating) {
             yaw = mc.player.rotationYaw;
             pitch = mc.player.rotationPitch;
@@ -687,31 +730,30 @@ public class AutoCrystal extends Module {
     }
 
 
-
     private int getCrystalsInRange() {
         int crystalCount = 0;
-        if(damageMap() == null) {
+        if (damageMap() == null) {
             return 0;
         }
         for (Map.Entry<Entity, Float> entry : this.damageMap().entrySet()) {
             Entity crystal = entry.getKey();
-            float damage = ((Float)entry.getValue()).floatValue();
+            float damage = ((Float) entry.getValue()).floatValue();
             boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystal((EntityEnderCrystal) crystal, (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
-            if((damage >= minPlaceDMG.getValue() || (isFacePlaceCrystal && countFacePlace.getValue())) && ((mc.player.getDistance(crystal) <= placeRange.getValue()))) {
-                if(antiMultiLethal.getValue() && damage >= lethalMin.getValue()) {
+            if ((damage >= minPlaceDMG.getValue() || (isFacePlaceCrystal && countFacePlace.getValue())) && ((mc.player.getDistance(crystal) <= placeRange.getValue()))) {
+                if (antiMultiLethal.getValue() && damage >= lethalMin.getValue()) {
                     crystalCount = maxInRange.getValue();
                     return crystalCount;
                 }
                 crystalCount++;
             }
         }
-        if(crystalCount == 0 && (maxInRange.getValue() == 1)) {
-            if(currentAttacking != null) {
-                crystalCount+=1;
+        if (crystalCount == 0 && (maxInRange.getValue() == 1)) {
+            if (currentAttacking != null) {
+                crystalCount += 1;
             }
         }
-        if(!novolaTimer.hasPassed(50) && antiping.getValue()) {
-            if(crystalCount == 0) {
+        if (!novolaTimer.hasPassed(50) && antiping.getValue()) {
+            if (crystalCount == 0) {
                 crystalCount = 1;
             }
         }
@@ -722,14 +764,14 @@ public class AutoCrystal extends Module {
         HashMap<Entity, Float> dmgMap = new HashMap<>();
         List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         double damage = 2.0;
-        for(Entity loadedEntity : mc.world.loadedEntityList) {
-            if(!(loadedEntity instanceof EntityEnderCrystal)) {
+        for (Entity loadedEntity : mc.world.loadedEntityList) {
+            if (!(loadedEntity instanceof EntityEnderCrystal)) {
                 continue;
             }
-            if(mc.player.getDistance(loadedEntity) > breakRange.getValue()) {
+            if (mc.player.getDistance(loadedEntity) > breakRange.getValue()) {
                 continue;
             }
-            if(!CombatUtil.getMapCrystalPlace((EntityEnderCrystal) loadedEntity, placeRange.getValue(), tracePlace.getValue(), wallsPlace.getValue(), antiSuicide.getValue(), maxSelfDMG.getValue(), breakLogic.getValue(), doesDamageMin.getValue(), enemyRange.getValue())) {
+            if (!CombatUtil.getMapCrystalPlace((EntityEnderCrystal) loadedEntity, placeRange.getValue(), tracePlace.getValue(), wallsPlace.getValue(), antiSuicide.getValue(), maxSelfDMG.getValue(), breakLogic.getValue(), doesDamageMin.getValue(), enemyRange.getValue())) {
                 continue;
             }
             float highestDMG = 0f;
@@ -743,11 +785,11 @@ public class AutoCrystal extends Module {
                 if (((EntityLivingBase) entity).getHealth() <= 0.0f || ((EntityLivingBase) entity).isDead) {
                     continue;
                 }
-                if(CombatUtil.calculateDamage((EntityEnderCrystal)loadedEntity, entity) > highestDMG) {
-                    highestDMG = CombatUtil.calculateDamage((EntityEnderCrystal)loadedEntity, entity);
+                if (CombatUtil.calculateDamage((EntityEnderCrystal) loadedEntity, entity) > highestDMG) {
+                    highestDMG = CombatUtil.calculateDamage((EntityEnderCrystal) loadedEntity, entity);
                 }
             }
-            if(dmgMap.get(loadedEntity) == null) {
+            if (dmgMap.get(loadedEntity) == null) {
                 dmgMap.put(loadedEntity, highestDMG);
             }
         }
@@ -756,13 +798,13 @@ public class AutoCrystal extends Module {
 
     @SubscribeEvent
     public void onUpdateWalking(EventUpdateWalkingPlayer event) {
-        if(updateLogic.getValue() == UpdateLogic.WALKING) {
+        if (updateLogic.getValue() == UpdateLogic.WALKING) {
             doAutoCrystal(event);
-        } else if(updateLogic.getValue() == UpdateLogic.FIELD) {
-            if(event.getStage() == ForgeEvent.Stage.PRE) {
+        } else if (updateLogic.getValue() == UpdateLogic.FIELD) {
+            if (event.getStage() == ForgeEvent.Stage.PRE) {
                 RotationUtil.updateRotations();
                 doAutoCrystal(event);
-            } else if(event.getStage() == ForgeEvent.Stage.POST) {
+            } else if (event.getStage() == ForgeEvent.Stage.POST) {
                 RotationUtil.restoreRotations();
             }
         }
@@ -770,16 +812,16 @@ public class AutoCrystal extends Module {
 
     @Override
     public void onClientUpdate() {
-        if(mc.player == null || mc.world == null) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
-        if(modInfoTimer.hasPassed(100)) {
-            if(StringUtils.stripControlCodes(this.getModuleInfo()).contains(" | FP") && !faceplaceKeyOn) {
+        if (modInfoTimer.hasPassed(100)) {
+            if (StringUtils.stripControlCodes(this.getModuleInfo()).contains(" | FP") && !faceplaceKeyOn) {
                 this.setModuleInfo(StringUtils.stripControlCodes(this.getModuleInfo()).replace(" | FP", ""));
             }
             modInfoTimer.reset();
         }
-        if(updateLogic.getValue() == UpdateLogic.PACKET) {
+        if (updateLogic.getValue() == UpdateLogic.PACKET) {
             doAutoCrystal(null);
         }
     }

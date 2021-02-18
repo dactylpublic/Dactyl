@@ -55,7 +55,7 @@ public class Configuration {
                                     }
                                 }
                             } else if(setting.getValue() instanceof Integer) {
-                                mod.getSetting(pathEntry.getKey()).setValue(Integer.valueOf(String.valueOf(pathEntry.getValue())));
+                                mod.getSetting(pathEntry.getKey()).setValue(Integer.valueOf((int) Double.parseDouble(String.valueOf(pathEntry.getValue()))));
                             } else if(setting.getValue() instanceof Double) {
                                 mod.getSetting(pathEntry.getKey()).setValue(Double.valueOf(String.valueOf(pathEntry.getValue())));
                             } else if(setting.getValue() instanceof Float) {
