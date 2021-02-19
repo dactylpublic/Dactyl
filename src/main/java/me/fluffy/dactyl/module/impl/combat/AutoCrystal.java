@@ -441,7 +441,7 @@ public class AutoCrystal extends Module {
             boolean finalizePlace = true;
             damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] rots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
-            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY(), placePosition.getZ() + 0.5);
+            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
             double[] finalRotations = (constRotate.getValue() ? constRots : rots);
             if (placeRotate.getValue()) {
                 if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
