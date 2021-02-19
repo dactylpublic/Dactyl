@@ -5,6 +5,7 @@ import me.fluffy.dactyl.config.XRayManager;
 import me.fluffy.dactyl.config.friends.FriendManager;
 import me.fluffy.dactyl.gui.ClickGUI;
 import me.fluffy.dactyl.managers.*;
+import me.fluffy.dactyl.util.SoundUtil;
 import me.fluffy.dactyl.util.render.font.FontUtil;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -12,12 +13,13 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.Display;
+import sun.audio.AudioPlayer;
 
 @Mod(modid = Dactyl.MODID, name = Dactyl.NAME, version = Dactyl.VERSION)
 public class Dactyl {
     public static final String MODID = "dactyl";
     public static final String NAME = "Dactyl";
-    public static final String VERSION = "v1.4.3";
+    public static final String VERSION = "v1.4.4";
 
     public static Logger logger;
 
@@ -37,6 +39,7 @@ public class Dactyl {
     @Mod.EventHandler
     public void preInitialization(FMLPreInitializationEvent event) {
         logger = event.getModLog();
+        SoundUtil.playStartupSound();
     }
 
     @Mod.EventHandler
