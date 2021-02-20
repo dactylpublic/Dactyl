@@ -2,6 +2,7 @@ package me.fluffy.dactyl.module.impl.client;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
 import me.fluffy.dactyl.Dactyl;
+import me.fluffy.dactyl.command.impl.ConfigCommand;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.event.impl.render.PotionHUDEvent;
 import me.fluffy.dactyl.injection.inj.access.IMinecraft;
@@ -58,6 +59,10 @@ public class HUD extends Module {
     public Setting<String> customWatermark = new Setting<String>("CustomWatermark", "Trollgod.cc", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
     public Setting<Integer> waterMarkOffset = new Setting<Integer>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
     public Setting<Boolean> gradientLogo = new Setting<Boolean>("LogoGradient", false, v->renderHud.getValue());
+
+    public Setting<Boolean> currentConfig = new Setting<Boolean>("CurrentConfig", false, v->renderHud.getValue());
+    public Setting<Integer> currentConfigOffset = new Setting<Integer>("ConfigOffset", 10, 0, 100, v->renderHud.getValue() && currentConfig.getValue());
+    public Setting<Boolean> currentConfigGradient = new Setting<Boolean>("ConfigGradient", false, v->renderHud.getValue()&&currentConfig.getValue());
 
     public Setting<Boolean> shadow = new Setting<Boolean>("Shadow", false, v->renderHud.getValue());
 
@@ -135,6 +140,7 @@ public class HUD extends Module {
         if(renderHud.getValue()) {
             doArrayList();
             doWatermark();
+            doCurrentConfig();
             doOtherRender();
             renderDirAndCoords();
             renderArmorHUD();
@@ -553,6 +559,33 @@ public class HUD extends Module {
                     Dactyl.fontUtil.drawStringWithShadow(drawingWatermark, 1, offset, Colors.INSTANCE.getColor(1, false));
                 } else {
                     Dactyl.fontUtil.drawString(drawingWatermark, 1, offset, Colors.INSTANCE.getColor(1, false));
+                }
+            }
+        }
+    }
+
+    private void doCurrentConfig() {
+        if(currentConfig.getValue()) {
+            int offset = 1 + currentConfigOffset.getValue();
+            if (ConfigCommand.INSTANCE == null || ConfigCommand.INSTANCE.lastLoadedConfig == null) {
+                return;
+            }
+            if (gradientLogo.getValue()) {
+                char[] characters = ("Config: " + ConfigCommand.INSTANCE.lastLoadedConfig).toCharArray();
+                int currentX = 1;
+                for (char ch : characters) {
+                    if (shadow.getValue()) {
+                        Dactyl.fontUtil.drawStringWithShadow(String.valueOf(ch), currentX, offset, Colors.INSTANCE.getColor(currentX, true));
+                    } else {
+                        Dactyl.fontUtil.drawString(String.valueOf(ch), currentX, offset, Colors.INSTANCE.getColor(currentX, true));
+                    }
+                    currentX += Dactyl.fontUtil.getStringWidth(String.valueOf(ch));
+                }
+            } else {
+                if (shadow.getValue()) {
+                    Dactyl.fontUtil.drawStringWithShadow(("Config: " + ConfigCommand.INSTANCE.lastLoadedConfig), 1, offset, Colors.INSTANCE.getColor(1, false));
+                } else {
+                    Dactyl.fontUtil.drawString(("Config: " + ConfigCommand.INSTANCE.lastLoadedConfig), 1, offset, Colors.INSTANCE.getColor(1, false));
                 }
             }
         }

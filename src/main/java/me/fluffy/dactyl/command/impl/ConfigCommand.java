@@ -6,9 +6,12 @@ import me.fluffy.dactyl.config.Configuration;
 import me.fluffy.dactyl.util.ChatUtil;
 
 public class ConfigCommand extends Command {
+    public static ConfigCommand INSTANCE;
     public ConfigCommand() {
         super("Config", new String[] {"config", "conf"},"Manage the current config.");
+        INSTANCE = this;
     }
+    public String lastLoadedConfig = "None";
 
     @Override
     public void run(String[] args) {
@@ -58,6 +61,7 @@ public class ConfigCommand extends Command {
             ChatUtil.printMsg("&cConfiguration " + args[2] + " does not exist.", true, true);
             return;
         }
+        lastLoadedConfig = args[2];
         ChatUtil.printMsg("&aConfiguration " + args[2] + " loaded!", true, true);
     }
 }
