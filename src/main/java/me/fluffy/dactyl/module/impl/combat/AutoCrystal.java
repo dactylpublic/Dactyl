@@ -93,8 +93,8 @@ public class AutoCrystal extends Module {
     // misc
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis -> settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 180, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
+    Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis -> settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
+    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 180, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
     Setting<Boolean> cancelUntilYaw = new Setting<Boolean>("CancelUntilYaw", true, v->yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
     //Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis -> settingPage.getValue() == SettingPage.MISC);
@@ -146,6 +146,11 @@ public class AutoCrystal extends Module {
     private static boolean hasReachedYaw = false;
     private static float lastTargetYaw = -1f;
     private static float currentRotationYaw = -1f;
+    private static float lastRotatedSteppedYaw = 0f;
+    private static float currentRotationStepped = 0f;
+    private static float lastRotatedSteppedYawPlace = 0f;
+    private static float currentRotationSteppedPlace = 0f;
+    private static boolean hasFinishedYawSteporoskiPlace = true;
     private static float targetRotationYaw = -1f;
     private static boolean hasFinishedYawSteporoski = true;
     private static float currentRotationPitch = -1f;
@@ -336,18 +341,30 @@ public class AutoCrystal extends Module {
         }
         if (updateLogic.getValue() == UpdateLogic.WALKING) {
             double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
+            if(rotateHead.getValue()) {
+                float finishedYaw = (float)rots[0];
+                float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
+                if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue()) {
+                    finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
+                }
+                mc.player.rotationYawHead = finishedYaw;
+            }
             if (eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                 if (breakRotate.getValue()) {
                     float finishedYaw = (float)rots[0];
                     float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue()) {
+                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue()) {
                         finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
                         hasFinishedYawSteporoski = false;
                     } else {
                         hasFinishedYawSteporoski = true;
                     }
-                    if(rotateHead.getValue()) {
-                        mc.player.rotationYawHead = finishedYaw;
+                    if(lastRotatedSteppedYaw == finishedYaw) {
+                        finishedYaw = lastRotatedSteppedYaw;
+                    } else {
+                        if(hasFinishedYawSteporoski) {
+                            currentRotationStepped = finishedYaw;
+                        }
                     }
                     eventUpdateWalkingPlayer.setYaw(finishedYaw);
                     eventUpdateWalkingPlayer.setPitch((float) rots[1]);
@@ -356,6 +373,7 @@ public class AutoCrystal extends Module {
                 if(!hasFinishedYawSteporoski && breakRotate.getValue()) {
                     return;
                 }
+                lastRotatedSteppedYaw = currentRotationStepped;
                 currentAttacking = crystal;
                 attackCrystal(crystal);
             }
@@ -456,13 +474,32 @@ public class AutoCrystal extends Module {
             double[] finalRotations = (constRotate.getValue() ? constRots : rots);
             if (placeRotate.getValue()) {
                 if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
-                     doWalkingRotationsAndCanDo(eventUpdateWalkingPlayer, finalRotations);
+                    float finishedYaw = (float) finalRotations[0];
+                    float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
+                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue()) {
+                        finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
+                        hasFinishedYawSteporoskiPlace = false;
+                    } else {
+                        hasFinishedYawSteporoskiPlace = true;
+                    }
+                    if(lastRotatedSteppedYawPlace == finishedYaw) {
+                        finishedYaw = lastRotatedSteppedYawPlace;
+                    } else {
+                        if(hasFinishedYawSteporoskiPlace) {
+                            currentRotationSteppedPlace = finishedYaw;
+                        }
+                    }
+                    eventUpdateWalkingPlayer.setYaw(finishedYaw);
+                    eventUpdateWalkingPlayer.setPitch((float) finalRotations[1]);
+                    //doWalkingRotationsAndCanDo(eventUpdateWalkingPlayer, finalRotations);
                 } else if (updateLogic.getValue() != UpdateLogic.WALKING) {
                     doRotations(updateLogic.getValue(), finalRotations);
                 }
             }
-            if(updateLogic.getValue() == UpdateLogic.WALKING) {
-                finalizePlace = canFinalizePlace();
+            if(!hasFinishedYawSteporoskiPlace && placeRotate.getValue()) {
+                finalizePlace = false;
+            } else {
+                lastRotatedSteppedYawPlace = currentRotationSteppedPlace;
             }
             RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5));
             EnumFacing facing = null;
@@ -504,7 +541,7 @@ public class AutoCrystal extends Module {
                     //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
                     //}
                     if (africanMode.getValue()) {
-                        for (int i = 0; i < 10; i++) {
+                        for (int i = 0; i < 30; i++) {
                             mc.player.connection.sendPacket(new CPacketPlayer(false));
                         }
                     }
@@ -692,46 +729,16 @@ public class AutoCrystal extends Module {
     }
 
     private void setRotations(double newYaw, double newPitch) {
-        if (yawStep.getValue()) {
-            if (newYaw >= 0) {
-                yawTicks += yawStepTicks.getValue();
-                if (yawTicks >= newYaw) {
-                    yaw = (float) newYaw;
-                    hasReachedYaw = true;
-                } else {
-                    yaw = (float) yawTicks;
-                }
-            } else {
-                // negative
-                yawTicks -= yawStepTicks.getValue();
-                if (yawTicks <= newYaw) {
-                    yaw = (float) newYaw;
-                    hasReachedYaw = true;
-                } else {
-                    yaw = (float) yawTicks;
-                }
-            }
-        } else {
-            yaw = (float) newYaw;
-        }
+        yaw = (float) newYaw;
         pitch = (float) newPitch;
         if (debugRotate.getValue()) {
             mc.player.rotationYaw = yaw;
             mc.player.rotationPitch = pitch;
         }
         isRotating = true;
-        if (!yawStep.getValue()) {
-            hasReachedYaw = true;
-        }
     }
 
     private static void resetRots() {
-        if (!hasReachedYaw) {
-            return;
-        }
-        currentRotationYaw = -1f;
-        currentRotationPitch = -1f;
-        targetRotationYaw = -1f;
         if (isRotating) {
             yaw = mc.player.rotationYaw;
             pitch = mc.player.rotationPitch;

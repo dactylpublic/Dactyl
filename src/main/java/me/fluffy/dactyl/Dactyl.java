@@ -19,7 +19,7 @@ import sun.audio.AudioPlayer;
 public class Dactyl {
     public static final String MODID = "dactyl";
     public static final String NAME = "Dactyl";
-    public static final String VERSION = "v1.4.4";
+    public static final String VERSION = "v1.4.5";
 
     public static Logger logger;
 
