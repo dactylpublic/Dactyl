@@ -638,47 +638,6 @@ public class AutoCrystal extends Module {
         }
     }
 
-    private boolean canFinalizePlace() {
-        if(!hasReachedYaw && cancelUntilYaw.getValue()) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean doWalkingRotationsAndCanDo(EventUpdateWalkingPlayer walking, double[] rots) {
-        boolean doNewYaw = true;
-        if(targetRotationYaw == -1f) {
-            currentRotationYaw = mc.player.rotationYaw;
-            targetRotationYaw = (float)rots[0];
-            if(lastTargetYaw == targetRotationYaw) {
-                currentRotationYaw = (float)rots[0];
-                doNewYaw = false;
-            }
-        }
-        if(yawStep.getValue() && doNewYaw) {
-            currentRotationYaw = RotationUtil.properYawStep(currentRotationYaw, targetRotationYaw, yawStepTicks.getValue().floatValue());
-        } else if(yawStep.getValue()){
-            currentRotationYaw = (float)rots[0];
-        }
-        if(rotateHead.getValue()) {
-            mc.player.rotationYawHead = currentRotationYaw;
-        }
-        walking.setYaw(currentRotationYaw);
-        walking.setPitch((float)rots[1]);
-        currentRotationPitch = (float) rots[1];
-        if(RotationUtil.yawReached(currentRotationYaw, targetRotationYaw) || !yawStep.getValue()) {
-            hasReachedYaw = true;
-            lastTargetYaw = currentRotationYaw;
-        } else {
-            hasReachedYaw = false;
-        }
-        if(!hasReachedYaw && cancelUntilYaw.getValue()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     private void doRotations(UpdateLogic logic, double[] rots) {
         switch(logic) {
             case FIELD:

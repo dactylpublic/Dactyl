@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.module.impl.movement;
 
 import me.fluffy.dactyl.event.ForgeEvent;
+import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.injection.inj.access.IMinecraft;
 import me.fluffy.dactyl.injection.inj.access.ITimer;
@@ -8,6 +9,8 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.init.MobEffects;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Objects;
@@ -37,6 +40,20 @@ public class LongJump extends Module {
         didJump = false;
     }
 
+    @SubscribeEvent
+    public void onPacket(PacketEvent event) {
+        if(event.getType() == PacketEvent.PacketType.INCOMING) {
+            if(event.getPacket() instanceof SPacketPlayerPosLook) {
+                SPacketPlayerPosLook p = (SPacketPlayerPosLook)event.getPacket();
+                if(mc.player.getDistance(p.getX(), p.getY(), p.getZ()) >= 0.75d) {
+                    if(autoOff.getValue()) {
+                        this.toggle();
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void onClientUpdate() {
         if(mc == null || mc.player == null) {
@@ -46,9 +63,9 @@ public class LongJump extends Module {
         if(canSprint() && autoSprint.getValue()) {
             mc.player.setSprinting(true);
         }
-        if(didJump && autoOff.getValue() && mc.player.onGround) {
-            this.toggle();
-        }
+        //if(didJump && autoOff.getValue() && mc.player.onGround) {
+        //    this.toggle();
+        //}
         this.setModuleInfo(timeOut.getValue() ? "Timeout" : "Boost");
     }
 

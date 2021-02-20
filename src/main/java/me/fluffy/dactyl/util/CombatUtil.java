@@ -1399,7 +1399,12 @@ public class CombatUtil {
     }
 
     public static boolean canSeeBlock(BlockPos pos) {
-        return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY()+1.0f, pos.getZ()), false, true, false) == null);
+        return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 0.5f, pos.getZ()), false, true, false) == null);
+        //return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY()+1.0f, pos.getZ()), false, true, false) == null);
+    }
+
+    public static boolean canSeeCenterOfBlock(BlockPos pos) {
+        return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX() - 0.5f, pos.getY(), pos.getZ() - 0.5f), false, true, false) == null);
     }
 
 
