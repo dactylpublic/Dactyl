@@ -94,7 +94,7 @@ public class AutoCrystal extends Module {
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis -> settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis -> settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 300, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
+    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 180, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> cancelUntilYaw = new Setting<Boolean>("CancelUntilYaw", true, v->yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
     //Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", false, vis->settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis -> settingPage.getValue() == SettingPage.MISC);
@@ -147,6 +147,7 @@ public class AutoCrystal extends Module {
     private static float lastTargetYaw = -1f;
     private static float currentRotationYaw = -1f;
     private static float targetRotationYaw = -1f;
+    private static boolean hasFinishedYawSteporoski = true;
     private static float currentRotationPitch = -1f;
     private static double damage = 0.0d;
     private static int yawTicks = 0;
@@ -333,23 +334,33 @@ public class AutoCrystal extends Module {
             currentAttacking = null;
             return;
         }
-        boolean finalizeBreak = true;
         if (updateLogic.getValue() == UpdateLogic.WALKING) {
             double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
             if (eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                 if (breakRotate.getValue()) {
-                    eventUpdateWalkingPlayer.setYaw((float) rots[0]);
+                    float finishedYaw = (float)rots[0];
+                    float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
+                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue()) {
+                        finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
+                        hasFinishedYawSteporoski = false;
+                    } else {
+                        hasFinishedYawSteporoski = true;
+                    }
+                    if(rotateHead.getValue()) {
+                        mc.player.rotationYawHead = finishedYaw;
+                    }
+                    eventUpdateWalkingPlayer.setYaw(finishedYaw);
                     eventUpdateWalkingPlayer.setPitch((float) rots[1]);
+                }
+            } else if(eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.POST) {
+                if(!hasFinishedYawSteporoski && breakRotate.getValue()) {
+                    return;
                 }
                 currentAttacking = crystal;
                 attackCrystal(crystal);
             }
         } else if (updateLogic.getValue() == UpdateLogic.PACKET) {
             if (breakRotate.getValue()) {
-                //if(extraRotPackets.getValue()) {
-                //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
-                //}
-                //float[] rots = CombatUtil.calcAngle(mc.player.getPositionEyes(mc.getRenderPartialTicks()), crystal.getPositionVector());
                 double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
                 setRotations(rots[0], rots[1]);
             }
