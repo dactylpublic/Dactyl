@@ -467,6 +467,10 @@ public class AutoCrystal extends Module {
                     damage = 0.0d;
                 }
                 //resetRots();
+                if(noPlaceWhenAttack.getValue() && currentAttacking != null) {
+                    crystalRender = null;
+                    damage = 0.0d;
+                }
                 return;
             }
             crystalRender = placePosition;
