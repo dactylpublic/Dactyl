@@ -95,6 +95,7 @@ public class AutoCrystal extends Module {
     Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis -> settingPage.getValue() == SettingPage.MISC);
     Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis -> settingPage.getValue() == SettingPage.MISC);
     Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis -> settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
+    Setting<Boolean> doLogicalBreakStep = new Setting<Boolean>("LogicalBreakYaw", false, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
     Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 180, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
     //Setting<Boolean> cancelUntilYaw = new Setting<Boolean>("CancelUntilYaw", true, v->yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
     //Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", false, vis->settingPage.getValue() == SettingPage.MISC);
@@ -361,7 +362,7 @@ public class AutoCrystal extends Module {
                     } else {
                         hasFinishedYawSteporoski = true;
                     }
-                    if(lastRotatedSteppedYaw == finishedYaw || lastRotatedSteppedYawPlace == finishedYaw) {
+                    if(lastRotatedSteppedYaw == finishedYaw || (doLogicalBreakStep.getValue() && lastRotatedSteppedYawPlace == finishedYaw)) {
                         finishedYaw = lastRotatedSteppedYaw;
                     } else {
                         if(hasFinishedYawSteporoski) {
