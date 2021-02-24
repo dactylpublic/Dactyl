@@ -359,13 +359,14 @@ public class AutoCrystal extends Module {
                     } else {
                         hasFinishedYawSteporoski = true;
                     }
-                    if(lastRotatedSteppedYaw == finishedYaw) {
+                    if(lastRotatedSteppedYaw == finishedYaw || lastRotatedSteppedYawPlace == finishedYaw) {
                         finishedYaw = lastRotatedSteppedYaw;
                     } else {
                         if(hasFinishedYawSteporoski) {
                             currentRotationStepped = finishedYaw;
                         }
                     }
+                    //System.out.println("Break Yaw: " + (float)rots[0]);
                     eventUpdateWalkingPlayer.setYaw(finishedYaw);
                     eventUpdateWalkingPlayer.setPitch((float) rots[1]);
                 }
@@ -489,6 +490,7 @@ public class AutoCrystal extends Module {
                             currentRotationSteppedPlace = finishedYaw;
                         }
                     }
+                    //System.out.println("Place Yaw: " + (float)finalRotations[0]);
                     eventUpdateWalkingPlayer.setYaw(finishedYaw);
                     eventUpdateWalkingPlayer.setPitch((float) finalRotations[1]);
                     //doWalkingRotationsAndCanDo(eventUpdateWalkingPlayer, finalRotations);
