@@ -28,6 +28,7 @@ public class Strafe extends Module {
     Setting<String> speedAddition = new Setting<String>("SpeedAddition", "0.272", v->addSpeed.getValue());
     Setting<Boolean> extraSpeed = new Setting<Boolean>("Extra", false);
     Setting<Boolean> damageBoost = new Setting<Boolean>("DMGBoost", false);
+    Setting<String> sneakAddition = new Setting<String>("SneakSpeed", "1.00");
     Setting<Double> vanillaSpeed = new Setting<Double>("VanillaSpeed", 6.0d, 0.1d, 10.0d, vis->extraSpeed.getValue());
     Setting<SkipMode> skipModeSetting = new Setting<SkipMode>("Skips", SkipMode.TICK);
     Setting<Integer> skipTickHops = new Setting<Integer>("SkipTicks", 1, 1, 10, vis->skipModeSetting.getValue() == SkipMode.TICK);
@@ -232,6 +233,13 @@ public class Strafe extends Module {
             }
         } else {
             baseSpeed = 0.272;
+        }
+        if(mc.player.isSneaking()) {
+            try{
+                baseSpeed = Double.valueOf(sneakAddition.getValue());
+            } catch(Exception e) {
+                baseSpeed = 0.354;
+            }
         }
         if (mc.player.isPotionActive(MobEffects.SPEED)) {
             final int amplifier = Objects.requireNonNull(mc.player.getActivePotionEffect(MobEffects.SPEED)).getAmplifier();
