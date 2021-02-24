@@ -332,7 +332,7 @@ public class AutoCrystal extends Module {
                 .filter(this::passesAntiStuck)
                 .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
                 .orElse(null);
-        if (crystal == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
+        if (crystal == null || (cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65))) {
             resetRots();
             currentAttacking = null;
             return;
@@ -409,7 +409,7 @@ public class AutoCrystal extends Module {
             return;
         }
 
-        if ((noPlaceWhenAttack.getValue() && currentAttacking != null) || mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
+        if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
             this.setModuleInfo("");
             crystalRender = null;
             damage = 0.0d;
@@ -452,7 +452,7 @@ public class AutoCrystal extends Module {
             placeHand = EnumHand.OFF_HAND;
         }
         if (placePosition != null) {
-            if (getCrystalsInRange() >= maxInRange.getValue()) {
+            if (getCrystalsInRange() >= maxInRange.getValue() || (noPlaceWhenAttack.getValue() && currentAttacking != null)) {
                 boolean doReset = true;
                 if (slowerClear.getValue()) {
                     if (crystalRender != null) {
