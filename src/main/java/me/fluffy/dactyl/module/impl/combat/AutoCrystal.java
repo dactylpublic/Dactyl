@@ -351,7 +351,7 @@ public class AutoCrystal extends Module {
                 if (breakRotate.getValue()) {
                     float finishedYaw = (float)rots[0];
                     float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue()) {
+                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue() && !(lastRotatedSteppedYaw == finishedYaw || (doLogicalBreakStep.getValue() && lastRotatedSteppedYawPlace == finishedYaw))) {
                         finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
                         hasFinishedYawSteporoski = false;
                     } else {
@@ -359,6 +359,8 @@ public class AutoCrystal extends Module {
                     }
                     if(lastRotatedSteppedYaw == finishedYaw || (doLogicalBreakStep.getValue() && lastRotatedSteppedYawPlace == finishedYaw)) {
                         finishedYaw = lastRotatedSteppedYaw;
+                        hasFinishedYawSteporoski = true;
+                        currentRotationStepped = finishedYaw;
                     } else {
                         if(hasFinishedYawSteporoski) {
                             currentRotationStepped = finishedYaw;
@@ -504,7 +506,7 @@ public class AutoCrystal extends Module {
                 if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                     float finishedYaw = (float) finalRotations[0];
                     float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue()) {
+                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue() && (lastRotatedSteppedYawPlace != finishedYaw)) {
                         finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
                         hasFinishedYawSteporoskiPlace = false;
                     } else {
@@ -512,15 +514,15 @@ public class AutoCrystal extends Module {
                     }
                     if(lastRotatedSteppedYawPlace == finishedYaw) {
                         finishedYaw = lastRotatedSteppedYawPlace;
+                        hasFinishedYawSteporoskiPlace = true;
+                        currentRotationSteppedPlace = finishedYaw;
                     } else {
                         if(hasFinishedYawSteporoskiPlace) {
                             currentRotationSteppedPlace = finishedYaw;
                         }
                     }
-                    //System.out.println("Place Yaw: " + (float)finalRotations[0]);
                     eventUpdateWalkingPlayer.setYaw(finishedYaw);
                     eventUpdateWalkingPlayer.setPitch((float) finalRotations[1]);
-                    //doWalkingRotationsAndCanDo(eventUpdateWalkingPlayer, finalRotations);
                 } else if (updateLogic.getValue() != UpdateLogic.WALKING) {
                     doRotations(updateLogic.getValue(), finalRotations);
                 }
