@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.module.impl.combat;
 
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.movement.Step;
 import me.fluffy.dactyl.module.impl.movement.Strafe;
 import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.setting.Setting;
@@ -23,6 +24,7 @@ public class Surround extends Module {
     public Setting<Boolean> autoCenter = new Setting<Boolean>("AutoCenter", true);
     public Setting<Boolean> jumpDisable = new Setting<Boolean>("JumpDisable", true);
     public Setting<Boolean> strafeDisable = new Setting<Boolean>("StrafeDisable", true);
+    public Setting<Boolean> stepDisable = new Setting<Boolean>("StepDisable", true);
     public Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", false);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
@@ -70,6 +72,14 @@ public class Surround extends Module {
         this.setModuleInfo(HoleUtil.isInHole() ? TextFormatting.GREEN + "Safe" : TextFormatting.RED + "Unsafe");
         if(strafeDisable.getValue()) {
             if(Strafe.INSTANCE.isEnabled()) {
+                if (mc.player.moveForward != 0.0F || mc.player.moveStrafing != 0.0F) {
+                    this.toggle();
+                    return;
+                }
+            }
+        }
+        if(stepDisable.getValue()) {
+            if(Step.INSTANCE.isEnabled()) {
                 if (mc.player.moveForward != 0.0F || mc.player.moveStrafing != 0.0F) {
                     this.toggle();
                     return;
