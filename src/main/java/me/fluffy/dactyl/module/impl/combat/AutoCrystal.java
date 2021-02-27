@@ -338,8 +338,10 @@ public class AutoCrystal extends Module {
             currentAttacking = null;
             return;
         }
+        if(crystal != null) {
+            currentAttacking = crystal;
+        }
         if (!breakTimer.hasPassed(breakDelay.getValue())) {
-            //currentAttacking = null;
             return;
         }
         if (updateLogic.getValue() == UpdateLogic.WALKING) {
