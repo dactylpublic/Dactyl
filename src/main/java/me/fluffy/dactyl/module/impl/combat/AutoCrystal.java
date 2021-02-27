@@ -67,6 +67,7 @@ public class AutoCrystal extends Module {
     Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 0.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
     Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> minCountDmg = new Setting<Double>("MinCountDMG", 4.0D, 1.0D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> facePlaceHold = new Setting<Boolean>("FPHold", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Bind> facePlaceKey = new Setting<Bind>("FacePlaceKey", new Bind(Keyboard.KEY_NONE), vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
@@ -749,7 +750,7 @@ public class AutoCrystal extends Module {
             Entity crystal = entry.getKey();
             float damage = ((Float) entry.getValue()).floatValue();
             boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystal((EntityEnderCrystal) crystal, (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
-            if ((damage >= minPlaceDMG.getValue() || (isFacePlaceCrystal && countFacePlace.getValue())) && ((mc.player.getDistance(crystal) <= placeRange.getValue()))) {
+            if ((damage >= minCountDmg.getValue() || (isFacePlaceCrystal && countFacePlace.getValue())) && ((mc.player.getDistance(crystal) <= placeRange.getValue()))) {
                 if (antiMultiLethal.getValue() && damage >= lethalMin.getValue()) {
                     crystalCount = maxInRange.getValue();
                     return crystalCount;
