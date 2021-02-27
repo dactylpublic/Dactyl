@@ -67,7 +67,7 @@ public class AutoCrystal extends Module {
     Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 0.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
     Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> minCountDmg = new Setting<Double>("MinCountDMG", 4.0D, 1.0D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    Setting<Double> minCountDmg = new Setting<Double>("MinCountDMG", 4.0D, 0.1D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Boolean> facePlaceHold = new Setting<Boolean>("FPHold", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
     Setting<Bind> facePlaceKey = new Setting<Bind>("FacePlaceKey", new Bind(Keyboard.KEY_NONE), vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
