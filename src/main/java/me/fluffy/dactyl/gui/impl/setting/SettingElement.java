@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.gui.impl.setting;
 
 import me.fluffy.dactyl.gui.ClickGUI;
+import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.render.RenderUtil;
 
@@ -30,7 +31,12 @@ public class SettingElement {
         int startColor = ClickGUI.INSTANCE.getColorHovering(this.y, this.x, this.y, mouseX, mouseY, !color, false);
         int endColor = ClickGUI.INSTANCE.getColorHovering(this.y+15, this.x, this.y, mouseX, mouseY, !color, false);
         //int c = ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, !color, false);
-        RenderUtil.drawGradientRect(x, y, x+100, y+15, startColor, endColor);
+        if(ClickGuiModule.INSTANCE.gradientGui.getValue()) {
+            RenderUtil.drawGradientRect(x, y, x + 100, y + 15, startColor, endColor);
+        } else {
+            startColor = ClickGUI.INSTANCE.getColorHoveringNonGradient(1, this.x, this.y, mouseX, mouseY, !color, false);
+            RenderUtil.drawRect(x, y, x + 100, y + 15, startColor);
+        }
         //RenderUtil.drawRect(x, y, x+100, y+15, c);
         RenderUtil.drawOutlinedRectangle(x, y, x+100, y+15, 0xff2e2e2e);
     }

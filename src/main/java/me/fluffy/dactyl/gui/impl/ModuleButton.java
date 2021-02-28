@@ -51,7 +51,12 @@ public class ModuleButton {
                     bottomY+=15;
                 }
             }
-            RenderUtil.drawOutlinedGradientRectangleZ(x, this.y+15, x+100,this.y+15+getSettingsSpace(), 500.0D);
+            if(ClickGuiModule.INSTANCE.gradientGui.getValue()) {
+                RenderUtil.drawOutlinedGradientRectangleZ(x, this.y+15, x+100,this.y+15+getSettingsSpace(), 500.0D);
+            } else {
+                RenderUtil.drawOutlinedRectangleZ(x, this.y+15, x+100,this.y+15+getSettingsSpace(), 500.0D);
+            }
+
             //RenderUtil.drawOutlinedRectangle(x, this.y+15, x+100, this.y+15+getSettingsSpace(), 0xff004fcf, 300.0D);
         }
     }
@@ -74,7 +79,12 @@ public class ModuleButton {
         //int color = ClickGUI.INSTANCE.getHoverColor(this, mouseX, mouseY, !(module.isEnabled() || module.isAlwaysListening()), false);
         //int startColor = Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(y, false), 170);
         //int endColor = Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(y+15, false), 170);
-        RenderUtil.drawGradientRect(x, y, x+100, y+15, startColor, endColor);
+        if(ClickGuiModule.INSTANCE.gradientGui.getValue()) {
+            RenderUtil.drawGradientRect(x, y, x + 100, y + 15, startColor, endColor);
+        } else {
+            startColor = ClickGUI.INSTANCE.getColorHoveringNonGradient(1, this.x, this.y, mouseX, mouseY, !(module.isEnabled() || module.isAlwaysListening()), false);
+            RenderUtil.drawRect(x, y, x + 100, y + 15, startColor);
+        }
         //RenderUtil.drawRect(x, y, x+100, y+15, color);
         RenderUtil.drawOutlinedRectangle(x, y, x+100, y+15, 0xff2e2e2e);
         Dactyl.fontUtil.drawString(module.getName(), x+4, y + (15 - 8) / 2, (module.isEnabled() || module.isAlwaysListening()) ? 0xffffffff : 0xff969696);

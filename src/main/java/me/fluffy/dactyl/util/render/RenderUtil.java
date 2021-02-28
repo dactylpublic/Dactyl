@@ -1059,6 +1059,17 @@ public class RenderUtil {
         drawGradientRect(right, top, right-1, bottom, Colors.INSTANCE.getColor(top, false), Colors.INSTANCE.getColor(bottom, false));
     }
 
+    public static void drawOutlinedRectangleZ(int left, int top, int right, int bottom, double zLevel) {
+        // bottom line
+        drawRect(left, bottom-1, right, bottom, Colors.INSTANCE.getColor(1, false), zLevel);
+        // top line
+        drawRect(left, top, right, top+1, Colors.INSTANCE.getColor(1, false), zLevel);
+        // left line
+        drawRect(left, top, left+1, bottom, Colors.INSTANCE.getColor(1, false), zLevel);
+        // right line
+        drawRect(right-1, top, right, bottom, Colors.INSTANCE.getColor(1, false), zLevel);
+    }
+
     public static void drawOutlinedGradientRectangleZ(int left, int top, int right, int bottom, double zLevel) {
         // bottom line
         drawGradientRect(left, bottom-1, right, bottom, Colors.INSTANCE.getColor(bottom, false), Colors.INSTANCE.getColor(bottom, false), zLevel);
@@ -1107,6 +1118,41 @@ public class RenderUtil {
         bufferbuilder.pos((double)right, (double)bottom, 0.0D).endVertex();
         bufferbuilder.pos((double)right, (double)top, 0.0D).endVertex();
         bufferbuilder.pos((double)left, (double)top, 0.0D).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+    }
+
+    public static void drawRectZ(int left, int top, int right, int bottom, int color, double zLevel) {
+        if (left < right)
+        {
+            int i = left;
+            left = right;
+            right = i;
+        }
+
+        if (top < bottom)
+        {
+            int j = top;
+            top = bottom;
+            bottom = j;
+        }
+
+        float f3 = (float)(color >> 24 & 255) / 255.0F;
+        float f = (float)(color >> 16 & 255) / 255.0F;
+        float f1 = (float)(color >> 8 & 255) / 255.0F;
+        float f2 = (float)(color & 255) / 255.0F;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture2D();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.color(f, f1, f2, f3);
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
+        bufferbuilder.pos((double)left, (double)bottom, zLevel).endVertex();
+        bufferbuilder.pos((double)right, (double)bottom, zLevel).endVertex();
+        bufferbuilder.pos((double)right, (double)top, zLevel).endVertex();
+        bufferbuilder.pos((double)left, (double)top, zLevel).endVertex();
         tessellator.draw();
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();

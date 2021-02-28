@@ -62,6 +62,40 @@ public class ClickGUI extends GuiScreen {
         }
     }
 
+    public int getColorHoveringNonGradient(int outY, int targetX, int targetY, int mouseX, int mouseY, boolean idle, boolean fullalpha) {
+        boolean hovered = false;
+        if(mouseX >= targetX && mouseX <= targetX+100 && mouseY >= targetY && mouseY <= targetY+15) hovered = true;
+        if(hovered) {
+            if(fullalpha) {
+                if(idle) {
+                    return 0xff3b3b3b;
+                } else {
+                    return Colors.INSTANCE.getColor(1, false);
+                }
+            } else {
+                if(idle) {
+                    return 0x573b3b3b;
+                } else {
+                    return Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColorDarker(1, false), 150);
+                }
+            }
+        } else {
+            if(fullalpha) {
+                if(idle) {
+                    return 0xff4f4f4f;
+                } else {
+                    return Colors.INSTANCE.getColor(1, false);
+                }
+            } else {
+                if(idle) {
+                    return 0x574f4f4f;
+                } else {
+                    return Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(1, false), 150);
+                }
+            }
+        }
+    }
+
     public int getHoverColor(Object guiElement, int mouseX, int mouseY, boolean idle, boolean fullalpha) {
         if(guiElement instanceof ModuleButton) {
             ModuleButton moduleButton = (ModuleButton)guiElement;

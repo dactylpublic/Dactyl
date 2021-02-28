@@ -3,6 +3,8 @@ package me.fluffy.dactyl.gui.impl.setting;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.gui.ClickGUI;
 import me.fluffy.dactyl.gui.impl.ModuleButton;
+import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.util.text.TextFormatting;
@@ -32,7 +34,12 @@ public class NumberElement extends SettingElement {
         Number currentVal = (Number) this.getSetting().getValue();
         int startColor = ClickGUI.INSTANCE.getColorHovering(this.getY(), this.getX(), this.getY(), mouseX, mouseY, false, false);
         int endColor = ClickGUI.INSTANCE.getColorHovering(this.getY()+15, this.getX(), this.getY(), mouseX, mouseY, false, false);
-        RenderUtil.drawGradientRect(this.getX(), this.getY()+1, (int)endOffset, this.getY()+15, startColor, endColor);
+        if(ClickGuiModule.INSTANCE.gradientGui.getValue()) {
+            RenderUtil.drawGradientRect(this.getX(), this.getY() + 1, (int) endOffset, this.getY() + 15, startColor, endColor);
+        } else {
+            startColor = ClickGUI.INSTANCE.getColorHoveringNonGradient(1, this.getX(), this.getY(), mouseX, mouseY, false, false);
+            RenderUtil.drawRect(this.getX(), this.getY() + 1, (int) endOffset, this.getY() + 15, startColor);
+        }
         Dactyl.fontUtil.drawString(getSetting().getName() + " " + TextFormatting.GRAY + ((this.getSetting().getValue() instanceof Float) ? String.format("%.01f", (Float) this.getSetting().getValue()) : String.valueOf(Double.valueOf(((Number)this.getSetting().getValue()).doubleValue()))), this.getX() + 4, this.getY() + (15 - 8) / 2, 0xffffffff);
     }
 
