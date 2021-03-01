@@ -27,7 +27,7 @@ public class FakePlayer extends Module {
             this.toggle();
             return;
         }
-        EntityOtherPlayerMP fake = new EntityOtherPlayerMP((World)mc.world, new GameProfile(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"), username.getValue()));
+        EntityOtherPlayerMP fake = new EntityOtherPlayerMP((World)mc.world, new GameProfile(mc.session.getProfile().getId(), username.getValue()));
         fake.copyLocationAndAnglesFrom(mc.player);
         fake.inventory.copyInventory(mc.player.inventory);
         if(copyPotions.getValue()) {
