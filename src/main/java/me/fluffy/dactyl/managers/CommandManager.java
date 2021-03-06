@@ -21,6 +21,7 @@ public class CommandManager {
         commandList.add(new PluginsCommand());
         commandList.add(new SpammerCommand());
         commandList.add(new GrabCommand());
+        commandList.add(new CreateKitCommand());
     }
 
     public List<Command> getCommandList() {

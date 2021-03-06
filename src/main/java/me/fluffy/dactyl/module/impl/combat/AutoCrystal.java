@@ -137,9 +137,7 @@ public class AutoCrystal extends Module {
 
 
     private static float yaw;
-    private static float updateYaw;
     private static float pitch;
-    private static float updatePitch;
     private static boolean isRotating;
     private float oldYaw, oldPitch;
     private static boolean togglePitch = false;
@@ -157,6 +155,14 @@ public class AutoCrystal extends Module {
     private static float targetRotationYaw = -1f;
     private static boolean hasFinishedYawSteporoski = true;
     private static float currentRotationPitch = -1f;
+
+
+    private static boolean isRotatingUpdates;
+    private static boolean isRotatingPlace;
+    private static boolean isRotatingBreak;
+    private static float updatesYaw = 0f;
+    private static float updatesPitch = 0f;
+
     private static double damage = 0.0d;
     private static int yawTicks = 0;
     private EntityEnderCrystal currentAttacking = null;
@@ -309,6 +315,22 @@ public class AutoCrystal extends Module {
         }
     }
 
+    @SubscribeEvent
+    public void onUpdateRotates(EventUpdateWalkingPlayer event) {
+        if(updateLogic.getValue() == UpdateLogic.WALKING) {
+            //if(event.getStage() == ForgeEvent.Stage.PRE) {
+            // do rotate
+            if(isRotatingUpdates) {
+                event.setYaw(updatesYaw);
+                event.setPitch(updatesPitch);
+                if (rotateHead.getValue()) {
+                    mc.player.rotationYawHead = yaw;
+                }
+            }
+            //}
+        }
+    }
+
     private void doBreak(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
         if (!doCaBreak.getValue()) {
             return;
@@ -317,6 +339,7 @@ public class AutoCrystal extends Module {
             if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
                 this.setModuleInfo("");
                 resetRots();
+                resetRotsBreak();
                 currentAttacking = null;
                 checkTimer.reset();
                 return;
@@ -336,6 +359,7 @@ public class AutoCrystal extends Module {
                 .orElse(null);
         if (crystal == null || (cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65))) {
             resetRots();
+            resetRotsBreak();
             currentAttacking = null;
             return;
         }
@@ -369,9 +393,18 @@ public class AutoCrystal extends Module {
                             currentRotationStepped = finishedYaw;
                         }
                     }
+                    updatesYaw = finishedYaw;
+                    updatesPitch = (float) rots[1];
+                    if (debugRotate.getValue()) {
+                        mc.player.rotationYaw = updatesYaw;
+                        mc.player.rotationPitch = updatesPitch;
+                    }
+                    isRotatingUpdates = true;
+                    isRotatingBreak = true;
+                    //return;
                     //System.out.println("Break Yaw: " + (float)rots[0]);
-                    eventUpdateWalkingPlayer.setYaw(finishedYaw);
-                    eventUpdateWalkingPlayer.setPitch((float) rots[1]);
+                    //eventUpdateWalkingPlayer.setYaw(finishedYaw);
+                    //eventUpdateWalkingPlayer.setPitch((float) rots[1]);
                 }
             } else if(eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.POST) {
                 if(!hasFinishedYawSteporoski && breakRotate.getValue()) {
@@ -431,6 +464,7 @@ public class AutoCrystal extends Module {
         if (!doCaPlace.getValue()) {
             this.setModuleInfo("");
             resetRots();
+            resetRotsPlace();
             return;
         }
 
@@ -439,6 +473,7 @@ public class AutoCrystal extends Module {
             crystalRender = null;
             damage = 0.0d;
             resetRots();
+            resetRotsPlace();
             checkTimer.reset();
             return;
         }
@@ -524,8 +559,17 @@ public class AutoCrystal extends Module {
                             currentRotationSteppedPlace = finishedYaw;
                         }
                     }
-                    eventUpdateWalkingPlayer.setYaw(finishedYaw);
-                    eventUpdateWalkingPlayer.setPitch((float) finalRotations[1]);
+                    updatesYaw = finishedYaw;
+                    updatesPitch = (float) finalRotations[1];
+                    if (debugRotate.getValue()) {
+                        mc.player.rotationYaw = updatesYaw;
+                        mc.player.rotationPitch = updatesPitch;
+                    }
+                    isRotatingUpdates = true;
+                    isRotatingPlace = true;
+                    //return;
+                    //eventUpdateWalkingPlayer.setYaw(finishedYaw);
+                    //eventUpdateWalkingPlayer.setPitch();
                 } else if (updateLogic.getValue() != UpdateLogic.WALKING) {
                     doRotations(updateLogic.getValue(), finalRotations);
                 }
@@ -551,6 +595,7 @@ public class AutoCrystal extends Module {
             if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
                 this.setModuleInfo("");
                 resetRots();
+                resetRotsPlace();
                 return;
             } else {
                 if (CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition) != null) {
@@ -565,6 +610,7 @@ public class AutoCrystal extends Module {
                     if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
                         this.setModuleInfo("");
                         resetRots();
+                        resetRotsPlace();
                         return;
                     }
                     if (waitPredict.getValue() && predictPacket != null) {
@@ -611,6 +657,7 @@ public class AutoCrystal extends Module {
                 damage = 0.0d;
                 if (!fasterResetRot.getValue()) {
                     resetRots();
+                    resetRotsPlace();
                 }
             } else {
                 if (!fasterResetRot.getValue()) {
@@ -626,6 +673,7 @@ public class AutoCrystal extends Module {
             }
             if (fasterResetRot.getValue()) {
                 resetRots();
+                resetRotsPlace();
             }
         }
     }
@@ -731,7 +779,23 @@ public class AutoCrystal extends Module {
         isRotating = true;
     }
 
+    private static void resetRotsPlace() {
+        isRotatingPlace = false;
+    }
+
+    private static void resetRotsBreak() {
+        isRotatingBreak = false;
+    }
+
     private static void resetRots() {
+        if((isRotatingBreak || isRotatingPlace) && (AutoCrystal.INSTANCE.updateLogic.getValue() == UpdateLogic.WALKING)) {
+            return;
+        }
+        if(isRotatingUpdates) {
+            updatesYaw = mc.player.rotationYaw;
+            updatesPitch = mc.player.rotationPitch;
+            isRotatingUpdates = false;
+        }
         if (isRotating) {
             yaw = mc.player.rotationYaw;
             pitch = mc.player.rotationPitch;
@@ -861,6 +925,8 @@ public class AutoCrystal extends Module {
         faceplaceKeyOn = false;
         hasReachedYaw = false;
         resetRots();
+        resetRotsPlace();
+        resetRotsPlace();
     }
 
     public Set<BlockPos> getPlacedCrystals() {
