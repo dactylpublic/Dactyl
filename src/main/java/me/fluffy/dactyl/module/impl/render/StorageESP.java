@@ -17,7 +17,7 @@ public class StorageESP extends Module {
     public Setting<Boolean> enderchests = new Setting<Boolean>("EChests", true);
     public Setting<Boolean> shulkers = new Setting<Boolean>("Shulkers", true);
     public Setting<Boolean> hoppers = new Setting<Boolean>("Hoppers", false);
-    public Setting<Double> lineWidth = new Setting<Double>("Width", 1.0d, 0.1d, 1.5d);
+    public Setting<Double> lineWidth = new Setting<Double>("Width", 1.0d, 0.1d, 3.0d);
 
     public static StorageESP INSTANCE;
     public StorageESP() {

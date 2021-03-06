@@ -28,6 +28,7 @@ public class ElytraFly extends Module {
     public Setting<Double> downSpeed = new Setting<Double>("DownSpeed", 10.0D, 0.1D, 25.0D, v->modeSetting.getValue() != ElytraMode.TOOBEE);
     public Setting<Double> glideSpeed = new Setting<Double>("GlideSpeed", 5.0d, 1.0d, 6.0d, v->modeSetting.getValue() != ElytraMode.TOOBEE);
     public Setting<Boolean> autoEquip = new Setting<Boolean>("AutoEquip", true);
+    public Setting<Boolean> redeploy = new Setting<Boolean>("Redeploy", true, vis->modeSetting.getValue() == ElytraMode.TOOBEE);
     public Setting<Boolean> autoTakeOff = new Setting<Boolean>("AutoTakeoff", true);
     public Setting<Boolean> timerTakeOff = new Setting<Boolean>("Timer", true, v->autoTakeOff.getValue());
     public Setting<Boolean> noRotate = new Setting<Boolean>("NoRotate", true);
@@ -170,6 +171,10 @@ public class ElytraFly extends Module {
         }
 
         if (!this.mc.player.isElytraFlying() || this.mc.player.motionY > -0.09D) {
+            if(redeploy.getValue()) {
+                mc.player.onGround = true;
+                mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
+            }
             return;
         }
 

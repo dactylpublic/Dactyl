@@ -32,7 +32,7 @@ public class NoSlow extends Module {
     Setting<Boolean> inventoryMove = new Setting<Boolean>("InvMove", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSlowItem = new Setting<Boolean>("Items", true, v->page.getValue() == SettingPage.COMMON);
     Setting<Boolean> noSoulSand = new Setting<Boolean>("SoulSand", true, v->page.getValue() == SettingPage.COMMON);
-    Setting<Boolean> sneakBypass = new Setting<Boolean>("2bBypass", false, v->page.getValue() == SettingPage.COMMON);
+    //Setting<Boolean> sneakBypass = new Setting<Boolean>("2bBypass", false, v->page.getValue() == SettingPage.COMMON);
     Setting<Double> soulSandSpeed = new Setting<Double>("SoulSpeed", 1.5D, 0.1D, 6.0D);
 
     // webs
@@ -63,7 +63,7 @@ public class NoSlow extends Module {
         this.setModuleInfo(strictSlowDown.getValue() ? "Strict" : "Loose");
         handleWebYMovement();
         handleShieldOffhand();
-        handleSneakBypass();
+        //handleSneakBypass();
     }
 
     @SubscribeEvent
@@ -95,7 +95,7 @@ public class NoSlow extends Module {
         }
     }
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     public void onItem(LivingEntityUseItemEvent event) {
         if(!sneakBypass.getValue()) {
             return;
@@ -104,7 +104,7 @@ public class NoSlow extends Module {
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
             sneaking = true;
         }
-    }
+    }*/
 
     private void handleStrictInventory() {
         if(strictInventory.getValue()) {
@@ -120,7 +120,7 @@ public class NoSlow extends Module {
         }
     }
 
-    private void handleSneakBypass() {
+    /*private void handleSneakBypass() {
         if(!sneakBypass.getValue()) {
             return;
         }
@@ -129,7 +129,7 @@ public class NoSlow extends Module {
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
             sneaking = false;
         }
-    }
+    }*/
 
     private void handleSoulSandSlowdown(MoveEvent event) {
         if(mc.currentScreen == Dactyl.clickGUI || Freecam.INSTANCE.isEnabled()) {
