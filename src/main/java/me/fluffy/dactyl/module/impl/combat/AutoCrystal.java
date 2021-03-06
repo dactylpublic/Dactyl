@@ -83,6 +83,7 @@ public class AutoCrystal extends Module {
     Setting<BreakLogic> breakLogic = new Setting<BreakLogic>("BreakLogic", BreakLogic.DOESDMG, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Double> doesDamageMin = new Setting<Double>("DoesDMGMin", 2.3D, 0.1D, 13.5D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && (breakLogic.getValue() == BreakLogic.DOESDMG || breakLogic.getValue() == BreakLogic.BOTH));
     Setting<Boolean> antiSuicide = new Setting<Boolean>("AntiSuicide", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
+    Setting<Boolean> setDeadSetting = new Setting<Boolean>("SetDead", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Double> maxSelfDMG = new Setting<Double>("MaxSelfDMG", 8.0D, 1.0D, 13.5D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiSuicide.getValue());
     Setting<Boolean> breakRotate = new Setting<Boolean>("BreakRotate", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Double> breakRange = new Setting<Double>("BreakRange", 5.5D, 1.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
@@ -765,6 +766,10 @@ public class AutoCrystal extends Module {
             }
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
             mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(crystalRender, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
+        }
+        if(setDeadSetting.getValue()) {
+            entity.setDead();
+            mc.world.removeAllEntities();
         }
         breakTimer.reset();
     }
