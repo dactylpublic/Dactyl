@@ -10,6 +10,7 @@ import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiShulkerBox;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.item.ItemAir;
 import net.minecraft.item.ItemStack;
@@ -56,15 +57,16 @@ public class Regear extends Module {
                 int windowId = mc.player.openContainer.windowId;
                 if(ymlInventory == null) return;
                 for(CreateKitCommand.YMLLoadedItem loadedItem : ymlInventory) {
-                    ItemStack currentStack = ((IGuiShulkerBox)guiShulkerBox).getInventory().getStackInSlot(loadedItem.getSlot()+18);
-                    if(!(currentStack.isEmpty() || currentStack.getItem() instanceof ItemAir) && onlyAir.getValue()) return;
-                    if(timer.hasPassed(delay.getValue().longValue())) {
-                        if (loadedItem.getItemName().equalsIgnoreCase(stack.getItem().getItemStackDisplayName(stack))) {
-                            mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
-                            mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
-                            //mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
-                            timer.reset();
-                        }
+                    ItemStack currentStack = mc.player.inventoryContainer.getInventory().get(loadedItem.getSlot());
+                    if(!(currentStack.getItem() == Items.AIR) && onlyAir.getValue()) return;
+                    if(!timer.hasPassed(delay.getValue().longValue())) {
+                        return;
+                    }
+                    if (loadedItem.getItemName().equalsIgnoreCase(stack.getItem().getItemStackDisplayName(stack))) {
+                        mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                        mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
+                        mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                        timer.reset();
                     }
                 }
             }
