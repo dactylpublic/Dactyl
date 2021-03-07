@@ -11,4 +11,7 @@ public interface ICPacketUseEntity {
 
     @Accessor("action")
     public void setAction(CPacketUseEntity.Action action);
+
+    @Accessor("entityId")
+    public int getEntityID();
 }

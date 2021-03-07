@@ -47,6 +47,7 @@ public class ModuleManager {
         modules.add(new PingSpoof());
         modules.add(new PacketFly());
         modules.add(new AutoDupe());
+        modules.add(new BypassCrystal());
 
         // misc
         modules.add(new FakePlayer());
