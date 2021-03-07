@@ -62,7 +62,7 @@ public class Regear extends Module {
                         if (loadedItem.getItemName().equalsIgnoreCase(stack.getItem().getItemStackDisplayName(stack))) {
                             mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
                             mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
-                            mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                            //mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
                             timer.reset();
                         }
                     }
