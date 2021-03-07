@@ -44,7 +44,7 @@ public class MiningTweaks extends Module {
     public Setting<Integer> exploitDelay = new Setting<Integer>("EDelay", 100, 10, 1000, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> modeSetting.getValue() == MiningMode.PACKET);
-    public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 20, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 6, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
 
     public MiningTweaks() {
@@ -88,7 +88,7 @@ public class MiningTweaks extends Module {
         }
 
         if (currentPos != null) {
-            if (mc.player != null && mc.player.getDistanceSq(this.currentPos) > ((resetRange.getValue()) ^ 2)) {
+            if (mc.player != null && mc.player.getDistance(this.currentPos.getX(), this.currentPos.getY(), this.currentPos.getZ()) > ((resetRange.getValue()))) {
                 this.currentPos = null;
                 this.currentBlockState = null;
                 return;
