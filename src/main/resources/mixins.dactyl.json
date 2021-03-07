@@ -29,6 +29,7 @@
     "InjNetworkManager",
     "InjPlayerControllerMP",
     "InjRenderEnderCrystal",
+    "InjRenderItem",
     "InjRenderLivingBase",
     "InjRenderPlayer",
     "InjScoreboard",

@@ -107,6 +107,7 @@ public class ModuleManager {
         modules.add(new Trajectories());
         modules.add(new BlockHighlight());
         modules.add(new NewChunks());
+        modules.add(new EnchantColor());
 
         // client
         modules.add(new ClickGuiModule());

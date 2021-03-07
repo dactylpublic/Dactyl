@@ -5,10 +5,12 @@ import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.HUD;
 import me.fluffy.dactyl.setting.Setting;
+import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import me.fluffy.dactyl.util.render.RenderUtil;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.ClickType;
@@ -27,6 +29,9 @@ public class AutoArmor extends Module {
     public Setting<Boolean> mendWhileXP = new Setting<Boolean>("XPMend", false);
     public Setting<Integer> mendPercent = new Setting<Integer>("Percent", 80, 5, 100, v->mendWhileXP.getValue());
     public Setting<Boolean> mendRotate = new Setting<Boolean>("XPRotate", true, v->mendWhileXP.getValue());
+    Setting<Boolean> deathCheck = new Setting<Boolean>("DangerCheck", true, v->mendWhileXP.getValue());
+    Setting<Double> enemyDistance = new Setting<Double>("EnemyRange", 5.0D, 1.0D, 13.5D, vis->deathCheck.getValue()&&mendWhileXP.getValue());
+    Setting<Double> crystalDistance = new Setting<Double>("CrystalRange", 10.0D, 1.0D, 13.5D, vis->deathCheck.getValue()&&mendWhileXP.getValue());
     public AutoArmor() {
         super("AutoArmor", Category.COMBAT);
     }
@@ -40,6 +45,27 @@ public class AutoArmor extends Module {
         }
         this.setModuleInfo(mendWhileXP.getValue() ? "Mend" : "Equip");
         boolean doMend = (mendWhileXP.getValue() && Mouse.isButtonDown(1) && (mc.player.getHeldItemMainhand().getItem() instanceof ItemExpBottle));
+        if(deathCheck.getValue()) {
+            // player check
+            for (EntityPlayer target : mc.world.playerEntities) {
+                if((target == mc.player || Dactyl.friendManager.isFriend(target.getName()))) {
+                    continue;
+                }
+                if (((target).getHealth() <= 0) || target.isDead) {
+                    continue;
+                }
+                if((mc.player.getDistance(target) > 13.5)) {
+                    continue;
+                }
+                if(mc.player.getDistance(target) <= enemyDistance.getValue()) {
+                    doMend = false;
+                }
+            }
+            //crystal check
+            if(CombatUtil.requiredDangerSwitch(crystalDistance.getValue())) {
+                doMend = false;
+            }
+        }
         if(doMend) {
             for (ItemStack is : mc.player.inventory.armorInventory) {
                 if (is.isEmpty()) {
