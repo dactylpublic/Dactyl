@@ -47,6 +47,7 @@ public class SettingElement {
     }
 
     public boolean isHovering(int mouseX, int mouseY) {
+        if(!this.isVisible()) return false;
         return mouseX >= x && mouseX <= x+100 && mouseY >= y && mouseY <= y + 15;
     }
 
