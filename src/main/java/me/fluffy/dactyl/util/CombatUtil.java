@@ -47,7 +47,9 @@ import java.util.stream.Collectors;
 public class CombatUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
-    private static final List<Integer> invalidSlots = Arrays.asList(0, 5, 6, 7, 8);
+    public static final List<Integer> invalidSlots = Arrays.asList(0, 5, 6, 7, 8);
+
+    public static final List<Integer> xcarryAndArmor = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8);
 
     private static final List<Integer> hotbarSlots = Arrays.asList(36, 37, 38, 39, 40, 41, 42, 43, 44);
 

@@ -22,6 +22,7 @@ public class CommandManager {
         commandList.add(new SpammerCommand());
         commandList.add(new GrabCommand());
         commandList.add(new CreateKitCommand());
+        commandList.add(new SelectKitCommand());
     }
 
     public List<Command> getCommandList() {

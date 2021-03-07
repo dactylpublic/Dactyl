@@ -64,10 +64,7 @@ public class ModuleManager {
         modules.add(new ExtraTab());
         modules.add(new Locator());
         modules.add(new ChatTimestamps());
-        //modules.add(new Regear());
-        /**
-         * REGEAR MODULE IS NOT DONE (FOR @25__)
-         */
+        modules.add(new Regear());
 
         // movement
         modules.add(new Strafe());
