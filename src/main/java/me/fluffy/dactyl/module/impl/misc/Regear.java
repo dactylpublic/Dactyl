@@ -69,13 +69,15 @@ public class Regear extends Module {
                     }
                     if (loadedItem.getItemName().equalsIgnoreCase(stack.getItem().getItemStackDisplayName(stack))) {
                         if(currentStack.getCount() >= currentStack.getMaxStackSize()) continue;
-                        if(stack.getCount() > currentStack.getCount() && !(currentStack.isEmpty() || currentStack.getItem() == Items.AIR)) {
-                            mc.playerController.windowClick(windowId, x, 0, ClickType.QUICK_MOVE, mc.player);
-                        } else {
+                        /*if(stack.getCount() > currentStack.getCount() && !(currentStack.isEmpty() || currentStack.getItem() == Items.AIR)) {
                             mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
                             mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
                             mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
-                        }
+                        } else {*/
+                        mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                        mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
+                        mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                        //}
                         timer.reset();
                     }
                 }
