@@ -58,14 +58,24 @@ public class Regear extends Module {
                 if(ymlInventory == null) return;
                 for(CreateKitCommand.YMLLoadedItem loadedItem : ymlInventory) {
                     ItemStack currentStack = mc.player.inventoryContainer.getInventory().get(loadedItem.getSlot());
-                    if(!(currentStack.getItem() == Items.AIR) && onlyAir.getValue()) return;
+                    if(!(currentStack.isEmpty() || currentStack.getItem() == Items.AIR) && onlyAir.getValue()) continue;
+                    if(!onlyAir.getValue()) {
+                        if((!currentStack.isEmpty() || currentStack.getItem() != Items.AIR) && currentStack.getCount() >= currentStack.getMaxStackSize()) {
+                            continue;
+                        }
+                    }
                     if(!timer.hasPassed(delay.getValue().longValue())) {
                         return;
                     }
                     if (loadedItem.getItemName().equalsIgnoreCase(stack.getItem().getItemStackDisplayName(stack))) {
-                        mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
-                        mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
-                        mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                        if(currentStack.getCount() >= currentStack.getMaxStackSize()) continue;
+                        if(stack.getCount() > currentStack.getCount()) {
+                            mc.playerController.windowClick(windowId, x, 0, ClickType.QUICK_MOVE, mc.player);
+                        } else {
+                            mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                            mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
+                            mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
+                        }
                         timer.reset();
                     }
                 }

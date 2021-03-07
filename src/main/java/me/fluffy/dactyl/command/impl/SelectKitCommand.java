@@ -56,7 +56,7 @@ public class SelectKitCommand extends Command {
                         }
                         it.remove();
                     }
-                    ymlItems.add(new CreateKitCommand.YMLLoadedItem(Integer.valueOf(pathEntry.getKey()), itemName, enchantments));
+                    ymlItems.add(new CreateKitCommand.YMLLoadedItem(Integer.parseInt(pathEntry.getKey()), itemName, enchantments));
                 }
             }
         } catch (FileNotFoundException exception) {
