@@ -95,9 +95,6 @@ public class HoleFill extends Module {
         }
         if(step >= getHolesToFill().size()) {
             step = 0;
-            if(autoDisable.getValue()) {
-                this.toggle();
-            }
             return;
         }
         if(!timer.hasPassed(delay.getValue().longValue())) {
@@ -108,9 +105,6 @@ public class HoleFill extends Module {
         for (int i = 0; i < quota.getValue().intValue(); i++) {
             if (step >= getHolesToFill().size()) {
                 step = 0;
-                if (autoDisable.getValue()) {
-                    this.toggle();
-                }
                 break;
             }
             boolean isOffhanding = (mc.player.getHeldItemOffhand().getItem() instanceof ItemBlock && Block.getBlockFromItem(mc.player.getHeldItemOffhand().getItem()) instanceof BlockObsidian);
@@ -129,7 +123,9 @@ public class HoleFill extends Module {
             if(resetSwap.getValue()) {
                 doResetSwap(recordedSlot);
                 recordedSlot = mc.player.inventory.currentItem;
-
+            }
+            if(autoDisable.getValue()) {
+                this.toggle();
             }
             timer.reset();
         }
