@@ -11,9 +11,9 @@ public class ViewModel extends Module {
     public Setting<Boolean> fovChanger = new Setting<Boolean>("Fov", true);
     public Setting<Integer> fovAmount = new Setting<Integer>("FovAmount", 141, 60, 180, v->fovChanger.getValue());
 
-    public Setting<Double> translateX = new Setting<Double>("TranslateX", 0.0d, -1.0d, 1.0d);
-    public Setting<Double> translateY = new Setting<Double>("TranslateY", 0.0d, -1.0d, 1.0d);
-    public Setting<Double> translateZ = new Setting<Double>("TranslateZ", 0.0d, -1.0d, 1.0d);
+    public Setting<Double> translateX = new Setting<Double>("TranslateX", 0.0d, -2.0d, 2.0d);
+    public Setting<Double> translateY = new Setting<Double>("TranslateY", 0.0d, -2.0d, 2.0d);
+    public Setting<Double> translateZ = new Setting<Double>("TranslateZ", 0.0d, -2.0d, 2.0d);
 
     public Setting<Double> scaleX = new Setting<Double>("ScaleX", 1.0d, 0.0d, 1.0d);
     public Setting<Double> scaleY = new Setting<Double>("ScaleY", 1.0d, 0.0d, 1.0d);
