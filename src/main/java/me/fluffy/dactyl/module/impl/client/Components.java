@@ -236,7 +236,7 @@ public class Components extends Module {
     }
 
     private int getItemCount(Item i) {
-        return (mc.player.getHeldItemOffhand().getCount()+(mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == i).mapToInt(ItemStack::getCount).sum()));
+        return (((mc.player.getHeldItemOffhand().getItem() == i) ? mc.player.getHeldItemOffhand().getCount() : 0)+(mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == i).mapToInt(ItemStack::getCount).sum()));
     }
 
     private Entity getClosest() {
