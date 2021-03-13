@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumHand;
@@ -40,6 +41,11 @@ public class InjItemRenderer {
     @Inject(method={"renderItemInFirstPerson(Lnet/minecraft/client/entity/AbstractClientPlayer;FFLnet/minecraft/util/EnumHand;FLnet/minecraft/item/ItemStack;F)V"}, at={@At(value="INVOKE", target="Lnet/minecraft/client/renderer/ItemRenderer;renderItemSide(Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/renderer/block/model/ItemCameraTransforms$TransformType;Z)V")})
     private void doItemModelTransforms(AbstractClientPlayer player, float p_187457_2_, float p_187457_3_, EnumHand hand, float p_187457_5_, ItemStack stack, float p_187457_7_, CallbackInfo ci) {
         if(ViewModel.INSTANCE.isEnabled()) {
+            if (player.isHandActive() && player.getItemInUseCount() > 0 && player.getActiveHand() == hand) {
+                if (stack.getItemUseAction() == EnumAction.EAT || stack.getItemUseAction() == EnumAction.DRINK) {
+                    return;
+                }
+            }
             GlStateManager.translate(ViewModel.INSTANCE.translateX.getValue(), ViewModel.INSTANCE.translateY.getValue(), ViewModel.INSTANCE.translateZ.getValue());
             GlStateManager.scale(ViewModel.INSTANCE.scaleX.getValue(), ViewModel.INSTANCE.scaleY.getValue(), ViewModel.INSTANCE.scaleZ.getValue());
             //GlStateManager.rotate(90f, ViewModel.INSTANCE.rotateX.getValue().floatValue(), ViewModel.INSTANCE.rotateY.getValue().floatValue(), ViewModel.INSTANCE.rotateZ.getValue().floatValue());
