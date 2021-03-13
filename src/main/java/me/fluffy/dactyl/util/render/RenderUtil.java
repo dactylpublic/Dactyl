@@ -3,12 +3,15 @@ package me.fluffy.dactyl.util.render;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.injection.inj.InjRenderEnderCrystal;
 import me.fluffy.dactyl.injection.inj.access.IRenderManager;
+import me.fluffy.dactyl.module.impl.client.ClickGuiModule;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
 import me.fluffy.dactyl.util.EntityUtil;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -66,6 +69,75 @@ public class RenderUtil {
         bufferbuilder.pos(left, top, 0.0D).color(f1, f2, f3, f).endVertex();
         bufferbuilder.pos(left, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
         bufferbuilder.pos(right, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+        tessellator.draw();
+        GlStateManager.shadeModel(7424);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+    }
+
+    public static void drawGradientRectHorizontal(int left, int top, int right, int bottom, int startColor, int endColor) {
+        float f = (float)(startColor >> 24 & 255) / 255.0F;
+        float f1 = (float)(startColor >> 16 & 255) / 255.0F;
+        float f2 = (float)(startColor >> 8 & 255) / 255.0F;
+        float f3 = (float)(startColor & 255) / 255.0F;
+        float f4 = (float)(endColor >> 24 & 255) / 255.0F;
+        float f5 = (float)(endColor >> 16 & 255) / 255.0F;
+        float f6 = (float)(endColor >> 8 & 255) / 255.0F;
+        float f7 = (float)(endColor & 255) / 255.0F;
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.shadeModel(7425);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(right, top, 0.0D).color(f1, f2, f3, f).endVertex();
+        bufferbuilder.pos(left, top, 0.0D).color(f5, f6, f7, f4).endVertex();
+        bufferbuilder.pos(left, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+        bufferbuilder.pos(right, bottom, 0.0D).color(f1, f2, f3, f).endVertex();
+
+        /**
+         bufferbuilder.pos(right, top, 0.0D).color(f1, f2, f3, f).endVertex();
+         bufferbuilder.pos(left, top, 0.0D).color(f1, f2, f3, f).endVertex();
+         bufferbuilder.pos(left, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+         bufferbuilder.pos(right, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+         */
+        tessellator.draw();
+        GlStateManager.shadeModel(7424);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+    }
+
+    public static void drawGradientRectHorizontalLeft(int left, int top, int right, int bottom, int startColor, int endColor) {
+        float f = (float)(startColor >> 24 & 255) / 255.0F;
+        float f1 = (float)(startColor >> 16 & 255) / 255.0F;
+        float f2 = (float)(startColor >> 8 & 255) / 255.0F;
+        float f3 = (float)(startColor & 255) / 255.0F;
+        float f4 = (float)(endColor >> 24 & 255) / 255.0F;
+        float f5 = (float)(endColor >> 16 & 255) / 255.0F;
+        float f6 = (float)(endColor >> 8 & 255) / 255.0F;
+        float f7 = (float)(endColor & 255) / 255.0F;
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.shadeModel(7425);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(left, top, 0.0D).color(f5, f6, f7, f4).endVertex();
+        bufferbuilder.pos(right, top, 0.0D).color(f1, f2, f3, f).endVertex();
+        bufferbuilder.pos(right, bottom, 0.0D).color(f1, f2, f3, f).endVertex();
+        bufferbuilder.pos(left, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+        /**
+         bufferbuilder.pos(right, top, 0.0D).color(f1, f2, f3, f).endVertex();
+         bufferbuilder.pos(left, top, 0.0D).color(f1, f2, f3, f).endVertex();
+         bufferbuilder.pos(left, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+         bufferbuilder.pos(right, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+         */
         tessellator.draw();
         GlStateManager.shadeModel(7424);
         GlStateManager.disableBlend();
@@ -1299,6 +1371,45 @@ public class RenderUtil {
 
         drawRect(x, startY + 1, x + 1, endY, color);
     }
+
+    public static void drawHorizontalLineGlow(int startX, int endX, int y, int color) {
+        if (endX < startX)
+        {
+            int i = startX;
+            startX = endX;
+            endX = i;
+        }
+
+        drawRect(startX, y, endX + 1, y + 1, color);
+    }
+
+    public static void drawVerticalLineGlowLeft(int x, int startY, int endY, int color) {
+        if (endY < startY)
+        {
+            int i = startY;
+            startY = endY;
+            endY = i;
+        }
+        int lowAlpha = Colors.INSTANCE.changeAlpha(color, 0);
+        drawGradientRectHorizontalLeft(x-4, startY, x, endY, lowAlpha, color);
+        //drawGradientRect(x, startY + 1, x + 1, endY, lowAlpha, color);
+        //drawRect(x, startY + 1, x + 1, endY, color);
+    }
+
+    public static void drawVerticalLineGlow(int x, int startY, int endY, int color) {
+        if (endY < startY)
+        {
+            int i = startY;
+            startY = endY;
+            endY = i;
+        }
+        int lowAlpha = Colors.INSTANCE.changeAlpha(color, 0);
+        drawGradientRectHorizontal(x, startY, x+4, endY, lowAlpha, color);
+        //drawGradientRect(x, startY + 1, x + 1, endY, lowAlpha, color);
+        //drawRect(x, startY + 1, x + 1, endY, color);
+    }
+
+
 
     public static void drawRect(int left, int top, int right, int bottom, int color, double zLevel) {
         if (left < right)

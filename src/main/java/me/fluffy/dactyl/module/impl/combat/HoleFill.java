@@ -31,6 +31,7 @@ public class HoleFill extends Module {
     public Setting<Boolean> offhandOnly = new Setting<Boolean>("OffhandOnly", false);
     public Setting<Boolean> disableSwap = new Setting<Boolean>("DisableSwap", false);
     public Setting<Boolean> smart = new Setting<Boolean>("Smart", false);
+    public Setting<Double> playerRange = new Setting<Double>("EntityRange", 6.0d, 1.0d, 10.0d, v->smart.getValue());
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 3.0d, 1.0d, 10.0d, v->smart.getValue());
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 3.5d, 0.5d, 6.0d);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
@@ -144,7 +145,7 @@ public class HoleFill extends Module {
         List<Entity> playerEntities = new ArrayList<>(mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         EntityPlayer p = null;
         for(Entity ent : playerEntities) {
-            if(mc.player.getDistance(ent) >= 20.0d) {
+            if(mc.player.getDistance(ent) >= playerRange.getValue()) {
                 continue;
             }
             if(ent.getDistanceSq(pos) > (enemyRange.getValue()*enemyRange.getValue())) {

@@ -80,6 +80,7 @@ public class AutoCrystal extends Module {
     Setting<Integer> breakDelay = new Setting<Integer>("BreakDelay", 65, 0, 350, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Boolean> antiStuck = new Setting<Boolean>("AntiStuck", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Integer> hitAttempts = new Setting<Integer>("HitAttempts", 5, 1, 15, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiStuck.getValue());
+    Setting<Boolean> soundRemove = new Setting<Boolean>("SoundRemove", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<BreakLogic> breakLogic = new Setting<BreakLogic>("BreakLogic", BreakLogic.DOESDMG, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
     Setting<Double> doesDamageMin = new Setting<Double>("DoesDMGMin", 2.3D, 0.1D, 13.5D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && (breakLogic.getValue() == BreakLogic.DOESDMG || breakLogic.getValue() == BreakLogic.BOTH));
     Setting<Boolean> antiSuicide = new Setting<Boolean>("AntiSuicide", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
@@ -194,28 +195,25 @@ public class AutoCrystal extends Module {
             }
         }
         if (event.getType() == PacketEvent.PacketType.INCOMING) {
-            if (antiStuck.getValue()) {
+            if (soundRemove.getValue()) {
                 if (event.getPacket() instanceof SPacketSoundEffect) {
                     SPacketSoundEffect packet = (SPacketSoundEffect) event.getPacket();
                     if (packet.getCategory() == SoundCategory.BLOCKS && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
-                        for (Entity e : mc.world.loadedEntityList) {
-                            if (e == null) continue;
-                            if (e instanceof EntityEnderCrystal) {
-                                if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
-                                    e.setDead();
-                                    try {
-                                        Iterator<EntityEnderCrystal> crystalIterator = attackedCrystals.keySet().iterator();
-                                        while (crystalIterator.hasNext()) {
-                                            crystalIterator.next();
-                                            if (attackedCrystals.containsKey(e)) {
-                                                crystalIterator.remove();
-                                                //attackedCrystals.remove(e);
-                                            }
+                        Iterator<Entity> entityLoadedList = mc.world.loadedEntityList.iterator();
+                        try {
+                            while (entityLoadedList.hasNext()) {
+                                Entity e = entityLoadedList.next();
+                                if (e == null) continue;
+                                if (e instanceof EntityEnderCrystal) {
+                                    if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
+                                        e.setDead();
+                                        if (attackedCrystals.containsKey(e)) {
+                                            attackedCrystals.remove(e);
                                         }
-                                    } catch (Exception exceeept) {
                                     }
                                 }
                             }
+                        } catch (Exception exceeept) {
                         }
                     }
                 }

@@ -20,6 +20,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
@@ -43,11 +46,19 @@ public class Components extends Module {
     public Setting<String> targetHudX = new Setting<String>("TargetX", "1", v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
     public Setting<String> targetHudY = new Setting<String>("TargetY", "30", v->targetHud.getValue() && page.getValue()==AddonPage.TARGETHUD);
 
+    // pvp info
+    public Setting<Boolean> pvpInfo = new Setting<Boolean>("PvPInfo", false, v->page.getValue()==AddonPage.PVPINFO);
+    public Setting<Boolean> xp = new Setting<Boolean>("XP", true, v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
+    public Setting<Boolean> crystals = new Setting<Boolean>("Crystals", true, v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
+    public Setting<Boolean> obi = new Setting<Boolean>("Obsidian", true, v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
+    public Setting<Boolean> totems = new Setting<Boolean>("Totems", true, v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
+    public Setting<Boolean> gapples = new Setting<Boolean>("Gapples", true, v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
+    public Setting<String> pvpInfoX = new Setting<String>("PvPX", "1", v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
+    public Setting<String> pvpInfoY = new Setting<String>("PvPY", "50", v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
+
     public Components() {
         super("Addons", Category.CLIENT, true);
     }
-
-    private final CFontRenderer font = new CFontRenderer(new Font("Verdana", Font.PLAIN, 18), true, true);
 
     @Override
     public void onScreen() {
@@ -55,6 +66,34 @@ public class Components extends Module {
             return;
         }
         doTargetHud();
+        doPvPInfo();
+    }
+
+    private void doPvPInfo() {
+        if(!pvpInfo.getValue()) {
+            return;
+        }
+        int setX = convertString(pvpInfoX.getValue());
+        int setY = convertString(pvpInfoY.getValue());
+        if(xp.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow("XP " +String.valueOf(getItemCount(Items.EXPERIENCE_BOTTLE)), setX, setY, Colors.INSTANCE.getColor(setY, false));
+            setY+=10;
+        }
+        if(crystals.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow("Crystals " + String.valueOf(getItemCount(Items.END_CRYSTAL)), setX, setY, Colors.INSTANCE.getColor(setY, false));
+            setY+=10;
+        }
+        if(obi.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow("Obi " + String.valueOf(getItemCount(Item.getItemFromBlock(Blocks.OBSIDIAN))), setX, setY, Colors.INSTANCE.getColor(setY, false));
+            setY+=10;
+        }
+        if(totems.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow("Totems " +String.valueOf(getItemCount(Items.TOTEM_OF_UNDYING)), setX, setY, Colors.INSTANCE.getColor(setY, false));
+            setY+=10;
+        }
+        if(gapples.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow("Gapples " +String.valueOf(getItemCount(Items.GOLDEN_APPLE)), setX, setY, Colors.INSTANCE.getColor(setY, false));
+        }
     }
 
     private void doTargetHud() {
@@ -63,12 +102,11 @@ public class Components extends Module {
         }
         int setX = convertString(targetHudX.getValue());
         int setY = convertString(targetHudY.getValue());
-        int fontHeight = font.getHeight();
         int c = Colors.INSTANCE.getColor(1, false);
         Entity targetEntity = getClosestTarget();
         String entName = targetEntity.getName();
-        font.drawStringWithShadow(entName, setX, setY, 0xffffffff);
-        setY+=font.getHeight()+2+5;
+        Dactyl.fontUtil.drawStringWithShadow(entName, setX, setY, 0xffffffff);
+        setY+=Dactyl.fontUtil.getFontHeight()+2+5;
         int armorY = 0;
         if(targetArmor.getValue()) {
             armorY+=renderArmor(setX, setY, (EntityPlayer) targetEntity);
@@ -103,18 +141,18 @@ public class Components extends Module {
             if(pHealth <= 0) {
                 pHealth = 1;
             }
-            font.drawStringWithShadow("HP: "+ textColor + String.valueOf(pHealth), setX+20, setY, 0xffffffff);
+            Dactyl.fontUtil.drawStringWithShadow("HP: "+ textColor + String.valueOf(pHealth), setX+20, setY, 0xffffffff);
             setY+=10;
         }
 
         if(targetPopped.getValue()) {
             if(Nametags.getTotemPops(targetEntity.getName()) > 0) {
-                font.drawStringWithShadow("TP: "+ TextFormatting.RED + String.valueOf(Nametags.getTotemPops(targetEntity.getName())), setX+20, setY, 0xffffffff);
+                Dactyl.fontUtil.drawStringWithShadow("TP: "+ TextFormatting.RED + String.valueOf(Nametags.getTotemPops(targetEntity.getName())), setX+20, setY, 0xffffffff);
                 setY+=10;
             }
         }
         if(targetPing.getValue()) {
-            font.drawStringWithShadow("Ping: "+ TextFormatting.GREEN + EntityUtil.getPing((EntityPlayer) targetEntity), setX+20, setY, 0xffffffff);
+            Dactyl.fontUtil.drawStringWithShadow("Ping: "+ TextFormatting.GREEN + EntityUtil.getPing((EntityPlayer) targetEntity), setX+20, setY, 0xffffffff);
             setY+=10;
         }
         if(targetBackground.getValue()) {
@@ -195,6 +233,10 @@ public class Components extends Module {
             }
         }
         return t;
+    }
+
+    private int getItemCount(Item i) {
+        return (mc.player.getHeldItemOffhand().getCount()+(mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == i).mapToInt(ItemStack::getCount).sum()));
     }
 
     private Entity getClosest() {

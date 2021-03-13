@@ -20,10 +20,10 @@ public class ClickGUI extends GuiScreen {
     public static ClickGUI INSTANCE;
 
     public ClickGUI() {
-        int x = 1;
+        int x = 5;
         for(Module.Category category : Module.Category.values()) {
             modulePanels.add(new ModulePanel(category, x, 1));
-            x+=105;
+            x+=110;
         }
         INSTANCE = this;
     }
