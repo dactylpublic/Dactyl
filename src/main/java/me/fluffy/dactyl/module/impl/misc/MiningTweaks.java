@@ -45,6 +45,7 @@ public class MiningTweaks extends Module {
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 6, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Boolean> strict = new Setting<Boolean>("Strict", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
 
     public MiningTweaks() {
@@ -75,9 +76,17 @@ public class MiningTweaks extends Module {
         }
         if(modeSetting.getValue() == MiningMode.BYPASS) {
             if (shit == true && timer.hasPassed(exploitDelay.getValue().longValue()) && this.lastBrokenPos != null) {
-                mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, this.lastBrokenPos, EnumFacing.DOWN));
-                blockWasBroken = false;
-                shit = false;
+                if(strict.getValue()) {
+                    if(mc.world.getBlockState(this.lastBrokenPos).getBlock() != Blocks.AIR) {
+                        mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, this.lastBrokenPos, EnumFacing.DOWN));
+                        blockWasBroken = false;
+                        shit = false;
+                    }
+                } else {
+                    mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, this.lastBrokenPos, EnumFacing.DOWN));
+                    blockWasBroken = false;
+                    shit = false;
+                }
             }
             if (currentPos != null) {
                 if (mc.world.getBlockState(currentPos).getBlock() == Blocks.AIR) {
