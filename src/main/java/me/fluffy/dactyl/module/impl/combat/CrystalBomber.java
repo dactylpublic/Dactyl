@@ -30,7 +30,6 @@ public class CrystalBomber extends Module {
     public Setting<Integer> delay = new Setting<Integer>("Delay", 50, 1, 500);
     public Setting<Integer> placeDelay = new Setting<Integer>("ObiDelay", 150, 1, 500);
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 6.0D, 1.0D, 10.0D);
-    public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 4.7D, 1.0D, 6.0D);
     public Setting<Boolean> oneBlock = new Setting<Boolean>("1.13+", false);
     public Setting<Boolean> swing = new Setting<Boolean>("Swing", true);
     public Setting<SwapMode> swapModeSetting = new Setting<SwapMode>("SwapMode", SwapMode.NORMAL);
