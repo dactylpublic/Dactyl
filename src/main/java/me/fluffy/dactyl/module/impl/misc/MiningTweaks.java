@@ -48,8 +48,10 @@ public class MiningTweaks extends Module {
     public Setting<Boolean> strict = new Setting<Boolean>("Strict", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
 
+    public static MiningTweaks INSTANCE;
     public MiningTweaks() {
         super("BreakTweaks", Category.MISC);
+        INSTANCE = this;
     }
 
     private boolean isMining = false;

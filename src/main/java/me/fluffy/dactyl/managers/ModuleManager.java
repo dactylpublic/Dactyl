@@ -30,6 +30,7 @@ public class ModuleManager {
         modules.add(new SelfTrap());
         modules.add(new AutoArmor());
         modules.add(new HoleFill());
+        modules.add(new CrystalBomber());
 
         // player
         modules.add(new Freecam());

@@ -411,6 +411,10 @@ public class CombatUtil {
         return true;
     }
 
+    public static boolean isObi(Block block) {
+        return block == Blocks.OBSIDIAN;
+    }
+
     public static boolean isHard(Block block) {
         return block == Blocks.OBSIDIAN || block == Blocks.BEDROCK || block == Blocks.ANVIL || block == Blocks.ENDER_CHEST;
     }
@@ -668,11 +672,11 @@ public class CombatUtil {
         return bd.doubleValue();
     }
 
-    private static Vec3d getHitVector(BlockPos pos, EnumFacing opposingSide) {
+    public static Vec3d getHitVector(BlockPos pos, EnumFacing opposingSide) {
         return new Vec3d(pos).add(0.5, 0.5, 0.5).add(new Vec3d(opposingSide.getDirectionVec()).scale(0.5));
     }
 
-    private static EnumFacing getPlaceSide(BlockPos blockPos) {
+    public static EnumFacing getPlaceSide(BlockPos blockPos) {
         EnumFacing placeableSide = null;
         for (EnumFacing side : EnumFacing.values()) {
             BlockPos adjacent = blockPos.offset(side);
@@ -1322,6 +1326,18 @@ public class CombatUtil {
         }
     }
 
+    public static boolean containsCrystal(BlockPos pos) {
+        if(mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(pos)) != null) {
+            List<Entity> entityList = mc.world.getEntitiesWithinAABB((Class) Entity.class, new AxisAlignedBB(pos));
+            for(Entity entity : entityList) {
+                if((entity instanceof EntityEnderCrystal)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static boolean containsNotCrystals(BlockPos pos) {
         if(mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(pos)) != null) {
             List<Entity> entityList = mc.world.getEntitiesWithinAABB((Class) Entity.class, new AxisAlignedBB(pos));
@@ -1334,7 +1350,18 @@ public class CombatUtil {
         return true;
     }
 
-    private static boolean isValidPlacePos(boolean isOnePointThirteen, BlockPos blockPos) {
+    public static boolean isCrystalBomberPlaceable(boolean isOnePointThirteen, BlockPos blockPos) {
+        if(!isOnePointThirteen) {
+            final BlockPos boost = blockPos.add(0, 1, 0);
+            final BlockPos boost2 = blockPos.add(0, 2, 0);
+            return  mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getBlockState(boost2).getBlock() == Blocks.AIR && mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(boost)).isEmpty() && mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(boost2)).isEmpty();
+        } else {
+            final BlockPos boost = blockPos.add(0, 1, 0);
+            return mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(boost)).isEmpty();
+        }
+    }
+
+    public static boolean isValidPlacePos(boolean isOnePointThirteen, BlockPos blockPos) {
         if(!isOnePointThirteen) {
             final BlockPos boost = blockPos.add(0, 1, 0);
             final BlockPos boost2 = blockPos.add(0, 2, 0);
