@@ -1354,10 +1354,10 @@ public class CombatUtil {
         if(!isOnePointThirteen) {
             final BlockPos boost = blockPos.add(0, 1, 0);
             final BlockPos boost2 = blockPos.add(0, 2, 0);
-            return  mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getBlockState(boost2).getBlock() == Blocks.AIR && mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(boost)).isEmpty() && mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(boost2)).isEmpty();
+            return  mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getBlockState(boost2).getBlock() == Blocks.AIR && !containsNotCrystals(boost) && !containsNotCrystals(boost2);
         } else {
             final BlockPos boost = blockPos.add(0, 1, 0);
-            return mc.world.getBlockState(boost).getBlock() == Blocks.AIR && mc.world.getEntitiesWithinAABB((Class)Entity.class, new AxisAlignedBB(boost)).isEmpty();
+            return mc.world.getBlockState(boost).getBlock() == Blocks.AIR && !containsNotCrystals(boost);
         }
     }
 

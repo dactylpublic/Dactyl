@@ -29,10 +29,8 @@ import java.util.List;
 public class CrystalBomber extends Module {
     public Setting<Integer> delay = new Setting<Integer>("Delay", 50, 1, 500);
     public Setting<Integer> placeDelay = new Setting<Integer>("ObiDelay", 150, 1, 500);
-    public Setting<TraceMode> raytrace = new Setting<TraceMode>("RayTrace", TraceMode.OFF);
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 6.0D, 1.0D, 10.0D);
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 4.7D, 1.0D, 6.0D);
-    public Setting<Double> wallsPlace = new Setting<Double>("WallsRange", 4.0D, 1.0D, 6.0D, vis->raytrace.getValue() == TraceMode.RANGE);
     public Setting<Boolean> oneBlock = new Setting<Boolean>("1.13+", false);
     public Setting<Boolean> swing = new Setting<Boolean>("Swing", true);
     public Setting<SwapMode> swapModeSetting = new Setting<SwapMode>("SwapMode", SwapMode.NORMAL);
@@ -46,6 +44,7 @@ public class CrystalBomber extends Module {
     private final TimeUtil checkTimer = new TimeUtil();
     private final TimeUtil justPlacedTimer = new TimeUtil();
     private EntityPlayer bestTarget;
+    private boolean hasAlreadySwitched = false;
 
     @Override
     public void onDisable() {
@@ -105,12 +104,17 @@ public class CrystalBomber extends Module {
             placeCrystal(placePos);
             mc.player.inventory.currentItem = oldSlot;
             placeTimer.reset();
-        } else if(CombatUtil.containsCrystal(placePos.add(new BlockPos(0, 1, 0))) && mc.world.getBlockState(placePos).getBlock() == Blocks.OBSIDIAN) {
+            return;
+        }
+        if(CombatUtil.containsCrystal(placePos.add(new BlockPos(0, 1, 0))) && mc.world.getBlockState(placePos).getBlock() == Blocks.OBSIDIAN && !hasAlreadySwitched) {
             if (findPickaxe() == -1) {
                 return;
             }
             mc.player.inventory.currentItem = findPickaxe();
-        } else if(CombatUtil.containsCrystal(placePos.add(new BlockPos(0, 1, 0))) && mc.world.getBlockState(placePos).getBlock() == Blocks.AIR) {
+            hasAlreadySwitched = true;
+            return;
+        }
+        if(CombatUtil.containsCrystal(placePos.add(new BlockPos(0, 1, 0))) && mc.world.getBlockState(placePos).getBlock() == Blocks.AIR) {
             if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
                 checkTimer.reset();
                 if (mc.player.inventory.currentItem != findCrystal()) {
@@ -121,17 +125,17 @@ public class CrystalBomber extends Module {
             if (!checkTimer.hasPassed(125L)) {
                 return;
             }
-        } else {
-            if(mc.world.getBlockState(placePos).getBlock() == Blocks.AIR) {
-                if(findObi() == -1) {
-                    return;
-                }
-                if (placeTimer.hasPassed(placeDelay.getValue().longValue())) {
-                    //ChatUtil.printMsg("trying to place", true, false);
-                    CombatUtil.placeBlock(placePos, false, rotate.getValue(), false, true, false, findObi());
-                    justPlacedTimer.reset();
-                    timer.reset();
-                }
+            return;
+        }
+        if(mc.world.getBlockState(placePos).getBlock() == Blocks.AIR) {
+            if (findObi() == -1) {
+                return;
+            }
+            if (placeTimer.hasPassed(placeDelay.getValue().longValue())) {
+                CombatUtil.placeBlock(placePos, false, rotate.getValue(), false, true, false, findObi());
+                justPlacedTimer.reset();
+                timer.reset();
+                hasAlreadySwitched = false;
             }
         }
     }
@@ -236,9 +240,9 @@ public class CrystalBomber extends Module {
                 size++;
             }
         }
-        if(!CombatUtil.isCrystalBomberPlaceable(oneBlock.getValue(), blockpos.add(new BlockPos(0, 2, 0)))) {
+        /*if(!CombatUtil.isCrystalBomberPlaceable(oneBlock.getValue(), blockpos.add(new BlockPos(0, 2, 0)))) {
             return false;
-        }
+        }*/
         return (size != 0);
     }
 
