@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
+import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -45,6 +46,7 @@ public class MiningTweaks extends Module {
     public Setting<Boolean> strict = new Setting<Boolean>("Strict", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Integer> exploitDelay = new Setting<Integer>("EDelay", 100, 10, 1000, v->modeSetting.getValue() == MiningMode.BYPASS && !strict.getValue());
     public Setting<Boolean> doCrystalPlace = new Setting<Boolean>("CrystalPlace", false, v->modeSetting.getValue() == MiningMode.BYPASS);
+    public Setting<Boolean> fastBreakAll = new Setting<Boolean>("BreakOthers", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 6, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET);
@@ -109,6 +111,27 @@ public class MiningTweaks extends Module {
             if (!mc.world.getBlockState(this.currentPos).equals(this.currentBlockState) || mc.world.getBlockState(this.currentPos).getBlock() == Blocks.AIR) {
                 this.currentPos = null;
                 this.currentBlockState = null;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onOtherBlockPlace(PacketEvent event) {
+        if(event.getType() == PacketEvent.PacketType.INCOMING) {
+            if (modeSetting.getValue() == MiningMode.BYPASS) {
+                if(event.getPacket() instanceof SPacketBlockChange) {
+                    SPacketBlockChange packet = (SPacketBlockChange)event.getPacket();
+                    if(fastBreakAll.getValue()) {
+                        if(packet.getBlockPosition() == this.lastBrokenPos) {
+                            if (packet.getBlockState().getBlock() != Blocks.AIR) {
+                                //mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, this.lastBrokenPos, EnumFacing.DOWN));
+                                popbobTimer.reset();
+                                shit = true;
+                            }
+                        }
+                    }
+                }
+
             }
         }
     }
