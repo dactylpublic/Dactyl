@@ -122,7 +122,7 @@ public class MiningTweaks extends Module {
                 if(event.getPacket() instanceof SPacketBlockChange) {
                     SPacketBlockChange packet = (SPacketBlockChange)event.getPacket();
                     if(fastBreakAll.getValue()) {
-                        if(packet.getBlockPosition() == this.lastBrokenPos) {
+                        if(lastBrokenPos != null &&  packet.getBlockPosition().getX() == lastBrokenPos.getX() && packet.getBlockPosition().getY() == lastBrokenPos.getY() && packet.getBlockPosition().getZ() == lastBrokenPos.getZ()) {
                             if (packet.getBlockState().getBlock() != Blocks.AIR) {
                                 //mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, this.lastBrokenPos, EnumFacing.DOWN));
                                 popbobTimer.reset();
