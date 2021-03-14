@@ -111,6 +111,7 @@ public class CrystalBomber extends Module {
             }
             mc.player.inventory.currentItem = findPickaxe();
             hasAlreadySwitched = true;
+            mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, placePos, EnumFacing.UP));
             return;
         }
         if(CombatUtil.containsCrystal(placePos.add(new BlockPos(0, 1, 0))) && mc.world.getBlockState(placePos).getBlock() == Blocks.AIR) {
