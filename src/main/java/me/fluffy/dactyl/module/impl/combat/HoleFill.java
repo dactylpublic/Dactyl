@@ -142,20 +142,22 @@ public class HoleFill extends Module {
         if(mc.world == null) {
             return false;
         }
-        List<Entity> playerEntities = new ArrayList<>(mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
-        EntityPlayer p = null;
-        for(Entity ent : playerEntities) {
-            if(mc.player.getDistance(ent) >= playerRange.getValue()) {
-                continue;
+        if(smart.getValue()) {
+            List<Entity> playerEntities = new ArrayList<>(mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+            EntityPlayer p = null;
+            for(Entity ent : playerEntities) {
+                if(mc.player.getDistance(ent) >= playerRange.getValue()) {
+                    continue;
+                }
+                if(ent.getDistanceSq(pos) > (enemyRange.getValue()*enemyRange.getValue())) {
+                    continue;
+                }
+                p = (EntityPlayer) ent;
             }
-            if(ent.getDistanceSq(pos) > (enemyRange.getValue()*enemyRange.getValue())) {
-                continue;
-            }
-            p = (EntityPlayer) ent;
-        }
 
-        if(p == null && smart.getValue()) {
-            return false;
+            if(p == null) {
+                return false;
+            }
         }
         if(!(mc.world.getBlockState(pos).getBlock() instanceof BlockAir)) {
             return false;

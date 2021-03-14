@@ -49,7 +49,7 @@ public class MiningTweaks extends Module {
     public Setting<Boolean> fastBreakAll = new Setting<Boolean>("BreakOthers", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> modeSetting.getValue() == MiningMode.PACKET);
-    public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 6, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 6, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
 
     public static MiningTweaks INSTANCE;
