@@ -21,6 +21,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
@@ -41,11 +42,12 @@ public class MiningTweaks extends Module {
     public Setting<MiningMode> modeSetting = new Setting<MiningMode>("Mode", MiningMode.PACKET);
     public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v -> modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Boolean> reset = new Setting<Boolean>("Reset", true);
-    public Setting<Integer> exploitDelay = new Setting<Integer>("EDelay", 100, 10, 1000, v->modeSetting.getValue() == MiningMode.BYPASS);
+    public Setting<Boolean> strict = new Setting<Boolean>("Strict", true, v->modeSetting.getValue() == MiningMode.BYPASS);
+    public Setting<Integer> exploitDelay = new Setting<Integer>("EDelay", 100, 10, 1000, v->modeSetting.getValue() == MiningMode.BYPASS && !strict.getValue());
+    public Setting<Boolean> doCrystalPlace = new Setting<Boolean>("CrystalPlace", false, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> modeSetting.getValue() == MiningMode.PACKET);
     public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 6, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET);
-    public Setting<Boolean> strict = new Setting<Boolean>("Strict", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
 
     public static MiningTweaks INSTANCE;
@@ -117,6 +119,11 @@ public class MiningTweaks extends Module {
             if(modeSetting.getValue() == MiningMode.BYPASS) {
                 if(event.getPacket() instanceof CPacketPlayerTryUseItemOnBlock) {
                     CPacketPlayerTryUseItemOnBlock p = (CPacketPlayerTryUseItemOnBlock)event.getPacket();
+                    if(!doCrystalPlace.getValue()) {
+                        if (mc.player.getHeldItem(p.getHand()).getItem() == Items.END_CRYSTAL) {
+                            return;
+                        }
+                    }
                     BlockPos placedPos = p.getPos().up();
                     if(lastBrokenPos != null &&  placedPos.getX() == lastBrokenPos.getX() && placedPos.getY() == lastBrokenPos.getY() && placedPos.getZ() == lastBrokenPos.getZ()) {
                         popbobTimer.reset();
