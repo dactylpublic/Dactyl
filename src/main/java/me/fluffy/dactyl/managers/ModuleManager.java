@@ -31,6 +31,7 @@ public class ModuleManager {
         modules.add(new AutoArmor());
         modules.add(new HoleFill());
         modules.add(new CrystalBomber());
+        modules.add(new BetaCrystal());
 
         // player
         modules.add(new Freecam());

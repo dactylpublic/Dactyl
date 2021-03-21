@@ -4,6 +4,7 @@ import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.injection.inj.access.IBlock;
 import me.fluffy.dactyl.injection.inj.access.IVec3i;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
+import me.fluffy.dactyl.module.impl.combat.BetaCrystal;
 import me.fluffy.dactyl.module.impl.misc.Chat;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
@@ -767,6 +768,61 @@ public class CombatUtil {
         return true;
     }
 
+    public static boolean crystalIsBreakable(EntityEnderCrystal crystal, BetaCrystal.WallsRange rangeMode, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, BetaCrystal.PassLogic passLogic, double doesDMGMin, double enemyRange) {
+        boolean doesDmgSettingBased = true;
+        if(passLogic == BetaCrystal.PassLogic.DOESDMG) {
+            doesDmgSettingBased = false;
+            List<Entity> entities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream()
+                    .filter(entityPlayer -> mc.player.getDistanceSq(entityPlayer) <= (enemyRange * enemyRange))
+                    .filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName()))
+                    .collect(Collectors.toList()));
+            for (final Entity e : entities) {
+                if (e != mc.player) {
+                    if(!(e instanceof EntityLivingBase)) {
+                        continue;
+                    }
+                    if (((EntityLivingBase) e).getHealth() <= 0.0f || ((EntityLivingBase)e).isDead) {
+                        continue;
+                    }
+                    if(((double)calculateDamage(crystal.posX, crystal.posY, crystal.posZ, e) >= doesDMGMin)) {
+                        doesDmgSettingBased = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(!doesDmgSettingBased) {
+            return false;
+        }
+
+        if(antiSuicide) {
+            if(((double)calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= maxSelfDmg)) {
+                return false;
+            }
+            if(((double)calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= (mc.player.getHealth()+mc.player.getAbsorptionAmount()))) {
+                return false;
+            }
+        }
+
+        switch(rangeMode) {
+            case RANGE:
+                if(!canSeeEntity(crystal)) {
+                    if (mc.player.getDistance(crystal) >= breakTraceRange) {
+                        return false;
+                    }
+                }
+                break;
+            case ANTI:
+                if(!canSeeEntity(crystal)) {
+                    return false;
+                }
+                break;
+        }
+
+        return true;
+    }
+
     public static boolean getMapCrystalPlace(EntityEnderCrystal crystal, double breakRange, boolean doBreakTrace, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, AutoCrystal.BreakLogic breakLogic, double doesDMGMin, double enemyRange) {
         boolean doesDmgSettingBased = true;
         if(breakLogic == AutoCrystal.BreakLogic.DOESDMG || breakLogic == AutoCrystal.BreakLogic.BOTH) {
@@ -826,6 +882,62 @@ public class CombatUtil {
         return true;
     }
 
+    public static boolean getMapCrystalPlaceNew(EntityEnderCrystal crystal, double breakRange, BetaCrystal.WallsRange wallsRange, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, BetaCrystal.PassLogic passLogic, double doesDMGMin, double enemyRange) {
+        boolean doesDmgSettingBased = true;
+        if(passLogic == BetaCrystal.PassLogic.DOESDMG) {
+            doesDmgSettingBased = false;
+            List<Entity> entities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream()
+                    .filter(entityPlayer -> mc.player.getDistanceSq(entityPlayer) <= (enemyRange * enemyRange))
+                    .filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName()))
+                    .collect(Collectors.toList()));
+            for (final Entity e : entities) {
+                if (e != mc.player) {
+                    if(!(e instanceof EntityLivingBase)) {
+                        continue;
+                    }
+                    if (((EntityLivingBase) e).getHealth() <= 0.0f || ((EntityLivingBase)e).isDead) {
+                        continue;
+                    }
+                    if(((double)calculateDamage(crystal.posX, crystal.posY, crystal.posZ, e) >= doesDMGMin)) {
+                        doesDmgSettingBased = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(!doesDmgSettingBased) {
+            return false;
+        }
+
+        if(mc.player.getDistance(crystal) >= breakRange) {
+            return false;
+        }
+
+        if(antiSuicide) {
+            if(((double)calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= maxSelfDmg)) {
+                return false;
+            }
+            if(((double)calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= (mc.player.getHealth()+mc.player.getAbsorptionAmount()))) {
+                return false;
+            }
+        }
+
+        if(wallsRange != BetaCrystal.WallsRange.OFF) {
+            if(!canSeeEntity(crystal)) {
+                if(wallsRange == BetaCrystal.WallsRange.RANGE) {
+                    if (mc.player.getDistance(crystal) >= breakTraceRange) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public static boolean isHoldingCrystal() {
         return (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL || mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL);
     }
@@ -874,6 +986,77 @@ public class CombatUtil {
         if(doPlaceTrace) {
             if(!canSeeBlock(blockPos)) {
                 if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                    return false;
+                }
+            }
+        }
+
+        if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+            return false;
+        }
+
+        double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+        float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+        if(antiSuicide) {
+            if(selfDamage > maxSelfDmg) {
+                return false;
+            }
+            if((selfDamage >= playerHealth)) {
+                return false;
+            }
+        }
+
+        if(satisfiedTarget == null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean placePosStillValid(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
+        if(blockPos == null) {
+            return false;
+        }
+        final List<Entity> playerEntities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        EntityPlayer satisfiedTarget = null;
+        for (Entity entity : playerEntities) {
+            if(entity == null) {
+                continue;
+            }
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            if(entity.getDistanceSq(blockPos) > 56.2) {
+                continue;
+            }
+            double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+            float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+            if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                continue;
+            }
+            if(targetDamage <= 2.0) {
+                continue;
+            }
+            satisfiedTarget = (EntityPlayer) entity;
+        }
+
+        if(!isValidPlacePos(onepointthirteen, blockPos)) {
+            return false;
+        }
+
+        if(wallsRange != BetaCrystal.WallsRange.OFF) {
+            if(!canSeeBlock(blockPos)) {
+                if(wallsRange == BetaCrystal.WallsRange.RANGE) {
+                    if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                        return false;
+                    }
+                } else {
                     return false;
                 }
             }
@@ -962,6 +1145,71 @@ public class CombatUtil {
         return true;
     }
 
+    public static boolean renderPosStillValid(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
+        final List<Entity> playerEntities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        EntityPlayer satisfiedTarget = null;
+        for (Entity entity : playerEntities) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            if(entity.getDistanceSq(blockPos) > 56.2) {
+                continue;
+            }
+            double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+            float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+            if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                continue;
+            }
+            if(targetDamage <= 2.0) {
+                continue;
+            }
+            satisfiedTarget = (EntityPlayer) entity;
+        }
+
+        if(!isValidRenderPos(onepointthirteen, blockPos)) {
+            return false;
+        }
+
+        if(wallsRange != BetaCrystal.WallsRange.OFF) {
+            if(!canSeeBlock(blockPos)) {
+                if(wallsRange == BetaCrystal.WallsRange.RANGE) {
+                    if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+            return false;
+        }
+
+        double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+        float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+        if(antiSuicide) {
+            if(selfDamage > maxSelfDmg) {
+                return false;
+            }
+            if((selfDamage >= playerHealth)) {
+                return false;
+            }
+        }
+
+        if(satisfiedTarget == null) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     public static BlockPos getBestPlacePosition(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, boolean doPlaceTrace, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
         BlockPos placePosition = null;
@@ -982,6 +1230,73 @@ public class CombatUtil {
                 if(doPlaceTrace) {
                     if(!canSeeBlock(blockPos)) {
                         if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                            continue;
+                        }
+                    }
+                }
+                if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+                    continue;
+                }
+                if(entity.getDistanceSq(blockPos) > 56.2) {
+                    continue;
+                }
+                double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+                float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+                if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                    continue;
+                }
+                if(targetDamage <= 2.0) {
+                    continue;
+                }
+                if (targetDamage <= damage) {
+                    continue;
+                }
+                double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+                float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                if(antiSuicide) {
+                    if(selfDamage > maxSelfDmg) {
+                        continue;
+                    }
+                    if((selfDamage >= playerHealth)) {
+                        continue;
+                    }
+                }
+                if(selfDamage > targetDamage) {
+                    continue;
+                }
+                placePosition = blockPos;
+                damage = targetDamage;
+            }
+        }
+        if (damage == 2.0) {
+            return null;
+        }
+        return placePosition;
+    }
+
+    public static BlockPos getBestPlacePosNew(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+        BlockPos placePosition = null;
+        final List<BlockPos> placePositions = findPossiblePlacePoses(oneBlockCA, placeRange);
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        double damage = 2.0;
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            for(BlockPos blockPos : placePositions) {
+                if(wallsRange != BetaCrystal.WallsRange.OFF) {
+                    if(!canSeeBlock(blockPos)) {
+                        if(wallsRange == BetaCrystal.WallsRange.RANGE) {
+                            if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                                continue;
+                            }
+                        } else {
                             continue;
                         }
                     }
@@ -1089,11 +1404,116 @@ public class CombatUtil {
         return damage;
     }
 
+    public static double getDamageBestPosNew(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+        BlockPos placePosition = null;
+        final List<BlockPos> placePositions = findPossiblePlacePoses(oneBlockCA, placeRange);
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        double damage = 2.0;
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            for(BlockPos blockPos : placePositions) {
+                if(wallsRange != BetaCrystal.WallsRange.OFF) {
+                    if(!canSeeBlock(blockPos)) {
+                        if(wallsRange == BetaCrystal.WallsRange.RANGE) {
+                            if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                                continue;
+                            }
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+                if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+                    continue;
+                }
+                if(entity.getDistanceSq(blockPos) > 56.2) {
+                    continue;
+                }
+                double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+                float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+                if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                    continue;
+                }
+                if(targetDamage <= 2.0) {
+                    continue;
+                }
+                if (targetDamage <= damage) {
+                    continue;
+                }
+                double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+                float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                if(antiSuicide) {
+                    if(selfDamage > maxSelfDmg) {
+                        continue;
+                    }
+                    if((selfDamage >= playerHealth)) {
+                        continue;
+                    }
+                }
+                if(selfDamage > targetDamage) {
+                    continue;
+                }
+                placePosition = blockPos;
+                damage = targetDamage;
+            }
+        }
+        if (damage == 2.0) {
+            return 0.0d;
+        }
+        return damage;
+    }
+
     public static boolean isFacePlaceCrystal(EntityEnderCrystal crystal, double minFacePlaceHP, boolean placeTrace, double wallsPlaceRange, double placeRange, double enemyRange) {
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         if(placeTrace) {
             if(!canSeeEntity(crystal) && mc.player.getDistance(crystal) > wallsPlaceRange) {
                 return false;
+            }
+        }
+        if(mc.player.getDistance(crystal) > placeRange) {
+            return false;
+        }
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            float entHP = ((EntityLivingBase)entity).getHealth()+((EntityLivingBase)entity).getAbsorptionAmount();
+            if(entHP > minFacePlaceHP) {
+                continue;
+            }
+            double targetDMG = calculateDamage(crystal, entity);
+            if(targetDMG >= 1.4d) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isFacePlaceCrystalNew(EntityEnderCrystal crystal, double minFacePlaceHP, BetaCrystal.WallsRange wallsRange, double wallsPlaceRange, double placeRange, double enemyRange) {
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        if(wallsRange != BetaCrystal.WallsRange.OFF) {
+            if(!canSeeEntity(crystal)) {
+                if(wallsRange == BetaCrystal.WallsRange.RANGE) {
+                    if(mc.player.getDistance(crystal) > wallsPlaceRange) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             }
         }
         if(mc.player.getDistance(crystal) > placeRange) {
@@ -1140,6 +1560,73 @@ public class CombatUtil {
                 if(doPlaceTrace) {
                     if(!canSeeBlock(blockPos)) {
                         if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                            continue;
+                        }
+                    }
+                }
+                if(mc.player.getDistanceSq(blockPos) > (placeRange*placeRange)) {
+                    continue;
+                }
+                if(entity.getDistanceSq(blockPos) > 56.2) {
+                    continue;
+                }
+                double targetDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, entity);
+                float targetHealth = ((EntityLivingBase)entity).getHealth() + ((EntityLivingBase)entity).getAbsorptionAmount();
+                if(targetDamage < minDamage && !(targetHealth < startFacePlaceHealth)) {
+                    continue;
+                }
+                if(targetDamage <= 2.0) {
+                    continue;
+                }
+                if (targetDamage <= damage) {
+                    continue;
+                }
+                double selfDamage = calculateDamage(((IVec3i)blockPos).getX() + 0.5, ((IVec3i)blockPos).getY() + 1, ((IVec3i)blockPos).getZ() + 0.5, (Entity) mc.player);
+                float playerHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                if(antiSuicide) {
+                    if(selfDamage > maxSelfDmg) {
+                        continue;
+                    }
+                    if((selfDamage >= playerHealth)) {
+                        continue;
+                    }
+                }
+                if(selfDamage > targetDamage) {
+                    continue;
+                }
+                placePosition = blockPos;
+                damage = targetDamage;
+            }
+        }
+        if (damage == 2.0) {
+            return null;
+        }
+        return placePosition;
+    }
+
+    public static BlockPos getBestPlacePosIgnoreAlreadyPlacedNew(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+        BlockPos placePosition = null;
+        final List<BlockPos> placePositions = findImpossiblePlacePoses(oneBlockCA, placeRange);
+        final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
+        double damage = 2.0;
+        for (Entity entity : playerEnts) {
+            if(mc.player.getDistance(entity) > enemyRange) {
+                continue;
+            }
+            if(entity == mc.player) {
+                continue;
+            }
+            if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            for(BlockPos blockPos : placePositions) {
+                if(wallsRange != BetaCrystal.WallsRange.OFF) {
+                    if(!canSeeBlock(blockPos)) {
+                        if(wallsRange == BetaCrystal.WallsRange.RANGE) {
+                            if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
+                                continue;
+                            }
+                        } else {
                             continue;
                         }
                     }
