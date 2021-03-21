@@ -9,6 +9,7 @@ import me.fluffy.dactyl.event.impl.world.DamageBlockEvent;
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
 import me.fluffy.dactyl.event.impl.world.ResetBlockRemovingEvent;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.ChatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
@@ -47,8 +48,10 @@ public class MiningTweaks extends Module {
     public Setting<Integer> exploitDelay = new Setting<Integer>("EDelay", 100, 10, 1000, v->modeSetting.getValue() == MiningMode.BYPASS && !strict.getValue());
     public Setting<Boolean> doCrystalPlace = new Setting<Boolean>("CrystalPlace", false, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> fastBreakAll = new Setting<Boolean>("BreakOthers", true, v->modeSetting.getValue() == MiningMode.BYPASS);
+    public Setting<Boolean> attemptBreakSelf = new Setting<Boolean>("OldBreakSelf", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
-    public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS));
+    public Setting<Boolean> renderBreakProgress = new Setting<Boolean>("Progress", true, v -> (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS) && renderPacketBlock.getValue());
     public Setting<Integer> resetRange = new Setting<Integer>("RemoveRange", 6, 1, 50, v -> modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> autoTool = new Setting<Boolean>("AutoTool", false);
 
@@ -138,6 +141,9 @@ public class MiningTweaks extends Module {
 
     @SubscribeEvent
     public void onBlockPlace(PacketEvent event) {
+        if(!attemptBreakSelf.getValue()) {
+            return;
+        }
         if(event.getType() == PacketEvent.PacketType.OUTGOING) {
             if(modeSetting.getValue() == MiningMode.BYPASS) {
                 if(event.getPacket() instanceof CPacketPlayerTryUseItemOnBlock) {
@@ -165,8 +171,18 @@ public class MiningTweaks extends Module {
         if (noBreakAnimation.getValue()) {
             if (event.getPacket() instanceof CPacketPlayerDigging) {
                 CPacketPlayerDigging cPacketPlayerDigging = (CPacketPlayerDigging) event.getPacket();
-                if (mc.world.getBlockState(cPacketPlayerDigging.getPosition()).getBlock() == Blocks.PORTAL)
+                if(cPacketPlayerDigging.getPosition() == null) {
                     return;
+                }
+                if(mc.world.getBlockState(cPacketPlayerDigging.getPosition()) == null) {
+                    return;
+                }
+                if(mc.world.getBlockState(cPacketPlayerDigging.getPosition()).getBlock() == null) {
+                    return;
+                }
+                if (mc.world.getBlockState(cPacketPlayerDigging.getPosition()).getBlock() == Blocks.PORTAL) {
+                    return;
+                }
                 for (Entity entity : mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(cPacketPlayerDigging.getPosition()))) {
                     if (entity instanceof EntityEnderCrystal) {
                         resetMining();
@@ -192,7 +208,40 @@ public class MiningTweaks extends Module {
     public void onRender3D(Render3DEvent event) {
         if (renderPacketBlock.getValue() && this.currentPos != null && (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
             Color color = new Color(this.timer.hasPassed((int)(2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 0 : 255, this.timer.hasPassed((int) (2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 255 : 0, 0, 255);
-            RenderUtil.drawBoxESP(this.currentPos, color, 1.0f, true, true, 44);
+            if(!renderBreakProgress.getValue()) {
+                /**
+                 * Solution:
+                 *
+                 * 200 is what percent of 2000?
+                 *
+                 * 200 is P% of 2000
+                 *
+                 * Equation: Y = P% * X
+                 *
+                 * Solving our equation for P
+                 * P% = Y/X
+                 * P% = 200/2000
+                 * p = 0.1
+                 *
+                 * Convert decimal to percent:
+                 * P% = 0.1 * 100 = 10%
+                 *
+                 *
+                 * https://upload.wikimedia.org/wikipedia/en/9/9a/Trollface_non-free.png
+                 * https://i.kym-cdn.com/photos/images/newsfeed/000/096/044/trollface.jpg?1296494117
+                 * https://ih1.redbubble.net/image.430953310.3132/flat,750x1000,075,f.u3.jpg
+                 * https://www.nicepng.com/png/detail/2-24510_trollface-deal-with-it-troll-face-png.png
+                 * https://static.wikia.nocookie.net/meme/images/7/7e/Ytroll-troll-crazy-insane.png/revision/latest/top-crop/width/360/height/450?cb=20150728035214
+                 * https://www.usbmemorydirect.com/media/images/store/products/troll_face/troll_face_usb_drive.jpg
+                 */
+                RenderUtil.drawBoxESP(this.currentPos, color, 1.0f, true, true, 44);
+            } else {
+                double passedOffset = timer.getPassedTime() / ((2000.0f * (20F / Dactyl.tickRateManager.getTickRate())));
+                if(passedOffset >= 1.0d) {
+                    passedOffset = 1.0d;
+                }
+                RenderUtil.drawOffsetBox(this.currentPos, 0, -(1.0-passedOffset), color, 1.0f, true, true, 44);
+            }
         }
     }
 
