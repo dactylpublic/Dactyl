@@ -226,9 +226,23 @@ public class ClickGUI extends GuiScreen {
         }
         if(Mouse.getEventDWheel() < 0) {
             for(ModulePanel panel : modulePanels) {
+                if(panel.getY() == 1 && !moduleSettingsIsOpen()) {
+                    return;
+                }
                 panel.setY(panel.getY()-13);
             }
         }
         super.handleMouseInput();
+    }
+
+    private boolean moduleSettingsIsOpen() {
+        for(ModulePanel panel : modulePanels) {
+            for(ModuleButton moduleButton : panel.moduleButtons) {
+                if(moduleButton.isExtended()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

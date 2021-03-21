@@ -60,6 +60,10 @@ public class HUD extends Module {
     public Setting<Integer> waterMarkOffset = new Setting<Integer>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
     public Setting<Boolean> gradientLogo = new Setting<Boolean>("LogoGradient", false, v->renderHud.getValue());
 
+    public Setting<Boolean> welcomer = new Setting<Boolean>("Welcomer", true, v->renderHud.getValue());
+    public Setting<String> customWelcomer = new Setting<String>("CustomWelcomer", "Hello <p>, welcome to Dactyl.ie >:)", v->renderHud.getValue()&&welcomer.getValue());
+    public Setting<Boolean> welcomerGradient = new Setting<Boolean>("WelcomeGradient", true, v->renderHud.getValue()&&welcomer.getValue());
+
     public Setting<Boolean> currentConfig = new Setting<Boolean>("CurrentConfig", false, v->renderHud.getValue());
     public Setting<Integer> currentConfigOffset = new Setting<Integer>("ConfigOffset", 10, 0, 100, v->renderHud.getValue() && currentConfig.getValue());
     public Setting<Boolean> currentConfigGradient = new Setting<Boolean>("ConfigGradient", false, v->renderHud.getValue()&&currentConfig.getValue());
@@ -140,6 +144,7 @@ public class HUD extends Module {
         if(renderHud.getValue()) {
             doArrayList();
             doWatermark();
+            doWelcomer();
             doCurrentConfig();
             doOtherRender();
             renderDirAndCoords();
@@ -564,13 +569,39 @@ public class HUD extends Module {
         }
     }
 
+    private void doWelcomer() {
+        if(!welcomer.getValue()) {
+            return;
+        }
+        int width = this.getRes().getScaledWidth();
+        String renderText = customWelcomer.getValue().replace("<p>", mc.session.getUsername());
+        if (welcomerGradient.getValue()) {
+            char[] characters = renderText.toCharArray();
+            int currentX = (int)width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2;
+            for (char ch : characters) {
+                if (shadow.getValue()) {
+                    Dactyl.fontUtil.drawStringWithShadow(String.valueOf(ch), currentX, 2, Colors.INSTANCE.getColor(currentX, true));
+                } else {
+                    Dactyl.fontUtil.drawString(String.valueOf(ch), currentX, 2, Colors.INSTANCE.getColor(currentX, true));
+                }
+                currentX += Dactyl.fontUtil.getStringWidth(String.valueOf(ch));
+            }
+        } else {
+            if (shadow.getValue()) {
+                Dactyl.fontUtil.drawStringWithShadow(renderText, (int)width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2, 2, Colors.INSTANCE.getColor(1, false));
+            } else {
+                Dactyl.fontUtil.drawString(renderText, (int)width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2, 2, Colors.INSTANCE.getColor(1, false));
+            }
+        }
+    }
+
     private void doCurrentConfig() {
         if(currentConfig.getValue()) {
             int offset = 1 + currentConfigOffset.getValue();
             if (ConfigCommand.INSTANCE == null || ConfigCommand.INSTANCE.lastLoadedConfig == null) {
                 return;
             }
-            if (gradientLogo.getValue()) {
+            if (currentConfigGradient.getValue()) {
                 char[] characters = ("Config: " + ConfigCommand.INSTANCE.lastLoadedConfig).toCharArray();
                 int currentX = 1;
                 for (char ch : characters) {

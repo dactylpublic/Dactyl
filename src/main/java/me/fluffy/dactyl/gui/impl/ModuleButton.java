@@ -184,6 +184,8 @@ public class ModuleButton {
         return this.y;
     }
 
+    public boolean isExtended() { return this.extended; }
+
     public boolean isHovering(int mouseX, int mouseY) {
         return mouseX >= x && mouseX <= x+100 && mouseY >= y && mouseY <= y + 15;
     }

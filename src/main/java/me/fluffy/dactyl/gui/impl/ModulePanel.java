@@ -14,7 +14,7 @@ public class ModulePanel {
     private final Module.Category category;
     private final int x;
     private int y;
-    private final ArrayList<ModuleButton> moduleButtons = new ArrayList<>();
+    public final ArrayList<ModuleButton> moduleButtons = new ArrayList<>();
     public ModulePanel(Module.Category category, int x, int y) {
         this.category = category;
         this.x = x;
