@@ -127,6 +127,9 @@ public class Notifications extends Module {
         if(visualRange.getValue()) {
             if (event.getEntity() instanceof EntityPlayer && event.getEntity() != mc.player) {
                 EntityPlayer entityPlayer = (EntityPlayer)event.getEntity();
+                if(entityPlayer.getName() == null) {
+                    return;
+                }
                 if(timeSent.containsKey(entityPlayer.getName()+" left your visual range.") || timeSent.containsKey("&d"+entityPlayer.getName()+" left your visual range.")) {
                     return;
                 }
@@ -140,6 +143,9 @@ public class Notifications extends Module {
     }
 
     private void sendNotification(String message, boolean popup) throws AWTException {
+        if(message == null) {
+            return;
+        }
         if(popup) {
             SystemTray tray = SystemTray.getSystemTray();
             Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
