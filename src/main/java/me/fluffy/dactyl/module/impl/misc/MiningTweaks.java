@@ -42,13 +42,14 @@ import java.awt.*;
 public class MiningTweaks extends Module {
     public Setting<Boolean> noBreakAnimation = new Setting<Boolean>("NoBreakAnim", true);
     public Setting<MiningMode> modeSetting = new Setting<MiningMode>("Mode", MiningMode.PACKET);
-    public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v -> modeSetting.getValue() == MiningMode.PACKET);
+    public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v->(modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS));
     public Setting<Boolean> reset = new Setting<Boolean>("Reset", true);
     public Setting<Boolean> strict = new Setting<Boolean>("Strict", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Integer> exploitDelay = new Setting<Integer>("EDelay", 100, 10, 1000, v->modeSetting.getValue() == MiningMode.BYPASS && !strict.getValue());
     public Setting<Boolean> doCrystalPlace = new Setting<Boolean>("CrystalPlace", false, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> fastBreakAll = new Setting<Boolean>("BreakOthers", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> attemptBreakSelf = new Setting<Boolean>("OldBreakSelf", true, v->modeSetting.getValue() == MiningMode.BYPASS);
+    public Setting<Boolean> autoSwitch = new Setting<Boolean>("AutoSwitch", true, v->modeSetting.getValue() == MiningMode.BYPASS);
     public Setting<Boolean> noBreakDelay = new Setting<Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS));
     public Setting<Boolean> renderBreakProgress = new Setting<Boolean>("Progress", true, v -> (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS) && renderPacketBlock.getValue());
@@ -289,10 +290,13 @@ public class MiningTweaks extends Module {
                     event.setCanceled(true);
                     break;
                 case BYPASS:
-                    if (this.currentPos == null) {
+                    //if (this.currentPos == null) {
                         this.currentPos = event.getPos();
                         this.currentBlockState = mc.world.getBlockState(this.currentPos);
                         this.timer.reset();
+                    //}
+                    if(autoSwitch.getValue()) {
+                        doAutoToolUse(event);
                     }
                     this.lastBrokenBlock = mc.world.getBlockState(currentPos).getBlock();
                     mc.player.swingArm(EnumHand.MAIN_HAND);
@@ -318,28 +322,58 @@ public class MiningTweaks extends Module {
             return;
         }
         if(autoTool.getValue()) {
-            int bestSlot = -1;
-            double max = 0;
-            for (int i = 0; i < 9; i++) {
-                ItemStack stack = mc.player.inventory.getStackInSlot(i);
-                if (stack.isEmpty()) continue;
-                float speed = stack.getDestroySpeed(mc.world.getBlockState(event.getPos()));
-                int eff;
-                if (speed > 1) {
-                    speed += ((eff = EnchantmentHelper.getEnchantmentLevel(Enchantments.EFFICIENCY, stack)) > 0 ? (Math.pow(eff, 2) + 1) : 0);
-                    if (speed > max) {
-                        max = speed;
-                        bestSlot = i;
-                    }
+            doAutoToolClick(event);
+        }
+    }
+
+    private void doAutoToolUse(DamageBlockEvent event) {
+        int bestSlot = -1;
+        double max = 0;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack.isEmpty()) continue;
+            float speed = stack.getDestroySpeed(mc.world.getBlockState(event.getPos()));
+            int eff;
+            if (speed > 1) {
+                speed += ((eff = EnchantmentHelper.getEnchantmentLevel(Enchantments.EFFICIENCY, stack)) > 0 ? (Math.pow(eff, 2) + 1) : 0);
+                if (speed > max) {
+                    max = speed;
+                    bestSlot = i;
                 }
             }
-            if (bestSlot != -1) {
-                mc.player.inventory.currentItem = bestSlot;
-                int i = this.mc.player.inventory.currentItem;
-                if (i != mc.playerController.currentPlayerItem) {
-                    mc.playerController.currentPlayerItem = i;
-                    mc.playerController.connection.sendPacket(new CPacketHeldItemChange(mc.playerController.currentPlayerItem));
+        }
+        if (bestSlot != -1) {
+            mc.player.inventory.currentItem = bestSlot;
+            int i = this.mc.player.inventory.currentItem;
+            if (i != mc.playerController.currentPlayerItem) {
+                mc.playerController.currentPlayerItem = i;
+                mc.playerController.connection.sendPacket(new CPacketHeldItemChange(mc.playerController.currentPlayerItem));
+            }
+        }
+    }
+
+    private void doAutoToolClick(PlayerInteractEvent.LeftClickBlock event) {
+        int bestSlot = -1;
+        double max = 0;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack.isEmpty()) continue;
+            float speed = stack.getDestroySpeed(mc.world.getBlockState(event.getPos()));
+            int eff;
+            if (speed > 1) {
+                speed += ((eff = EnchantmentHelper.getEnchantmentLevel(Enchantments.EFFICIENCY, stack)) > 0 ? (Math.pow(eff, 2) + 1) : 0);
+                if (speed > max) {
+                    max = speed;
+                    bestSlot = i;
                 }
+            }
+        }
+        if (bestSlot != -1) {
+            mc.player.inventory.currentItem = bestSlot;
+            int i = this.mc.player.inventory.currentItem;
+            if (i != mc.playerController.currentPlayerItem) {
+                mc.playerController.currentPlayerItem = i;
+                mc.playerController.connection.sendPacket(new CPacketHeldItemChange(mc.playerController.currentPlayerItem));
             }
         }
     }
