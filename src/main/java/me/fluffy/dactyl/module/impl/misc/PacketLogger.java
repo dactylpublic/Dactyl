@@ -9,6 +9,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketVehicleMove;
+import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -23,6 +24,7 @@ public class PacketLogger extends Module {
     Setting<Boolean> chat = new Setting<Boolean>("Chat", true);
     Setting<Boolean> showCancel = new Setting<Boolean>("ShowCancel", true);
     Setting<Boolean> ignorePosPackets = new Setting<Boolean>("IgnorePos", false);
+    Setting<Boolean> onlyBlockChange = new Setting<Boolean>("OnlyBChange", false, v->incoming.getValue());
     Setting<Boolean> console = new Setting<Boolean>("Logs", true);
     Setting<Boolean> packetData = new Setting<Boolean>("Data", true);
     public PacketLogger() {
@@ -40,6 +42,11 @@ public class PacketLogger extends Module {
             if(incoming.getValue()) {
                 if(ignorePosPackets.getValue()) {
                     if(event.getPacket() instanceof SPacketPlayerPosLook) {
+                        return;
+                    }
+                }
+                if(onlyBlockChange.getValue()) {
+                    if(!(event.getPacket() instanceof SPacketBlockChange)) {
                         return;
                     }
                 }
