@@ -69,6 +69,7 @@ public class Regear extends Module {
                     }
                     if (loadedItem.getItemName().equalsIgnoreCase(stack.getItem().getItemStackDisplayName(stack))) {
                         if(currentStack.getCount() >= currentStack.getMaxStackSize()) continue;
+                        if((x >= 63) || ((loadedItem.getSlot() + 18) >= 63)) return;
                         if(stack.getCount() > currentStack.getCount() && !(currentStack.isEmpty() || currentStack.getItem() == Items.AIR)) {
                             mc.playerController.windowClick(windowId, x, 0, ClickType.PICKUP, mc.player);
                             mc.playerController.windowClick(windowId, (loadedItem.getSlot() + 18), 0, ClickType.PICKUP, mc.player);
