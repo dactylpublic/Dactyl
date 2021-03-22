@@ -13,7 +13,6 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.Display;
-import sun.audio.AudioPlayer;
 
 @Mod(modid = Dactyl.MODID, name = Dactyl.NAME, version = Dactyl.VERSION)
 public class Dactyl {

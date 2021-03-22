@@ -543,7 +543,7 @@ public class AutoCrystal extends Module {
                 if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
                     float finishedYaw = (float) finalRotations[0];
                     float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue() && (lastRotatedSteppedYawPlace != finishedYaw)) {
+                    if (Math.abs(yawDiff) > yawStepTicks.getValue() && yawStep.getValue() && (lastRotatedSteppedYawPlace != finishedYaw)) {
                         finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
                         hasFinishedYawSteporoskiPlace = false;
                     } else {
