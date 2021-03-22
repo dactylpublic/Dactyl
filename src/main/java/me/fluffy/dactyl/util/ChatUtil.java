@@ -12,23 +12,30 @@ public class ChatUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static void printMsg(String msg, boolean watermark, boolean unclogged) {
-        if(mc.ingameGUI.getChatGUI() != null) {
-            if(unclogged) {
-                mc.ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new FormattedMessage((watermark ? getWatermark() : "") + msg), -1337);
-            } else {
-                mc.ingameGUI.getChatGUI().printChatMessage(new FormattedMessage((watermark ? getWatermark() : "") + msg));
+        try {
+            if (mc.ingameGUI.getChatGUI() != null) {
+                if (unclogged) {
+                    mc.ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new FormattedMessage((watermark ? getWatermark() : "") + msg), -1337);
+                } else {
+                    mc.ingameGUI.getChatGUI().printChatMessage(new FormattedMessage((watermark ? getWatermark() : "") + msg));
+                }
             }
-        }
+        } catch(Exception e) {}
     }
 
     public static void printMsg(String msg, boolean watermark, boolean unclogged, int chatLineId) {
-        if(mc.ingameGUI.getChatGUI() != null) {
-            if(unclogged) {
-                mc.ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new FormattedMessage((watermark ? getWatermark() : "") + msg), chatLineId);
-            } else {
-                mc.ingameGUI.getChatGUI().printChatMessage(new FormattedMessage((watermark ? getWatermark() : "") + msg));
+        try {
+            if (mc.ingameGUI == null) {
+                return;
             }
-        }
+            if (mc.ingameGUI.getChatGUI() != null) {
+                if (unclogged) {
+                    mc.ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new FormattedMessage((watermark ? getWatermark() : "") + msg), chatLineId);
+                } else {
+                    mc.ingameGUI.getChatGUI().printChatMessage(new FormattedMessage((watermark ? getWatermark() : "") + msg));
+                }
+            }
+        } catch(Exception e) {}
     }
 
     public static String getWatermark() {
