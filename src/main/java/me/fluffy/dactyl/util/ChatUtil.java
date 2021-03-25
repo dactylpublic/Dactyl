@@ -1,6 +1,10 @@
 package me.fluffy.dactyl.util;
 
+import net.minecraft.block.BlockPistonBase;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.item.ItemPiston;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentBase;
 import net.minecraft.util.text.TextFormatting;
@@ -9,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatUtil {
+
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static void printMsg(String msg, boolean watermark, boolean unclogged) {

@@ -27,10 +27,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemShulkerBox;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPacketAnimation;
-import net.minecraft.network.play.client.CPacketEntityAction;
-import net.minecraft.network.play.client.CPacketHeldItemChange;
-import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -574,6 +571,68 @@ public class CombatUtil {
 
         EnumHand actionHand = offhand ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
         mc.playerController.processRightClickBlock(mc.player, mc.world, adjacentBlock, opposingSide, hitVector, actionHand);
+        mc.player.connection.sendPacket(new CPacketAnimation(actionHand));
+        if(isSneak) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+        }
+        return true;
+    }
+
+    public static boolean placeBlockSpoofDir(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetRotate, boolean doSwitch, boolean silentSwitch, int toSwitch, EnumFacing spoofDirection) {
+        if(!checkCanPlace(blockPos)) {
+            return false;
+        }
+
+        EnumFacing placeSide = getPlaceSide(blockPos);
+        BlockPos adjacentBlock = blockPos.offset(placeSide);
+        EnumFacing opposingSide = placeSide.getOpposite();
+        if(!mc.world.getBlockState(adjacentBlock).getBlock().canCollideCheck(mc.world.getBlockState(adjacentBlock), false)) {
+            return false;
+        }
+        if(doSwitch) {
+            if(!offhand) {
+                if (silentSwitch) {
+                    mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
+                } else {
+                    if (mc.player.inventory.currentItem != toSwitch) {
+                        mc.player.inventory.currentItem = toSwitch;
+                    }
+                }
+            }
+        }
+        boolean isSneak = false;
+        if(blackList.contains(mc.world.getBlockState(adjacentBlock).getBlock()) || shulkerList.contains(mc.world.getBlockState(adjacentBlock).getBlock())) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+            isSneak = true;
+        }
+        Vec3d hitVector = getHitVector(adjacentBlock, opposingSide);
+        final float[] angle = getLegitRotations(hitVector);
+        if(rotate) {
+            mc.player.connection.sendPacket(new CPacketPlayer.Rotation(angle[0], angle[1], mc.player.onGround));
+        }
+
+        EnumHand actionHand = offhand ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+        float f = (float)(hitVector.x - (double)adjacentBlock.getX());
+        float f1 = (float)(hitVector.y - (double)adjacentBlock.getY());
+        float f2 = (float)(hitVector.z - (double)adjacentBlock.getZ());
+        //mc.playerController.processRightClickBlock(mc.player, mc.world, adjacentBlock, opposingSide, hitVector, actionHand);
+        float spoofAngle = 0f;
+        switch(spoofDirection) {
+            case SOUTH:
+                spoofAngle = 180f;
+                break;
+            case EAST:
+                spoofAngle = 90f;
+                break;
+            case WEST:
+                spoofAngle = -90f;
+                break;
+            case NORTH:
+                spoofAngle = 0f;
+
+        }
+        mc.player.connection.sendPacket(new CPacketPlayer.Rotation(spoofAngle, angle[1], mc.player.onGround));
+        mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(adjacentBlock, opposingSide, actionHand, f, f1, f2));
         mc.player.connection.sendPacket(new CPacketAnimation(actionHand));
         if(isSneak) {
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));

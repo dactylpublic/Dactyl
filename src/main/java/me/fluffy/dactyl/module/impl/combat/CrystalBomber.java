@@ -33,6 +33,7 @@ public class CrystalBomber extends Module {
     public Setting<Boolean> oneBlock = new Setting<Boolean>("1.13+", false);
     public Setting<Boolean> swing = new Setting<Boolean>("Swing", true);
     public Setting<SwapMode> swapModeSetting = new Setting<SwapMode>("SwapMode", SwapMode.NORMAL);
+    public Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", true);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
     public CrystalBomber() {
         super("CrystalBomber", Category.COMBAT);
@@ -57,12 +58,11 @@ public class CrystalBomber extends Module {
             timer.reset();
             return;
         }
-        if(!(MiningTweaks.INSTANCE.isEnabled())) {
-            toggleWithReason("InstaMine is not enabled!");
-            return;
-        }
         findBestTarget();
         if(bestTarget == null) {
+            if(this.autoDisable.getValue()) {
+                this.toggle();
+            }
             resetCrystalBomber();
             return;
         }
