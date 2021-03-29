@@ -58,7 +58,8 @@ public class BetaCrystal extends Module {
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 6.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 3.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue() && (placeTrace.getValue() == WallsRange.RANGE));
     public Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, v->isViewPlace() && doPlace.getValue());
-    public Setting<Double> recalcDmgOverride = new Setting<Double>("RecalcOverride", 8.5d, 1.0d, 16.0d, v->isViewPlace() && doPlace.getValue() && antiRecalc.getValue());
+    public Setting<Boolean> doRecalcOverride = new Setting<Boolean>("Override", false, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> recalcDmgOverride = new Setting<Double>("RecalcOverride", 8.5d, 1.0d, 16.0d, v->isViewPlace() && doPlace.getValue() && antiRecalc.getValue() && doRecalcOverride.getValue());
     public Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFP", true, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> minCountDmg = new Setting<Double>("MinCountDmg", 3.0d, 0.1d, 12.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, v->isViewPlace() && doPlace.getValue());
@@ -267,7 +268,7 @@ public class BetaCrystal extends Module {
         BlockPos placePosition = CombatUtil.getBestPlacePosNew(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
 
         if(!doRecalc) {
-            if(CombatUtil.getDamageBestPosNew(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) >= recalcDmgOverride.getValue()) {
+            if(doRecalcOverride.getValue() && CombatUtil.getDamageBestPosNew(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) >= recalcDmgOverride.getValue()) {
                 doRecalc = true;
             }
         }
