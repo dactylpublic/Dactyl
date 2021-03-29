@@ -2032,7 +2032,7 @@ public class CombatUtil {
         if(!multiPoint) {
             return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), entity.getPositionVector(), false, true, false) == null);
         } else {
-            for(Vec3d corner : getEntityCornerVecs(entity instanceof EntityEnderCrystal ? (entity.getEyeHeight() / 0.85F) : entity.getEyeHeight())) {
+            for(Vec3d corner : getEntityCornerVecs(entity.getEyeHeight())) {
                 Vec3d entityVec = entity.getPositionVector();
                 Vec3d multiPointCorner = entityVec.add(corner);
                 RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
