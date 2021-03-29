@@ -67,6 +67,7 @@ public class ModuleManager {
         modules.add(new Locator());
         modules.add(new ChatTimestamps());
         modules.add(new Regear());
+        modules.add(new AutoDuelWin());
 
         // movement
         modules.add(new Strafe());

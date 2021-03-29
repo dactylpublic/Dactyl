@@ -15,6 +15,9 @@ public class AutoRespawn extends Module {
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
         if (event.getGui() instanceof GuiGameOver) {
+            if(AutoDuelWin.INSTANCE.isEnabled()) {
+                return;
+            }
             if (mc.player.getHealth() <= 0.0f || (this.antiDeathScreen.getValue() && AutoRespawn.mc.player.getHealth() > 0.0f)) {
                 event.setCanceled(true);
                 mc.player.respawnPlayer();
