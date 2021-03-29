@@ -1994,18 +1994,21 @@ public class CombatUtil {
 
     public static Vec3d[] getEntityCornerVecs(float eyeHeight) {
         Vec3d[] cornerVecs = {
+                // top
                 new Vec3d(0f, eyeHeight, 0f),
                 new Vec3d(0.5f, eyeHeight, 0.5f),
                 new Vec3d(0.5f, eyeHeight, -0.5f),
                 new Vec3d(-0.5f, eyeHeight, 0.5f),
                 new Vec3d(-0.5f, eyeHeight, -0.5f),
 
+                //bottom
                 new Vec3d(0f, -eyeHeight, 0f),
                 new Vec3d(0.5f, -eyeHeight, 0.5f),
                 new Vec3d(0.5f, -eyeHeight, -0.5f),
                 new Vec3d(-0.5f, -eyeHeight, 0.5f),
                 new Vec3d(-0.5f, -eyeHeight, -0.5f),
 
+                // center
                 new Vec3d(0f, 0f, 0f),
                 new Vec3d(0.5f, 0f, 0.5f),
                 new Vec3d(0.5f, 0f, -0.5f),
@@ -2019,7 +2022,8 @@ public class CombatUtil {
             return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 1.0f, pos.getZ()), false, true, false) == null);
         } else {
             for(Vec3d corner : cornerVecs) {
-                Vec3d blockVec = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+                // adding .5 to make sure its the center
+                Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
                 Vec3d multiPointCorner = blockVec.add(corner);
                 RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
                 if(result == null) {
