@@ -58,6 +58,7 @@ public class BetaCrystal extends Module {
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 6.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 3.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue() && (placeTrace.getValue() == WallsRange.RANGE));
     public Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, v->isViewPlace() && doPlace.getValue());
+    public Setting<Boolean> strictDirection = new Setting<Boolean>("StrictDirection", true, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> doRecalcOverride = new Setting<Boolean>("Override", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> recalcDmgOverride = new Setting<Double>("RecalcOverride", 8.5d, 1.0d, 16.0d, v->isViewPlace() && doPlace.getValue() && antiRecalc.getValue() && doRecalcOverride.getValue());
     public Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFP", true, v->isViewPlace() && doPlace.getValue());
@@ -393,6 +394,9 @@ public class BetaCrystal extends Module {
                         return;
                     }
                     placedCrystals.add(placePosition);
+                    if(strictDirection.getValue()) {
+                        placePosition = placePosition.add(0.5d, 0, 0.5d);
+                    }
                     mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
                     if (swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
                         mc.player.swingArm(placeHand);
@@ -571,8 +575,12 @@ public class BetaCrystal extends Module {
             } else {
                 facing = rayTraceResult.sideHit;
             }
+            BlockPos replacingPosition = placeRender;
+            if(strictDirection.getValue()) {
+                replacingPosition = replacingPosition.add(0.5d, 0, 0.5d);
+            }
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
-            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
+            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(replacingPosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
         }
         breakTimer.reset();
     }
