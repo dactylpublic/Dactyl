@@ -1945,6 +1945,9 @@ public class CombatUtil {
             final EntityPlayer ep = (EntityPlayer)entity;
             final DamageSource ds = DamageSource.causeExplosionDamage(explosion);
             damage = CombatRules.getDamageAfterAbsorb(damage, (float)ep.getTotalArmorValue(), (float)ep.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue());
+            if(ep.getArmorInventoryList() == null || ds == null) {
+                return 0.0f;
+            }
             final int k = EnchantmentHelper.getEnchantmentModifierDamage(ep.getArmorInventoryList(), ds);
             final float f = MathHelper.clamp((float)k, 0.0f, 20.0f);
             damage *= 1.0f - f / 25.0f;
