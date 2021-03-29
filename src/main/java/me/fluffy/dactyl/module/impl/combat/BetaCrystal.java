@@ -48,9 +48,9 @@ public class BetaCrystal extends Module {
     public Setting<WallsRange> placeTrace = new Setting<WallsRange>("PlaceTrace", WallsRange.RANGE, v->isViewPlace() && doPlace.getValue());
     public Setting<Integer> placeSpeed = new Setting<Integer>("PlaceSpeed", 20, 1, 20, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, v->isViewPlace() && doPlace.getValue());
-    public Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0d, 1.0d, 13.5d, v->isViewPlace() && doPlace.getValue() && antiSuiPlace.getValue());
+    public Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0d, 1.0d, 13.0d, v->isViewPlace() && doPlace.getValue() && antiSuiPlace.getValue());
     public Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, v->isViewPlace() && doPlace.getValue());
-    public Setting<Double> minDamage = new Setting<Double>("MinDamage", 6.0d, 1.0d, 13.5d, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> minDamage = new Setting<Double>("MinDamage", 6.0d, 1.0d, 13.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> facePlaceH = new Setting<Double>("FPHealth", 10.0d, 1.0d, 36.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> ignoreValidExploit = new Setting<Boolean>("IgnoreInvalid", true, v->isViewPlace() && doPlace.getValue(), "PlaceExploit from old ca");
     public Setting<Boolean> noPlaceAttack = new Setting<Boolean>("NoPlaceAttack", true, v->isViewPlace() && doPlace.getValue());
@@ -87,7 +87,7 @@ public class BetaCrystal extends Module {
     public Setting<Double> breakRange = new Setting<Double>("BreakRange", 6.0d, 1.0d, 6.0d, v->isViewBreak() && doBreak.getValue());
     public Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 3.5d, 1.0d, 6.0d, v->isViewBreak() && doBreak.getValue() && breakTrace.getValue() == WallsRange.RANGE);
     public Setting<Boolean> antiSuiBreak = new Setting<Boolean>("AntiSuicide", true, v->isViewBreak() && doBreak.getValue());
-    public Setting<Double> maxSelfBreak = new Setting<Double>("MaxSelfBreak", 8.0d, 1.0d, 13.5d, v->isViewBreak() && doBreak.getValue() && antiSuiBreak.getValue());
+    public Setting<Double> maxSelfBreak = new Setting<Double>("MaxSelfBreak", 8.0d, 1.0d, 13.0d, v->isViewBreak() && doBreak.getValue() && antiSuiBreak.getValue());
     public Setting<Integer> ticksExisted = new Setting<Integer>("TicksExisted", 0, 0, 10, v->isViewBreak() && doBreak.getValue());
     public Setting<Boolean> preAttackRotate = new Setting<Boolean>("PreRotate", true, v->isViewBreak() && doBreak.getValue() && breakRotate.getValue());
     public Setting<Boolean> preAttack = new Setting<Boolean>("PreAttack", true, v->isViewBreak() && doBreak.getValue());
@@ -95,20 +95,21 @@ public class BetaCrystal extends Module {
     // general
     public Setting<YawStepEnum> yawStepEnum = new Setting<YawStepEnum>("YawStep", YawStepEnum.BOTH, v->isViewGeneral());
     public Setting<Integer> yawStep = new Setting<Integer>("StepAmount", 55, 1, 180, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
-    public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v ->isViewGeneral());
+    public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v->isViewGeneral());
+    public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
     public Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, v->isViewGeneral());
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 16.0D, v->isViewGeneral());
 
     // render
-    Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, v->isViewRender());
-    Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, v->isViewRender());
-    Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, v->isViewRender());
-    Setting<Boolean> outline = new Setting<Boolean>("Outline", true, v->isViewRender());
-    Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, v->isViewRender() && outline.getValue());
-    Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, v->isViewRender());
-    Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, v->isViewRender() && !colorSync.getValue());
-    Setting<Integer> colorGreen = new Setting<Integer>("Green", 175, 1, 255, v->isViewRender() && !colorSync.getValue());
-    Setting<Integer> colorBlue = new Setting<Integer>("Blue", 255, 1, 255, v->isViewRender() && !colorSync.getValue());
+    public Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, v->isViewRender());
+    public Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, v->isViewRender());
+    public Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, v->isViewRender());
+    public Setting<Boolean> outline = new Setting<Boolean>("Outline", true, v->isViewRender());
+    public Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, v->isViewRender() && outline.getValue());
+    public Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, v->isViewRender());
+    public Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, v->isViewRender() && !colorSync.getValue());
+    public Setting<Integer> colorGreen = new Setting<Integer>("Green", 175, 1, 255, v->isViewRender() && !colorSync.getValue());
+    public Setting<Integer> colorBlue = new Setting<Integer>("Blue", 255, 1, 255, v->isViewRender() && !colorSync.getValue());
 
 
     public BetaCrystal() {
@@ -175,7 +176,7 @@ public class BetaCrystal extends Module {
         EntityEnderCrystal crystal = (EntityEnderCrystal) mc.world.loadedEntityList.stream()
                 .filter(entity -> entity instanceof EntityEnderCrystal)
                 .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
-                .filter(entity -> CombatUtil.crystalIsBreakable((EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue()))
+                .filter(entity -> CombatUtil.crystalIsBreakable(multiPoint.getValue(), (EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue()))
                 .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuiBreak.getValue(), maxSelfBreak.getValue()))
                 .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal) entity, true, ticksExisted.getValue()))
                 .filter(entity -> canAttackCrystal((EntityEnderCrystal) entity))
@@ -254,7 +255,7 @@ public class BetaCrystal extends Module {
             if (oldPlacePos == null) {
                 doRecalc = true;
             } else {
-                if (CombatUtil.placePosStillValid(oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                if (CombatUtil.placePosStillValid(multiPoint.getValue(), oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                     doRecalc = false;
                 } else {
                     doRecalc = true;
@@ -265,10 +266,10 @@ public class BetaCrystal extends Module {
             doRecalc = true;
         }
 
-        BlockPos placePosition = CombatUtil.getBestPlacePosNew(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+        BlockPos placePosition = CombatUtil.getBestPlacePosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
 
         if(!doRecalc) {
-            if(doRecalcOverride.getValue() && CombatUtil.getDamageBestPosNew(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) >= recalcDmgOverride.getValue()) {
+            if(doRecalcOverride.getValue() && CombatUtil.getDamageBestPosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) >= recalcDmgOverride.getValue()) {
                 doRecalc = true;
             }
         }
@@ -281,7 +282,7 @@ public class BetaCrystal extends Module {
 
         EnumHand placeHand = null;
 
-        if (CombatUtil.getBestPlacePosIgnoreAlreadyPlacedNew(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
+        if (CombatUtil.getBestPlacePosIgnoreAlreadyPlacedNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
             this.setModuleInfo("");
         }
 
@@ -297,7 +298,7 @@ public class BetaCrystal extends Module {
                     EntityEnderCrystal crystal = (EntityEnderCrystal) mc.world.loadedEntityList.stream()
                             .filter(entity -> entity instanceof EntityEnderCrystal)
                             .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
-                            .filter(entity -> CombatUtil.crystalIsBreakable((EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue()))
+                            .filter(entity -> CombatUtil.crystalIsBreakable(multiPoint.getValue(), (EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue()))
                             .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuiBreak.getValue(), maxSelfBreak.getValue()))
                             .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal) entity, true, ticksExisted.getValue()))
                             .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
@@ -310,7 +311,7 @@ public class BetaCrystal extends Module {
             if (getCrystalsInRange() >= maxInRange.getValue() || (noPlaceAttack.getValue() && isAttacking)) {
                 boolean doReset = true;
                 if (placeRender != null) {
-                    if (CombatUtil.renderPosStillValid(placeRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                    if (CombatUtil.renderPosStillValid(multiPoint.getValue(), placeRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                         doReset = false;
                     }
                 }
@@ -323,7 +324,7 @@ public class BetaCrystal extends Module {
             placeRender = placePosition;
             oldPlacePos = placePosition;
             boolean finalizePlace = true;
-            damage = CombatUtil.getDamageBestPosNew(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+            damage = CombatUtil.getDamageBestPosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] finalRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
             if (placeRotate.getValue()) {
                 if(yawStepEnum.getValue() == YawStepEnum.PLACE || yawStepEnum.getValue() == YawStepEnum.BOTH) {
@@ -402,7 +403,7 @@ public class BetaCrystal extends Module {
         } else {
             boolean doReset = true;
             if (placeRender != null) {
-                if (CombatUtil.renderPosStillValid(placeRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                if (CombatUtil.renderPosStillValid(multiPoint.getValue(), placeRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                     doReset = false;
                 }
             }
@@ -464,7 +465,7 @@ public class BetaCrystal extends Module {
         for (Map.Entry<Entity, Float> entry : this.damageMap().entrySet()) {
             Entity crystal = entry.getKey();
             float damage = ((Float) entry.getValue()).floatValue();
-            boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystalNew((EntityEnderCrystal) crystal, (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
+            boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystalNew(multiPoint.getValue(), (EntityEnderCrystal) crystal, (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
             if ((damage >= minCountDmg.getValue() || (isFacePlaceCrystal && countFacePlace.getValue())) && ((mc.player.getDistance(crystal) <= placeRange.getValue()))) {
                 crystalCount++;
             }
@@ -488,7 +489,7 @@ public class BetaCrystal extends Module {
             if (mc.player.getDistance(loadedEntity) > breakRange.getValue()) {
                 continue;
             }
-            if (!CombatUtil.getMapCrystalPlaceNew((EntityEnderCrystal) loadedEntity, placeRange.getValue(), placeTrace.getValue(), wallsPlace.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue())) {
+            if (!CombatUtil.getMapCrystalPlaceNew(multiPoint.getValue(), (EntityEnderCrystal) loadedEntity, placeRange.getValue(), placeTrace.getValue(), wallsPlace.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue())) {
                 continue;
             }
             float highestDMG = 0f;

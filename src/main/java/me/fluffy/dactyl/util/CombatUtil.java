@@ -30,10 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
@@ -817,7 +814,7 @@ public class CombatUtil {
         }
 
         if(doBreakTrace) {
-            if(!canSeeEntity(crystal)) {
+            if(!canSeeEntity(crystal, false)) {
                 if (mc.player.getDistance(crystal) >= breakTraceRange) {
                     return false;
                 }
@@ -827,7 +824,7 @@ public class CombatUtil {
         return true;
     }
 
-    public static boolean crystalIsBreakable(EntityEnderCrystal crystal, BetaCrystal.WallsRange rangeMode, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, BetaCrystal.PassLogic passLogic, double doesDMGMin, double enemyRange) {
+    public static boolean crystalIsBreakable(boolean multiPoint, EntityEnderCrystal crystal, BetaCrystal.WallsRange rangeMode, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, BetaCrystal.PassLogic passLogic, double doesDMGMin, double enemyRange) {
         boolean doesDmgSettingBased = true;
         if(passLogic == BetaCrystal.PassLogic.DOESDMG) {
             doesDmgSettingBased = false;
@@ -866,14 +863,14 @@ public class CombatUtil {
 
         switch(rangeMode) {
             case RANGE:
-                if(!canSeeEntity(crystal)) {
+                if(!canSeeEntity(crystal, multiPoint)) {
                     if (mc.player.getDistance(crystal) >= breakTraceRange) {
                         return false;
                     }
                 }
                 break;
             case ANTI:
-                if(!canSeeEntity(crystal)) {
+                if(!canSeeEntity(crystal, multiPoint)) {
                     return false;
                 }
                 break;
@@ -931,7 +928,7 @@ public class CombatUtil {
         }
 
         if(doBreakTrace) {
-            if(!canSeeEntity(crystal)) {
+            if(!canSeeEntity(crystal, false)) {
                 if (mc.player.getDistance(crystal) >= breakTraceRange) {
                     return false;
                 }
@@ -941,7 +938,7 @@ public class CombatUtil {
         return true;
     }
 
-    public static boolean getMapCrystalPlaceNew(EntityEnderCrystal crystal, double breakRange, BetaCrystal.WallsRange wallsRange, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, BetaCrystal.PassLogic passLogic, double doesDMGMin, double enemyRange) {
+    public static boolean getMapCrystalPlaceNew(boolean multiPoint, EntityEnderCrystal crystal, double breakRange, BetaCrystal.WallsRange wallsRange, double breakTraceRange, boolean antiSuicide, double maxSelfDmg, BetaCrystal.PassLogic passLogic, double doesDMGMin, double enemyRange) {
         boolean doesDmgSettingBased = true;
         if(passLogic == BetaCrystal.PassLogic.DOESDMG) {
             doesDmgSettingBased = false;
@@ -983,7 +980,7 @@ public class CombatUtil {
         }
 
         if(wallsRange != BetaCrystal.WallsRange.OFF) {
-            if(!canSeeEntity(crystal)) {
+            if(!canSeeEntity(crystal, multiPoint)) {
                 if(wallsRange == BetaCrystal.WallsRange.RANGE) {
                     if (mc.player.getDistance(crystal) >= breakTraceRange) {
                         return false;
@@ -1043,7 +1040,7 @@ public class CombatUtil {
         }
 
         if(doPlaceTrace) {
-            if(!canSeeBlock(blockPos)) {
+            if(!canSeeBlock(blockPos,false)) {
                 if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                     return false;
                 }
@@ -1072,7 +1069,7 @@ public class CombatUtil {
         return true;
     }
 
-    public static boolean placePosStillValid(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
+    public static boolean placePosStillValid(boolean multiPoint, BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
         if(blockPos == null) {
             return false;
         }
@@ -1110,7 +1107,7 @@ public class CombatUtil {
         }
 
         if(wallsRange != BetaCrystal.WallsRange.OFF) {
-            if(!canSeeBlock(blockPos)) {
+            if(!canSeeBlock(blockPos, multiPoint)) {
                 if(wallsRange == BetaCrystal.WallsRange.RANGE) {
                     if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                         return false;
@@ -1175,7 +1172,7 @@ public class CombatUtil {
         }
 
         if(doPlaceTrace) {
-            if(!canSeeBlock(blockPos)) {
+            if(!canSeeBlock(blockPos, false)) {
                 if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                     return false;
                 }
@@ -1204,7 +1201,7 @@ public class CombatUtil {
         return true;
     }
 
-    public static boolean renderPosStillValid(BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
+    public static boolean renderPosStillValid(boolean multiPoint, BlockPos blockPos, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean onepointthirteen, double placeRange) {
         final List<Entity> playerEntities = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         EntityPlayer satisfiedTarget = null;
         for (Entity entity : playerEntities) {
@@ -1236,7 +1233,7 @@ public class CombatUtil {
         }
 
         if(wallsRange != BetaCrystal.WallsRange.OFF) {
-            if(!canSeeBlock(blockPos)) {
+            if(!canSeeBlock(blockPos, multiPoint)) {
                 if(wallsRange == BetaCrystal.WallsRange.RANGE) {
                     if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                         return false;
@@ -1287,7 +1284,7 @@ public class CombatUtil {
             }
             for(BlockPos blockPos : placePositions) {
                 if(doPlaceTrace) {
-                    if(!canSeeBlock(blockPos)) {
+                    if(!canSeeBlock(blockPos, false)) {
                         if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                             continue;
                         }
@@ -1333,7 +1330,7 @@ public class CombatUtil {
         return placePosition;
     }
 
-    public static BlockPos getBestPlacePosNew(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+    public static BlockPos getBestPlacePosNew(boolean multiPoint, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
         BlockPos placePosition = null;
         final List<BlockPos> placePositions = findPossiblePlacePoses(oneBlockCA, placeRange);
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
@@ -1350,7 +1347,7 @@ public class CombatUtil {
             }
             for(BlockPos blockPos : placePositions) {
                 if(wallsRange != BetaCrystal.WallsRange.OFF) {
-                    if(!canSeeBlock(blockPos)) {
+                    if(!canSeeBlock(blockPos, multiPoint)) {
                         if(wallsRange == BetaCrystal.WallsRange.RANGE) {
                             if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                                 continue;
@@ -1417,7 +1414,7 @@ public class CombatUtil {
             }
             for(BlockPos blockPos : placePositions) {
                 if(doPlaceTrace) {
-                    if(!canSeeBlock(blockPos)) {
+                    if(!canSeeBlock(blockPos, false)) {
                         if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                             continue;
                         }
@@ -1463,7 +1460,7 @@ public class CombatUtil {
         return damage;
     }
 
-    public static double getDamageBestPosNew(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+    public static double getDamageBestPosNew(boolean multiPoint, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
         BlockPos placePosition = null;
         final List<BlockPos> placePositions = findPossiblePlacePoses(oneBlockCA, placeRange);
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
@@ -1480,7 +1477,7 @@ public class CombatUtil {
             }
             for(BlockPos blockPos : placePositions) {
                 if(wallsRange != BetaCrystal.WallsRange.OFF) {
-                    if(!canSeeBlock(blockPos)) {
+                    if(!canSeeBlock(blockPos, multiPoint)) {
                         if(wallsRange == BetaCrystal.WallsRange.RANGE) {
                             if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                                 continue;
@@ -1533,7 +1530,7 @@ public class CombatUtil {
     public static boolean isFacePlaceCrystal(EntityEnderCrystal crystal, double minFacePlaceHP, boolean placeTrace, double wallsPlaceRange, double placeRange, double enemyRange) {
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         if(placeTrace) {
-            if(!canSeeEntity(crystal) && mc.player.getDistance(crystal) > wallsPlaceRange) {
+            if(!canSeeEntity(crystal, false) && mc.player.getDistance(crystal) > wallsPlaceRange) {
                 return false;
             }
         }
@@ -1562,10 +1559,10 @@ public class CombatUtil {
         return false;
     }
 
-    public static boolean isFacePlaceCrystalNew(EntityEnderCrystal crystal, double minFacePlaceHP, BetaCrystal.WallsRange wallsRange, double wallsPlaceRange, double placeRange, double enemyRange) {
+    public static boolean isFacePlaceCrystalNew(boolean multiPoint, EntityEnderCrystal crystal, double minFacePlaceHP, BetaCrystal.WallsRange wallsRange, double wallsPlaceRange, double placeRange, double enemyRange) {
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
         if(wallsRange != BetaCrystal.WallsRange.OFF) {
-            if(!canSeeEntity(crystal)) {
+            if(!canSeeEntity(crystal, multiPoint)) {
                 if(wallsRange == BetaCrystal.WallsRange.RANGE) {
                     if(mc.player.getDistance(crystal) > wallsPlaceRange) {
                         return false;
@@ -1617,7 +1614,7 @@ public class CombatUtil {
             }
             for(BlockPos blockPos : placePositions) {
                 if(doPlaceTrace) {
-                    if(!canSeeBlock(blockPos)) {
+                    if(!canSeeBlock(blockPos, false)) {
                         if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                             continue;
                         }
@@ -1663,7 +1660,7 @@ public class CombatUtil {
         return placePosition;
     }
 
-    public static BlockPos getBestPlacePosIgnoreAlreadyPlacedNew(boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+    public static BlockPos getBestPlacePosIgnoreAlreadyPlacedNew(boolean multiPoint, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
         BlockPos placePosition = null;
         final List<BlockPos> placePositions = findImpossiblePlacePoses(oneBlockCA, placeRange);
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
@@ -1680,7 +1677,7 @@ public class CombatUtil {
             }
             for(BlockPos blockPos : placePositions) {
                 if(wallsRange != BetaCrystal.WallsRange.OFF) {
-                    if(!canSeeBlock(blockPos)) {
+                    if(!canSeeBlock(blockPos, multiPoint)) {
                         if(wallsRange == BetaCrystal.WallsRange.RANGE) {
                             if (mc.player.getDistanceSq(blockPos) > (placeTraceRange * placeTraceRange)) {
                                 continue;
@@ -1973,14 +1970,78 @@ public class CombatUtil {
         return calculateDamage(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, entity);
     }
 
-    public static boolean canSeeBlock(BlockPos pos) {
-        //return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 0.5f, pos.getZ()), false, true, false) == null);
-        return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY()+1.0f, pos.getZ()), false, true, false) == null);
+    private static Vec3d[] cornerVecs = {
+            new Vec3d(0f, 1f, 0f),
+            new Vec3d(0.5f, 1f, 0.5f),
+            new Vec3d(0.5f, 1f, -0.5f),
+            new Vec3d(-0.5f, 1f, 0.5f),
+            new Vec3d(-0.5f, 1f, -0.5f),
+
+            new Vec3d(0f, -1f, 0f),
+            new Vec3d(0.5f, -1f, 0.5f),
+            new Vec3d(0.5f, -1f, -0.5f),
+            new Vec3d(-0.5f, -1f, 0.5f),
+            new Vec3d(-0.5f, -1f, -0.5f),
+
+            new Vec3d(0f, 0f, 0f),
+            new Vec3d(0.5f, 0f, 0.5f),
+            new Vec3d(0.5f, 0f, -0.5f),
+            new Vec3d(-0.5f, 0f, 0.5f),
+            new Vec3d(-0.5f, 0f, -0.5f)};
+
+    public static Vec3d[] getEntityCornerVecs(float eyeHeight) {
+        Vec3d[] cornerVecs = {
+                new Vec3d(0f, eyeHeight, 0f),
+                new Vec3d(0.5f, eyeHeight, 0.5f),
+                new Vec3d(0.5f, eyeHeight, -0.5f),
+                new Vec3d(-0.5f, eyeHeight, 0.5f),
+                new Vec3d(-0.5f, eyeHeight, -0.5f),
+
+                new Vec3d(0f, -eyeHeight, 0f),
+                new Vec3d(0.5f, -eyeHeight, 0.5f),
+                new Vec3d(0.5f, -eyeHeight, -0.5f),
+                new Vec3d(-0.5f, -eyeHeight, 0.5f),
+                new Vec3d(-0.5f, -eyeHeight, -0.5f),
+
+                new Vec3d(0f, 0f, 0f),
+                new Vec3d(0.5f, 0f, 0.5f),
+                new Vec3d(0.5f, 0f, -0.5f),
+                new Vec3d(-0.5f, 0f, 0.5f),
+                new Vec3d(-0.5f, 0f, -0.5f)};
+        return cornerVecs;
+    }
+
+    public static boolean canSeeBlock(BlockPos pos, boolean multiPoint) {
+        if(!multiPoint) {
+            return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 1.0f, pos.getZ()), false, true, false) == null);
+        } else {
+            for(Vec3d corner : cornerVecs) {
+                Vec3d blockVec = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+                Vec3d multiPointCorner = blockVec.add(corner);
+                RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
+                if(result == null) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 
-    public static boolean canSeeEntity(Entity entity) {
-        return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), entity.getPositionVector(), false, true, false) == null);
+    public static boolean canSeeEntity(Entity entity, boolean multiPoint) {
+        if(!multiPoint) {
+            return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), entity.getPositionVector(), false, true, false) == null);
+        } else {
+            for(Vec3d corner : getEntityCornerVecs(entity instanceof EntityEnderCrystal ? (entity.getEyeHeight() / 0.85F) : entity.getEyeHeight())) {
+                Vec3d entityVec = entity.getPositionVector();
+                Vec3d multiPointCorner = entityVec.add(corner);
+                RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
+                if(result == null) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     public static double[] calculateLookAt(double px, double py, double pz) {

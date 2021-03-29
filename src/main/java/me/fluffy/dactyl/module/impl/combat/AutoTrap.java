@@ -117,7 +117,7 @@ public class AutoTrap extends Module {
                 return;
             }
             BlockPos placementPosition = new BlockPos(target.getPositionVector()).down().add(getTrap().get(step).x, getTrap().get(step).y, getTrap().get(step).z);
-            boolean canSeeBlock = CombatUtil.canSeeBlock(placementPosition);
+            boolean canSeeBlock = CombatUtil.canSeeBlock(placementPosition, true);
             double rangeBasedSettings = placeRange.getValue().doubleValue();
             if(!canSeeBlock && raytrace.getValue() == TraceMode.RANGE) {
                 rangeBasedSettings = wallsPlace.getValue().doubleValue();
