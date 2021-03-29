@@ -21,7 +21,7 @@ public class ModuleManager {
     private final ArrayList<Module> modules = new ArrayList<>();
     public ModuleManager() {
         // combat
-        modules.add(new AutoCrystal());
+        //modules.add(new AutoCrystal());
         modules.add(new Offhand());
         modules.add(new Killaura());
         modules.add(new Criticals());

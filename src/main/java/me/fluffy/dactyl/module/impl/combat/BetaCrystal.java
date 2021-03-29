@@ -112,7 +112,7 @@ public class BetaCrystal extends Module {
 
 
     public BetaCrystal() {
-        super("BetaCrystal", Category.COMBAT,
+        super("AutoCrystal", Category.COMBAT,
                 "An attempt at making a better ca for both strict and non-strict servers");
     }
 
