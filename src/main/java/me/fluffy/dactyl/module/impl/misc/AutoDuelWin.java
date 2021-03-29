@@ -77,6 +77,7 @@ public class AutoDuelWin extends Module {
     private void reset() {
         sentDuel = false;
         killed = false;
+        disconnected = false;
     }
 
     private enum KillCommand {
