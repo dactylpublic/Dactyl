@@ -58,7 +58,6 @@ public class BetaCrystal extends Module {
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 6.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 3.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue() && (placeTrace.getValue() == WallsRange.RANGE));
     public Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, v->isViewPlace() && doPlace.getValue());
-    public Setting<Boolean> strictDirection = new Setting<Boolean>("StrictDirection", true, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> doRecalcOverride = new Setting<Boolean>("Override", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> recalcDmgOverride = new Setting<Double>("RecalcOverride", 8.5d, 1.0d, 16.0d, v->isViewPlace() && doPlace.getValue() && antiRecalc.getValue() && doRecalcOverride.getValue());
     public Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFP", true, v->isViewPlace() && doPlace.getValue());
@@ -362,19 +361,6 @@ public class BetaCrystal extends Module {
                     isRotatingPlace = true;
                 }
             }
-            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5));
-            EnumFacing facing = null;
-            // placing that works on 2b :^)
-            if (rayTraceResult == null || rayTraceResult.sideHit == null) {
-                rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
-                if (rayTraceResult != null) {
-                    if (rayTraceResult.sideHit != null) {
-                        facing = rayTraceResult.sideHit;
-                    }
-                }
-            } else {
-                facing = rayTraceResult.sideHit;
-            }
             if (placeHand == null) {
                 this.setModuleInfo("");
                 resetRots();
@@ -394,10 +380,11 @@ public class BetaCrystal extends Module {
                         return;
                     }
                     placedCrystals.add(placePosition);
-                    if(strictDirection.getValue()) {
-                        placePosition = placePosition.add(0.5d, 0.0d, 0.5d);
+
+                    CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getRaytracePlace(placePosition, multiPoint.getValue());
+                    if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
+                        mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
                     }
-                    mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
                     if (swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
                         mc.player.swingArm(placeHand);
                     }
@@ -563,24 +550,11 @@ public class BetaCrystal extends Module {
         }
         Criticals.INSTANCE.ignoring = false;
         if (ignoreValidExploit.getValue() && (runLogic.getValue() == BreakLogic.HOLDING) && placeRender != null) {
-            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(placeRender));
-            EnumFacing facing = null;
-            if (rayTraceResult == null || rayTraceResult.sideHit == null) {
-                rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
-                if (rayTraceResult != null) {
-                    if (rayTraceResult.sideHit != null) {
-                        facing = rayTraceResult.sideHit;
-                    }
-                }
-            } else {
-                facing = rayTraceResult.sideHit;
-            }
-            BlockPos replacingPosition = placeRender;
-            if(strictDirection.getValue()) {
-                replacingPosition = replacingPosition.add(0.5d, 0.0d, 0.5d);
-            }
+            CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getRaytracePlace(placeRender, multiPoint.getValue());
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
-            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(replacingPosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
+            if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
+                mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
+            }
         }
         breakTimer.reset();
     }

@@ -1992,6 +1992,17 @@ public class CombatUtil {
             new Vec3d(-0.5f, 0f, 0.5f),
             new Vec3d(-0.5f, 0f, -0.5f)};
 
+    private static Vec3d[] cornerVecsRotations = {
+            new Vec3d(0.5f, -0.5f, 0.5f),
+            new Vec3d(0.5f, -0.5f, -0.5f),
+            new Vec3d(-0.5f, -0.5f, 0.5f),
+            new Vec3d(-0.5f, -0.5f, -0.5f),
+
+            new Vec3d(0.5f, -1f, 0.5f),
+            new Vec3d(0.5f, -1f, -0.5f),
+            new Vec3d(-0.5f, -1f, 0.5f),
+            new Vec3d(-0.5f, -1f, -0.5f)};
+
     public static Vec3d[] getEntityCornerVecs(float eyeHeight) {
         Vec3d[] cornerVecs = {
                 // top
@@ -2017,12 +2028,47 @@ public class CombatUtil {
         return cornerVecs;
     }
 
+    public static class AutoCrystalTraceResult {
+        public EnumFacing facing;
+        public RayTraceResult result;
+
+        public AutoCrystalTraceResult(EnumFacing facing, RayTraceResult result) {
+            this.facing = facing;
+            this.result = result;
+        }
+    }
+
+    public static AutoCrystalTraceResult getRaytracePlace(BlockPos pos, boolean multiPoint) {
+        if(!multiPoint) {
+            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(pos));
+            EnumFacing facing = null;
+            if (rayTraceResult == null || rayTraceResult.sideHit == null) {
+                rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
+                if (rayTraceResult != null) {
+                    if (rayTraceResult.sideHit != null) {
+                        facing = rayTraceResult.sideHit;
+                    }
+                }
+            } else {
+                facing = rayTraceResult.sideHit;
+            }
+            return new AutoCrystalTraceResult(facing, rayTraceResult);
+        } else {
+            for(Vec3d cornerVector : cornerVecs) {
+                RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(pos).add(cornerVector));
+                if (rayTraceResult != null && rayTraceResult.sideHit != null && rayTraceResult.getBlockPos().getX() == pos.getX() && rayTraceResult.getBlockPos().getY() == pos.getY() && rayTraceResult.getBlockPos().getZ() == pos.getZ()) {
+                    return new AutoCrystalTraceResult(rayTraceResult.sideHit, rayTraceResult);
+                }
+            }
+            return null;
+        }
+    }
+
     public static boolean canSeeBlock(BlockPos pos, boolean multiPoint) {
         if(!multiPoint) {
             return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 1.0f, pos.getZ()), false, true, false) == null);
         } else {
             for(Vec3d corner : cornerVecs) {
-                // adding .5 to make sure its the center
                 Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
                 Vec3d multiPointCorner = blockVec.add(corner);
                 RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
