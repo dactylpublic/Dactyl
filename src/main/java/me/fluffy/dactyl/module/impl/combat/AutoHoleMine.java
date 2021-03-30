@@ -118,7 +118,7 @@ public class AutoHoleMine extends Module {
             if(!isCityable(target)) {
                 continue;
             }
-            if(!HoleUtil.isInHole()) {
+            if(!HoleUtil.isEnemySurrounded(target)) {
                 continue;
             }
             if(bestTarget != null) {
