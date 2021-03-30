@@ -54,7 +54,7 @@ public class BetaCrystal extends Module {
     public Setting<Double> minDamage = new Setting<Double>("MinDamage", 6.0d, 1.0d, 13.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> facePlaceH = new Setting<Double>("FPHealth", 10.0d, 1.0d, 36.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> ignoreValidExploit = new Setting<Boolean>("IgnoreInvalid", true, v->isViewPlace() && doPlace.getValue(), "PlaceExploit from old ca");
-    public Setting<Boolean> spawnPacketExploit = new Setting<Boolean>("SpawnExploit", true, v->isViewPlace() && doPlace.getValue(), "New PlaceExploit lol");
+    //public Setting<Boolean> spawnPacketExploit = new Setting<Boolean>("SpawnExploit", true, v->isViewPlace() && doPlace.getValue(), "New PlaceExploit lol");
     public Setting<Boolean> noPlaceAttack = new Setting<Boolean>("NoPlaceAttack", true, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 6.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue());
@@ -709,7 +709,7 @@ public class BetaCrystal extends Module {
                                 ((ICPacketUseEntity) attackPacket).setEntityId(packetSpawnObject.getEntityID());
                                 ((ICPacketUseEntity) attackPacket).setAction(CPacketUseEntity.Action.ATTACK);
                                 mc.player.connection.sendPacket(attackPacket);
-                                if(spawnPacketExploit.getValue()) {
+                                /*if(spawnPacketExploit.getValue()) {
                                     if ((runLogic.getValue() == BreakLogic.HOLDING) && placeRender != null) {
                                         CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placeRender);
                                         EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
@@ -720,7 +720,7 @@ public class BetaCrystal extends Module {
                                             mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
                                         }
                                     }
-                                }
+                                }*/
                             }
                         }
                     }
