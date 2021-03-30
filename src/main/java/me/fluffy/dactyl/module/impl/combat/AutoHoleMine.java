@@ -6,6 +6,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.misc.MiningTweaks;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
+import me.fluffy.dactyl.util.HoleUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockObsidian;
 import net.minecraft.entity.player.EntityPlayer;
@@ -115,6 +116,9 @@ public class AutoHoleMine extends Module {
                 continue;
             }
             if(!isCityable(target)) {
+                continue;
+            }
+            if(HoleUtil.isInHole()) {
                 continue;
             }
             if(bestTarget != null) {
