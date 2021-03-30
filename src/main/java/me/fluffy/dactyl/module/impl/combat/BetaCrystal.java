@@ -16,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -97,6 +98,7 @@ public class BetaCrystal extends Module {
     public Setting<Integer> yawStep = new Setting<Integer>("StepAmount", 55, 1, 180, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
     public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v->isViewGeneral());
     public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
+    public Setting<Boolean> multiPointRotations = new Setting<Boolean>("PointRotations", false, v->isViewGeneral());
     public Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, v->isViewGeneral());
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 16.0D, v->isViewGeneral());
 
@@ -326,6 +328,9 @@ public class BetaCrystal extends Module {
             boolean finalizePlace = true;
             damage = CombatUtil.getDamageBestPosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] finalRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
+            if(multiPointRotations.getValue()) {
+                finalRots = CombatUtil.calculateLookAtBlock(placePosition);
+            }
             if (placeRotate.getValue()) {
                 if(yawStepEnum.getValue() == YawStepEnum.PLACE || yawStepEnum.getValue() == YawStepEnum.BOTH) {
                     float relativeYaw = (float)finalRots[0];
@@ -381,7 +386,7 @@ public class BetaCrystal extends Module {
                     }
                     placedCrystals.add(placePosition);
 
-                    CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getRaytracePlace(placePosition, multiPoint.getValue());
+                    CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placePosition);
                     if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
                         mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
                     }
@@ -405,6 +410,27 @@ public class BetaCrystal extends Module {
                 resetRotField(true);
             }
         }
+    }
+
+    private EnumFacing getStrictDirection(BlockPos pos) {
+        double lastDist = 69.0d;
+        EnumFacing finalFacing = EnumFacing.UP;
+        for(EnumFacing facing : EnumFacing.values()) {
+            Vec3d offset = new Vec3d(pos).add(0.5d, 0.5f, 0.5d).add(new Vec3d(facing.getDirectionVec()).scale(0.5d));
+            double dist = mc.player.getDistance(offset.x, offset.y, offset.z);
+            if(dist <= lastDist) {
+                if(facing != EnumFacing.UP && facing != EnumFacing.DOWN) {
+                    if(dist > 0.5 && (mc.world.getBlockState(pos.offset(facing.getOpposite())) != null && mc.world.getBlockState(pos.offset(facing)).getBlock() != null && mc.world.getBlockState(pos.offset(facing)).getBlock() != Blocks.AIR)) {
+                        System.out.println(mc.world.getBlockState(pos.offset(facing)).getBlock().getLocalizedName());
+                        finalFacing = facing;
+                    }
+                } else {
+                    finalFacing = facing;
+                }
+                lastDist = dist;
+            }
+        }
+        return finalFacing;
     }
 
     @Override
@@ -550,7 +576,7 @@ public class BetaCrystal extends Module {
         }
         Criticals.INSTANCE.ignoring = false;
         if (ignoreValidExploit.getValue() && (runLogic.getValue() == BreakLogic.HOLDING) && placeRender != null) {
-            CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getRaytracePlace(placeRender, multiPoint.getValue());
+            CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placeRender);
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
             if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
                 mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));

@@ -1974,34 +1974,156 @@ public class CombatUtil {
     }
 
     private static Vec3d[] cornerVecs = {
-            new Vec3d(0f, 1f, 0f),
-            new Vec3d(0.5f, 1f, 0.5f),
-            new Vec3d(0.5f, 1f, -0.5f),
-            new Vec3d(-0.5f, 1f, 0.5f),
-            new Vec3d(-0.5f, 1f, -0.5f),
 
-            new Vec3d(0f, -1f, 0f),
-            new Vec3d(0.5f, -1f, 0.5f),
-            new Vec3d(0.5f, -1f, -0.5f),
-            new Vec3d(-0.5f, -1f, 0.5f),
-            new Vec3d(-0.5f, -1f, -0.5f),
+            // center of bottom and top
+            new Vec3d(0.0f, 1, 0.0f),
+            new Vec3d(0.0f, 0, 0.0f),
+            new Vec3d(0.0f, -1, 0.0f),
 
-            new Vec3d(0f, 0f, 0f),
-            new Vec3d(0.5f, 0f, 0.5f),
-            new Vec3d(0.5f, 0f, -0.5f),
-            new Vec3d(-0.5f, 0f, 0.5f),
-            new Vec3d(-0.5f, 0f, -0.5f)};
+            // west side
+
+            // top
+            new Vec3d(-0.5f, 1f, 0.0f), // center
+            new Vec3d(-0.5f, 1f, -0.5f), // left
+            new Vec3d(-0.5f, 1f, 0.5f), // right
+
+            // mid
+            new Vec3d(-0.5f, -1f, 0.0f), // center
+            new Vec3d(-0.5f, -1f, -0.5f), // left
+            new Vec3d(-0.5f, -1f, 0.5f), // right
+
+            // bottom
+            new Vec3d(-0.5f, 0, 0.0f), // center
+            new Vec3d(-0.5f, 0, -0.5f), // left
+            new Vec3d(-0.5f, 0, 0.5f), // right
+
+            // north side
+
+            // top
+            new Vec3d(0.0f, 1, -0.5f), // center
+            new Vec3d(0.5f, 1, -0.5f), // left
+            new Vec3d(-0.5f, 1, -0.5f), // right
+
+            // mid
+            new Vec3d(0.0f, 0, -0.5f), // center
+            new Vec3d(0.5f, 0, -0.5f), // left
+            new Vec3d(-0.5f, 0, -0.5f), // right
+
+            // bottom
+            new Vec3d(0.0f, -1, -0.5f), // center
+            new Vec3d(0.5f, -1, -0.5f), // left
+            new Vec3d(-0.5f, -1, -0.5f), // right
+
+
+            // east side
+
+            // top
+            new Vec3d(0.5f, 1, 0.0f), // center
+            new Vec3d(0.5f, 1, 0.5f), // left
+            new Vec3d(0.5f, 1, -0.5f), // right
+
+            // mid
+            new Vec3d(0.5f, 0.0f, 0.0f), // center
+            new Vec3d(0.5f, 0.0f, 0.5f), // left
+            new Vec3d(0.5f, 0.0f, -0.5f), // right
+
+            // bottom
+            new Vec3d(0.5f, -1, 0.0f), // center
+            new Vec3d(0.5f, -1, 0.5f), // left
+            new Vec3d(0.5f, -1, -0.5f), // right
+
+            // south side
+
+            // top
+            new Vec3d(0.0f, 1, 0.5f), // center
+            new Vec3d(-0.5f, 1, 0.5f), // left
+            new Vec3d(0.5f, 1, 0.5f), // right
+
+            // mid
+            new Vec3d(0.0f, 0.0f, 0.5f), // center
+            new Vec3d(-0.5f, 0.0f, 0.5f), // left
+            new Vec3d(0.5f, 0.0f, 0.5f), // right
+
+            // bottom
+            new Vec3d(0.0f, -1, 0.5f), // center
+            new Vec3d(-0.5f, -1, 0.5f), // left
+            new Vec3d(0.5f, -1, 0.5f)}; // right
 
     private static Vec3d[] cornerVecsRotations = {
-            new Vec3d(0.5f, -0.5f, 0.5f),
-            new Vec3d(0.5f, -0.5f, -0.5f),
-            new Vec3d(-0.5f, -0.5f, 0.5f),
-            new Vec3d(-0.5f, -0.5f, -0.5f),
 
-            new Vec3d(0.5f, -1f, 0.5f),
-            new Vec3d(0.5f, -1f, -0.5f),
-            new Vec3d(-0.5f, -1f, 0.5f),
-            new Vec3d(-0.5f, -1f, -0.5f)};
+            // center of bottom and top
+            new Vec3d(0.0f, 0.5f, 0.0f),
+            new Vec3d(0.0f, 0, 0.0f),
+            new Vec3d(0.0f, -0.5f, 0.0f),
+
+            // west side
+
+            // top
+            new Vec3d(-0.5f, 0.5f, 0.0f), // center
+            new Vec3d(-0.5f, 0.5f, -0.5f), // left
+            new Vec3d(-0.5f, 0.5f, 0.5f), // right
+
+            // mid
+            new Vec3d(-0.5f, 0f, 0.0f), // center
+            new Vec3d(-0.5f, 0f, -0.5f), // left
+            new Vec3d(-0.5f, 0f, 0.5f), // right
+
+            // bottom
+            new Vec3d(-0.5f, -0.5f, 0.0f), // center
+            new Vec3d(-0.5f, -0.5f, -0.5f), // left
+            new Vec3d(-0.5f, -0.5f, 0.5f), // right
+
+            // north side
+
+            // top
+            new Vec3d(0.0f, 0.5f, -0.5f), // center
+            new Vec3d(0.5f, 0.5f, -0.5f), // left
+            new Vec3d(-0.5f, 0.5f, -0.5f), // right
+
+            // mid
+            new Vec3d(0.0f, 0, -0.5f), // center
+            new Vec3d(0.5f, 0, -0.5f), // left
+            new Vec3d(-0.5f, 0, -0.5f), // right
+
+            // bottom
+            new Vec3d(0.0f, -0.5f, -0.5f), // center
+            new Vec3d(0.5f, -0.5f, -0.5f), // left
+            new Vec3d(-0.5f, -0.5f, -0.5f), // right
+
+
+            // east side
+
+            // top
+            new Vec3d(0.5f, 0.5f, 0.0f), // center
+            new Vec3d(0.5f, 0.5f, 0.5f), // left
+            new Vec3d(0.5f, 0.5f, -0.5f), // right
+
+            // mid
+            new Vec3d(0.5f, 0.0f, 0.0f), // center
+            new Vec3d(0.5f, 0.0f, 0.5f), // left
+            new Vec3d(0.5f, 0.0f, -0.5f), // right
+
+            // bottom
+            new Vec3d(0.5f, -0.5f, 0.0f), // center
+            new Vec3d(0.5f, -0.5f, 0.5f), // left
+            new Vec3d(0.5f, -0.5f, -0.5f), // right
+
+            // south side
+
+            // top
+            new Vec3d(0.0f, 0.5f, 0.5f), // center
+            new Vec3d(-0.5f, 0.5f, 0.5f), // left
+            new Vec3d(0.5f, 0.5f, 0.5f), // right
+
+            // mid
+            new Vec3d(0.0f, 0.0f, 0.5f), // center
+            new Vec3d(-0.5f, 0.0f, 0.5f), // left
+            new Vec3d(0.5f, 0.0f, 0.5f), // right
+
+            // bottom
+            new Vec3d(0.0f, -0.5f, 0.5f), // center
+            new Vec3d(-0.5f, -0.5f, 0.5f), // left
+            new Vec3d(0.5f, -0.5f, 0.5f)}; // right
 
     public static Vec3d[] getEntityCornerVecs(float eyeHeight) {
         Vec3d[] cornerVecs = {
@@ -2038,6 +2160,22 @@ public class CombatUtil {
         }
     }
 
+    public static AutoCrystalTraceResult getNormalTrace(BlockPos pos) {
+        RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(pos));
+        EnumFacing facing = null;
+        if (rayTraceResult == null || rayTraceResult.sideHit == null) {
+            rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
+            if (rayTraceResult != null) {
+                if (rayTraceResult.sideHit != null) {
+                    facing = rayTraceResult.sideHit;
+                }
+            }
+        } else {
+            facing = rayTraceResult.sideHit;
+        }
+        return new AutoCrystalTraceResult(facing, rayTraceResult);
+    }
+
     public static AutoCrystalTraceResult getRaytracePlace(BlockPos pos, boolean multiPoint) {
         if(!multiPoint) {
             RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(pos));
@@ -2056,11 +2194,11 @@ public class CombatUtil {
         } else {
             for(Vec3d cornerVector : cornerVecs) {
                 RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(pos).add(cornerVector));
-                if (rayTraceResult != null && rayTraceResult.sideHit != null && rayTraceResult.getBlockPos().getX() == pos.getX() && rayTraceResult.getBlockPos().getY() == pos.getY() && rayTraceResult.getBlockPos().getZ() == pos.getZ()) {
-                    return new AutoCrystalTraceResult(rayTraceResult.sideHit, rayTraceResult);
+                if (rayTraceResult != null && rayTraceResult.sideHit != null) {
+                    return new AutoCrystalTraceResult(rayTraceResult.sideHit.getOpposite(), rayTraceResult);
                 }
             }
-            return null;
+            return getNormalTrace(pos);
         }
     }
 
@@ -2095,6 +2233,55 @@ public class CombatUtil {
             }
             return false;
         }
+    }
+
+    public static double[] getOffsetVec3d(BlockPos pos) {
+        Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 0.5d, pos.getZ() + 0.5f);
+        Vec3d[] rotationVecs = cornerVecsRotations.clone();
+        Arrays.sort(rotationVecs, Comparator.comparingDouble(v -> mc.player.getDistance(((Vec3d)v).add(blockVec).x, ((Vec3d)v).add(blockVec).y, ((Vec3d)v).add(blockVec).z)));
+        for(Vec3d corner : rotationVecs) {
+            Vec3d multiPointCorner = blockVec.add(corner);
+            RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
+            // result is null if you can see said corner
+            if(result == null) {
+                return new double[] {multiPointCorner.x, multiPointCorner.y, multiPointCorner.z};
+            }
+        }
+        return new double[] {0.0d, 0.0d, 0.0d};
+    }
+
+    public static double[] calculateLookAtBlock(BlockPos pos) {
+        double px = pos.getX() + 0.5d;
+        double py = pos.getY() - 0.5d;
+        double pz = pos.getZ() + 0.5d;
+        Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 0.5d, pos.getZ() + 0.5f);
+        Vec3d[] rotationVecs = cornerVecsRotations.clone();
+        Arrays.sort(rotationVecs, Comparator.comparingDouble(v -> mc.player.getDistance(((Vec3d)v).add(blockVec).x, ((Vec3d)v).add(blockVec).y, ((Vec3d)v).add(blockVec).z)));
+        for(Vec3d corner : rotationVecs) {
+            Vec3d multiPointCorner = blockVec.add(corner);
+            RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
+            // result is null if you can see said corner
+            if(result == null) {
+                px = multiPointCorner.x;
+                py = multiPointCorner.y;
+                pz = multiPointCorner.z;
+                break;
+            }
+        }
+
+        double dirx = mc.player.posX - px;
+        double diry = mc.player.posY - py;
+        double dirz = mc.player.posZ - pz;
+        double len = Math.sqrt(dirx*dirx + diry*diry + dirz*dirz);
+        dirx /= len;
+        diry /= len;
+        dirz /= len;
+        double pitch = Math.asin(diry);
+        double yaw = Math.atan2(dirz, dirx);
+        pitch = pitch * 180.0d / Math.PI;
+        yaw = yaw * 180.0d / Math.PI;
+        yaw += 90f;
+        return new double[]{yaw,pitch};
     }
 
     public static double[] calculateLookAt(double px, double py, double pz) {
