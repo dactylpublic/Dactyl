@@ -68,6 +68,8 @@ public class ModuleManager {
         modules.add(new ChatTimestamps());
         modules.add(new Regear());
         modules.add(new AutoDuelWin());
+        modules.add(new HClip());
+        modules.add(new VClip());
 
         // movement
         modules.add(new Strafe());
