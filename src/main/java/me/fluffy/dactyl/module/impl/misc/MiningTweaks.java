@@ -64,6 +64,7 @@ public class MiningTweaks extends Module {
     private final TimeUtil timer = new TimeUtil();
     private int lastInvSlot = 0;
     boolean placedBlock = false;
+    public boolean isBlockDoneMining = false;
 
     @Override
     public void onClientUpdate() {
@@ -97,10 +98,12 @@ public class MiningTweaks extends Module {
             if (mc.player != null && mc.player.getDistance(this.currentPos.getX(), this.currentPos.getY(), this.currentPos.getZ()) > ((resetRange.getValue()))) {
                 this.currentPos = null;
                 this.currentBlockState = null;
+                this.isBlockDoneMining = false;
                 return;
             }
             if (!mc.world.getBlockState(this.currentPos).equals(this.currentBlockState) || mc.world.getBlockState(this.currentPos).getBlock() == Blocks.AIR) {
                 this.currentPos = null;
+                this.isBlockDoneMining = false;
                 this.currentBlockState = null;
             }
         }
@@ -169,6 +172,9 @@ public class MiningTweaks extends Module {
     public void onRender3D(Render3DEvent event) {
         if (renderPacketBlock.getValue() && this.currentPos != null && (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
             Color color = new Color(this.timer.hasPassed((int)(2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 0 : 255, this.timer.hasPassed((int) (2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 255 : 0, 0, 255);
+            if(this.timer.hasPassed((int) (2000.0f * (20F / Dactyl.tickRateManager.getTickRate())))) {
+                this.isBlockDoneMining = true;
+            }
             if(!renderBreakProgress.getValue()) {
                 /**
                  * Solution:
