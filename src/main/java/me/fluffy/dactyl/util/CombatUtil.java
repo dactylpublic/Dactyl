@@ -515,6 +515,7 @@ public class CombatUtil {
         }
     }
 
+
     public static void switchOffhandTotemNotStrict() {
         int targetSlot = findItemSlot(Items.TOTEM_OF_UNDYING);
         if(targetSlot != -1) {
@@ -1993,87 +1994,21 @@ public class CombatUtil {
     }
 
     private static Vec3d[] cornerVecs = {
-
-            // center of bottom and top
-            new Vec3d(0.0f, 1, 0.0f),
-            new Vec3d(0.0f, 0, 0.0f),
-            new Vec3d(0.0f, -1, 0.0f),
-
-            // west side
-
-            // top
-            new Vec3d(-0.5f, 1f, 0.0f), // center
-            new Vec3d(-0.5f, 1f, -0.5f), // left
-            new Vec3d(-0.5f, 1f, 0.5f), // right
-
-            // mid
-            new Vec3d(-0.5f, -1f, 0.0f), // center
-            new Vec3d(-0.5f, -1f, -0.5f), // left
-            new Vec3d(-0.5f, -1f, 0.5f), // right
-
-            // bottom
-            new Vec3d(-0.5f, 0, 0.0f), // center
-            new Vec3d(-0.5f, 0, -0.5f), // left
-            new Vec3d(-0.5f, 0, 0.5f), // right
-
-            // north side
-
-            // top
-            new Vec3d(0.0f, 1, -0.5f), // center
-            new Vec3d(0.5f, 1, -0.5f), // left
-            new Vec3d(-0.5f, 1, -0.5f), // right
-
-            // mid
-            new Vec3d(0.0f, 0, -0.5f), // center
-            new Vec3d(0.5f, 0, -0.5f), // left
-            new Vec3d(-0.5f, 0, -0.5f), // right
-
-            // bottom
-            new Vec3d(0.0f, -1, -0.5f), // center
-            new Vec3d(0.5f, -1, -0.5f), // left
-            new Vec3d(-0.5f, -1, -0.5f), // right
-
-
-            // east side
-
-            // top
-            new Vec3d(0.5f, 1, 0.0f), // center
-            new Vec3d(0.5f, 1, 0.5f), // left
-            new Vec3d(0.5f, 1, -0.5f), // right
-
-            // mid
-            new Vec3d(0.5f, 0.0f, 0.0f), // center
-            new Vec3d(0.5f, 0.0f, 0.5f), // left
-            new Vec3d(0.5f, 0.0f, -0.5f), // right
-
-            // bottom
-            new Vec3d(0.5f, -1, 0.0f), // center
-            new Vec3d(0.5f, -1, 0.5f), // left
-            new Vec3d(0.5f, -1, -0.5f), // right
-
-            // south side
-
-            // top
-            new Vec3d(0.0f, 1, 0.5f), // center
-            new Vec3d(-0.5f, 1, 0.5f), // left
-            new Vec3d(0.5f, 1, 0.5f), // right
-
-            // mid
-            new Vec3d(0.0f, 0.0f, 0.5f), // center
-            new Vec3d(-0.5f, 0.0f, 0.5f), // left
-            new Vec3d(0.5f, 0.0f, 0.5f), // right
-
-            // bottom
-            new Vec3d(0.0f, -1, 0.5f), // center
-            new Vec3d(-0.5f, -1, 0.5f), // left
-            new Vec3d(0.5f, -1, 0.5f)}; // right
-
-    private static Vec3d[] cornerVecsRotations = {
-
-            // center of bottom and top
+            // top center
             new Vec3d(0.0f, 0.5f, 0.0f),
-            new Vec3d(0.0f, 0, 0.0f),
+            // bottom center
             new Vec3d(0.0f, -0.5f, 0.0f),
+            // north center
+            new Vec3d(0.0f, 0.0f, -0.5f),
+            // east center
+            new Vec3d(0.5f, 0.0f, 0.0f),
+            // south center
+            new Vec3d(0.0f, 0.0f, 0.5f),
+            // west center
+            new Vec3d(-0.5f, 0.0f, 0.0f)};
+            /*// center of bottom and top
+            new Vec3d(0.0f, 1f, 0.0f),
+            new Vec3d(0.0f, -1f, 0.0f),
 
             // west side
 
@@ -2083,21 +2018,21 @@ public class CombatUtil {
             new Vec3d(-0.5f, 0.5f, 0.5f), // right
 
             // mid
-            new Vec3d(-0.5f, 0f, 0.0f), // center
-            new Vec3d(-0.5f, 0f, -0.5f), // left
-            new Vec3d(-0.5f, 0f, 0.5f), // right
-
-            // bottom
             new Vec3d(-0.5f, -0.5f, 0.0f), // center
             new Vec3d(-0.5f, -0.5f, -0.5f), // left
             new Vec3d(-0.5f, -0.5f, 0.5f), // right
 
+            // bottom
+            new Vec3d(-0.5f, 0, 0.0f), // center
+            new Vec3d(-0.5f, 0, -0.5f), // left
+            new Vec3d(-0.5f, 0, 0.5f), // right
+
             // north side
 
             // top
-            new Vec3d(0.0f, 0.5f, -0.5f), // center
-            new Vec3d(0.5f, 0.5f, -0.5f), // left
-            new Vec3d(-0.5f, 0.5f, -0.5f), // right
+            new Vec3d(0.0f, 1f, -0.5f), // center
+            new Vec3d(0.5f, 1f, -0.5f), // left
+            new Vec3d(-0.5f, 1f, -0.5f), // right
 
             // mid
             new Vec3d(0.0f, 0, -0.5f), // center
@@ -2105,17 +2040,17 @@ public class CombatUtil {
             new Vec3d(-0.5f, 0, -0.5f), // right
 
             // bottom
-            new Vec3d(0.0f, -0.5f, -0.5f), // center
-            new Vec3d(0.5f, -0.5f, -0.5f), // left
-            new Vec3d(-0.5f, -0.5f, -0.5f), // right
+            new Vec3d(0.0f, -1f, -0.5f), // center
+            new Vec3d(0.5f, -1f, -0.5f), // left
+            new Vec3d(-0.5f, -1f, -0.5f), // right
 
 
             // east side
 
             // top
-            new Vec3d(0.5f, 0.5f, 0.0f), // center
-            new Vec3d(0.5f, 0.5f, 0.5f), // left
-            new Vec3d(0.5f, 0.5f, -0.5f), // right
+            new Vec3d(0.5f, 1f, 0.0f), // center
+            new Vec3d(0.5f, 1f, 0.5f), // left
+            new Vec3d(0.5f, 1f, -0.5f), // right
 
             // mid
             new Vec3d(0.5f, 0.0f, 0.0f), // center
@@ -2123,14 +2058,14 @@ public class CombatUtil {
             new Vec3d(0.5f, 0.0f, -0.5f), // right
 
             // bottom
-            new Vec3d(0.5f, -0.5f, 0.0f), // center
-            new Vec3d(0.5f, -0.5f, 0.5f), // left
-            new Vec3d(0.5f, -0.5f, -0.5f), // right
+            new Vec3d(0.5f, -1f, 0.0f), // center
+            new Vec3d(0.5f, -1f, 0.5f), // left
+            new Vec3d(0.5f, -1f, -0.5f), // right
 
             // south side
 
             // top
-            new Vec3d(0.0f, 0.5f, 0.5f), // center
+            new Vec3d(0.0f, 1f, 0.5f), // center
             new Vec3d(-0.5f, 0.5f, 0.5f), // left
             new Vec3d(0.5f, 0.5f, 0.5f), // right
 
@@ -2140,9 +2075,23 @@ public class CombatUtil {
             new Vec3d(0.5f, 0.0f, 0.5f), // right
 
             // bottom
-            new Vec3d(0.0f, -0.5f, 0.5f), // center
-            new Vec3d(-0.5f, -0.5f, 0.5f), // left
-            new Vec3d(0.5f, -0.5f, 0.5f)}; // right
+            new Vec3d(0.0f, -1f, 0.5f), // center
+            new Vec3d(-0.5f, -1f, 0.5f), // left
+            new Vec3d(0.5f, -1f, 0.5f)}; // right*/
+
+    private static Vec3d[] cornerVecsRotations = {
+            // top center
+            new Vec3d(0.0f, 0.5f, 0.0f),
+            // bottom center
+            new Vec3d(0.0f, -0.5f, 0.0f),
+            // north center
+            new Vec3d(0.0f, 0.0f, -0.5f),
+            // east center
+            new Vec3d(0.5f, 0.0f, 0.0f),
+            // south center
+            new Vec3d(0.0f, 0.0f, 0.5f),
+            // west center
+            new Vec3d(-0.5f, 0.0f, 0.0f)};
 
     public static Vec3d[] getEntityCornerVecs(float eyeHeight) {
         Vec3d[] cornerVecs = {
@@ -2177,6 +2126,26 @@ public class CombatUtil {
             this.facing = facing;
             this.result = result;
         }
+    }
+
+    public static RayTraceResult getStrictDirection(BlockPos pos) {
+        RayTraceResult finalResult = null;
+        for(EnumFacing facing : EnumFacing.values()) {
+            Vec3d hitVector = new Vec3d(pos).add(0.5d, 0.5f, 0.5d).add(new Vec3d(facing.getDirectionVec()).scale(0.5d));
+            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), hitVector);
+            // rayTraceResult is null if player can see
+            if(rayTraceResult == null) {
+                finalResult = new RayTraceResult(hitVector, facing);
+                return finalResult;
+            }
+        }
+        if(finalResult == null) {
+            RayTraceResult res = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
+            if (res != null && res.sideHit != null && res.hitVec != null) {
+                finalResult = res;
+            }
+        }
+        return finalResult;
     }
 
     public static AutoCrystalTraceResult getNormalTrace(BlockPos pos) {
@@ -2226,7 +2195,7 @@ public class CombatUtil {
             return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 1.0f, pos.getZ()), false, true, false) == null);
         } else {
             for(Vec3d corner : cornerVecs) {
-                Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
+                Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 1.0f, pos.getZ() + 0.5f);
                 Vec3d multiPointCorner = blockVec.add(corner);
                 RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
                 if(result == null) {
@@ -2273,9 +2242,9 @@ public class CombatUtil {
         double px = pos.getX() + 0.5d;
         double py = pos.getY() - 0.5d;
         double pz = pos.getZ() + 0.5d;
-        Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 0.5d, pos.getZ() + 0.5f);
+        Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 1.0f, pos.getZ() + 0.5f);
         Vec3d[] rotationVecs = cornerVecsRotations.clone();
-        Arrays.sort(rotationVecs, Comparator.comparingDouble(v -> mc.player.getDistance(((Vec3d)v).add(blockVec).x, ((Vec3d)v).add(blockVec).y, ((Vec3d)v).add(blockVec).z)));
+        //Arrays.sort(rotationVecs, Comparator.comparingDouble(v -> mc.player.getDistance(((Vec3d)v).add(blockVec).x, ((Vec3d)v).add(blockVec).y, ((Vec3d)v).add(blockVec).z)));
         for(Vec3d corner : rotationVecs) {
             Vec3d multiPointCorner = blockVec.add(corner);
             RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
@@ -2284,6 +2253,9 @@ public class CombatUtil {
                 px = multiPointCorner.x;
                 py = multiPointCorner.y;
                 pz = multiPointCorner.z;
+                /*System.out.println("X: " + corner.x);
+                System.out.println("Y: " + corner.y);
+                System.out.println("Z: " + corner.z + "\n");*/
                 break;
             }
         }

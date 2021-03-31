@@ -18,7 +18,7 @@ import org.lwjgl.opengl.Display;
 public class Dactyl {
     public static final String MODID = "dactyl";
     public static final String NAME = "Dactyl";
-    public static final String VERSION = "v1.5.9";
+    public static final String VERSION = "v1.6.0";
 
     public static Logger logger;
 

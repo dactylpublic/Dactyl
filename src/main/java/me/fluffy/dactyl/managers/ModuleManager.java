@@ -33,6 +33,7 @@ public class ModuleManager {
         modules.add(new CrystalBomber());
         modules.add(new BetaCrystal());
         modules.add(new AutoHoleMine());
+        //modules.add(new Auto32k());
 
         // player
         modules.add(new Freecam());

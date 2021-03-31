@@ -59,6 +59,7 @@ public class BetaCrystal extends Module {
     public Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 6.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 3.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue() && (placeTrace.getValue() == WallsRange.RANGE));
+    public Setting<Boolean> strictDirection = new Setting<Boolean>("StrictDirection", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> doRecalcOverride = new Setting<Boolean>("Override", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> recalcDmgOverride = new Setting<Double>("RecalcOverride", 8.5d, 1.0d, 16.0d, v->isViewPlace() && doPlace.getValue() && antiRecalc.getValue() && doRecalcOverride.getValue());
@@ -92,6 +93,7 @@ public class BetaCrystal extends Module {
     public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v->isViewGeneral());
     public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
     public Setting<Boolean> multiPointRotations = new Setting<Boolean>("PointRotations", false, v->isViewGeneral());
+    public Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v->isViewGeneral());
     public Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, v->isViewGeneral());
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 16.0D, v->isViewGeneral());
 
@@ -381,6 +383,10 @@ public class BetaCrystal extends Module {
 
                     CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placePosition);
                     if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
+                        if(strictDirection.getValue()) {
+                            RayTraceResult res = CombatUtil.getStrictDirection(placePosition);
+                            traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
+                        }
                         mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
                     }
                     if (swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
@@ -572,6 +578,10 @@ public class BetaCrystal extends Module {
             CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placeRender);
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
             if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
+                if(strictDirection.getValue()) {
+                    RayTraceResult res = CombatUtil.getStrictDirection(placeRender);
+                    traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
+                }
                 mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
             }
         }
@@ -593,6 +603,8 @@ public class BetaCrystal extends Module {
             return true;
         }
     }
+
+
 
     private void incrementAttacked(EntityEnderCrystal entity) {
         Iterator<AttackedCrystal> crystals = attackedCrystals.iterator();
@@ -729,6 +741,17 @@ public class BetaCrystal extends Module {
         }
     }
 
+    /*@Override
+    public void onScreen2D(float partialTicks) {
+        if(mc.player == null || mc.world == null) {
+            return;
+        }
+        if(isRotatingUpdates) {
+            Dactyl.fontUtil.drawStringWithShadow("Yaw: " + String.valueOf(yaw), 1, 20, 0xfffce700);
+            Dactyl.fontUtil.drawStringWithShadow("Pitch: " + String.valueOf(pitch), 1, 30, 0xfffce700);
+        }
+    }*/
+
 
     @SubscribeEvent
     public void onUpdateRotate(EventUpdateWalkingPlayer event) {
@@ -741,6 +764,10 @@ public class BetaCrystal extends Module {
                 mc.player.rotationYawHead = yaw;
             }
             event.setPitch(pitch);
+            if(debugRotate.getValue()) {
+                mc.player.rotationYaw = yaw;
+                mc.player.rotationPitch = pitch;
+            }
         }
     }
 
