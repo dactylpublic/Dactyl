@@ -1994,6 +1994,8 @@ public class CombatUtil {
     }
 
     private static Vec3d[] cornerVecs = {
+            // original
+            new Vec3d(0.0f, 2.0f, 0.0f),
             // top center
             new Vec3d(0.0f, 0.5f, 0.0f),
             // bottom center
