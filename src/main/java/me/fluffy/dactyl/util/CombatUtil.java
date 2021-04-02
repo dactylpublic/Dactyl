@@ -1994,24 +1994,28 @@ public class CombatUtil {
     }
 
     private static Vec3d[] cornerVecs = {
-            // top
+            // center of top and bottom
             new Vec3d(0.0f, 0.5f, 0.0f),
-            new Vec3d(0.0f, 0.5f, -0.5f),
-            new Vec3d(0.0f, 0.5f, 0.5f),
-            new Vec3d(0.5f, 0.5f, 0.0f),
-            new Vec3d(-0.5f, 0.5f, 0.0f),
-
-            // middle
-            new Vec3d(0.0f, 0.0f, -0.5f),
-            new Vec3d(0.0f, 0.0f, 0.5f),
-            new Vec3d(0.5f, 0.0f, 0.0f),
-            new Vec3d(-0.5f, 0.0f, 0.0f),
-
-            // bottom
             new Vec3d(0.0f, -0.5f, 0.0f),
+
+            // north side
+            new Vec3d(0.0f, 0.5f, -0.5f),
+            new Vec3d(0.0f, 0.0f, -0.5f),
             new Vec3d(0.0f, -0.5f, -0.5f),
-            new Vec3d(0.0f, -0.5f, 0.5f),
+
+            // east side
+            new Vec3d(0.5f, 0.5f, 0.0f),
+            new Vec3d(0.5f, 0.0f, 0.0f),
             new Vec3d(0.5f, -0.5f, 0.0f),
+
+            // south side
+            new Vec3d(0.0f, 0.5f, 0.5f),
+            new Vec3d(0.0f, 0.0f, 0.5f),
+            new Vec3d(0.0f, -0.5f, 0.5f),
+
+            // west side
+            new Vec3d(-0.5f, 0.5f, 0.0f),
+            new Vec3d(-0.5f, 0.0f, 0.0f),
             new Vec3d(-0.5f, -0.5f, 0.0f)};
 
     private static Vec3d[] cornerVecsRotations = {
@@ -2130,7 +2134,7 @@ public class CombatUtil {
             return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 1.0f, pos.getZ()), false, true, false) == null);
         } else {
             for(Vec3d corner : cornerVecs) {
-                Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 1.0f, pos.getZ() + 0.5f);
+                Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f);
                 Vec3d multiPointCorner = blockVec.add(corner);
                 RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
                 if(result == null) {
@@ -2177,7 +2181,7 @@ public class CombatUtil {
         double px = pos.getX() + 0.5d;
         double py = pos.getY() - 0.5d;
         double pz = pos.getZ() + 0.5d;
-        Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 1.0f, pos.getZ() + 0.5f);
+        Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() - 0.5f, pos.getZ() + 0.5f);
         Vec3d[] rotationVecs = cornerVecsRotations.clone();
         //Arrays.sort(rotationVecs, Comparator.comparingDouble(v -> mc.player.getDistance(((Vec3d)v).add(blockVec).x, ((Vec3d)v).add(blockVec).y, ((Vec3d)v).add(blockVec).z)));
         for(Vec3d corner : rotationVecs) {
