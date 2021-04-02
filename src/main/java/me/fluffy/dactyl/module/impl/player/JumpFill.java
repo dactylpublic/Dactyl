@@ -13,6 +13,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
+import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -22,8 +23,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class JumpFill extends Module {
     Setting<Priority> prioritySetting = new Setting<Priority>("Prio", Priority.OBI);
-    Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", false);
-    Setting<Integer> packetOffset = new Setting<Integer>("POffset", 5, 1, 100);
+    //Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", false);
+    //Setting<Integer> packetOffset = new Setting<Integer>("POffset", 5, 1, 100);
     Setting<Boolean> rotate = new Setting<Boolean>("Rotate", false);
     public static JumpFill INSTANCE;
     public JumpFill() {
@@ -76,21 +77,27 @@ public class JumpFill extends Module {
             double startY = mc.player.posY;
             double startZ = mc.player.posZ;
 
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.42, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.75, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.01, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.16, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.419997086886978, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7500029, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.9999942, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.170005801788139, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.1700203017881385, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
             BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, 0, 0);
             int oldslot = isHoldingBlock ? blockSlot : mc.player.inventory.currentItem;
             int switchSlot = (isHoldingBlock ? blockSlot : CombatUtil.findBlockInHotbar(getBlockSetting()));
-            boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), false, (switchSlot != -1), packetSwitch.getValue(), switchSlot);
+            boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), false, (switchSlot != -1), true, switchSlot);
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
             if(switchSlot == -1) {
                 this.disable();
                 return;
             }
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + packetOffset.getValue(), mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.242620301394748, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 2.340058003576277, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY, mc.player.posZ, mc.player.onGround));
+            //mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + packetOffset.getValue(), mc.player.posZ, mc.player.onGround));
             if(switchSlot != 420) {
-                CombatUtil.switchToSlot(packetSwitch.getValue(), oldslot);
+                CombatUtil.switchToSlot(true, oldslot);
             }
             this.disable();
         }
