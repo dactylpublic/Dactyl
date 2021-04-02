@@ -1994,92 +1994,25 @@ public class CombatUtil {
     }
 
     private static Vec3d[] cornerVecs = {
-            // original
-            new Vec3d(0.0f, 2.0f, 0.0f),
-            // top center
+            // top
             new Vec3d(0.0f, 0.5f, 0.0f),
-            // bottom center
-            new Vec3d(0.0f, -0.5f, 0.0f),
-            // north center
+            new Vec3d(0.0f, 0.5f, -0.5f),
+            new Vec3d(0.0f, 0.5f, 0.5f),
+            new Vec3d(0.5f, 0.5f, 0.0f),
+            new Vec3d(-0.5f, 0.5f, 0.0f),
+
+            // middle
             new Vec3d(0.0f, 0.0f, -0.5f),
-            // east center
-            new Vec3d(0.5f, 0.0f, 0.0f),
-            // south center
             new Vec3d(0.0f, 0.0f, 0.5f),
-            // west center
-            new Vec3d(-0.5f, 0.0f, 0.0f)};
-            /*// center of bottom and top
-            new Vec3d(0.0f, 1f, 0.0f),
-            new Vec3d(0.0f, -1f, 0.0f),
-
-            // west side
-
-            // top
-            new Vec3d(-0.5f, 0.5f, 0.0f), // center
-            new Vec3d(-0.5f, 0.5f, -0.5f), // left
-            new Vec3d(-0.5f, 0.5f, 0.5f), // right
-
-            // mid
-            new Vec3d(-0.5f, -0.5f, 0.0f), // center
-            new Vec3d(-0.5f, -0.5f, -0.5f), // left
-            new Vec3d(-0.5f, -0.5f, 0.5f), // right
+            new Vec3d(0.5f, 0.0f, 0.0f),
+            new Vec3d(-0.5f, 0.0f, 0.0f),
 
             // bottom
-            new Vec3d(-0.5f, 0, 0.0f), // center
-            new Vec3d(-0.5f, 0, -0.5f), // left
-            new Vec3d(-0.5f, 0, 0.5f), // right
-
-            // north side
-
-            // top
-            new Vec3d(0.0f, 1f, -0.5f), // center
-            new Vec3d(0.5f, 1f, -0.5f), // left
-            new Vec3d(-0.5f, 1f, -0.5f), // right
-
-            // mid
-            new Vec3d(0.0f, 0, -0.5f), // center
-            new Vec3d(0.5f, 0, -0.5f), // left
-            new Vec3d(-0.5f, 0, -0.5f), // right
-
-            // bottom
-            new Vec3d(0.0f, -1f, -0.5f), // center
-            new Vec3d(0.5f, -1f, -0.5f), // left
-            new Vec3d(-0.5f, -1f, -0.5f), // right
-
-
-            // east side
-
-            // top
-            new Vec3d(0.5f, 1f, 0.0f), // center
-            new Vec3d(0.5f, 1f, 0.5f), // left
-            new Vec3d(0.5f, 1f, -0.5f), // right
-
-            // mid
-            new Vec3d(0.5f, 0.0f, 0.0f), // center
-            new Vec3d(0.5f, 0.0f, 0.5f), // left
-            new Vec3d(0.5f, 0.0f, -0.5f), // right
-
-            // bottom
-            new Vec3d(0.5f, -1f, 0.0f), // center
-            new Vec3d(0.5f, -1f, 0.5f), // left
-            new Vec3d(0.5f, -1f, -0.5f), // right
-
-            // south side
-
-            // top
-            new Vec3d(0.0f, 1f, 0.5f), // center
-            new Vec3d(-0.5f, 0.5f, 0.5f), // left
-            new Vec3d(0.5f, 0.5f, 0.5f), // right
-
-            // mid
-            new Vec3d(0.0f, 0.0f, 0.5f), // center
-            new Vec3d(-0.5f, 0.0f, 0.5f), // left
-            new Vec3d(0.5f, 0.0f, 0.5f), // right
-
-            // bottom
-            new Vec3d(0.0f, -1f, 0.5f), // center
-            new Vec3d(-0.5f, -1f, 0.5f), // left
-            new Vec3d(0.5f, -1f, 0.5f)}; // right*/
+            new Vec3d(0.0f, -0.5f, 0.0f),
+            new Vec3d(0.0f, -0.5f, -0.5f),
+            new Vec3d(0.0f, -0.5f, 0.5f),
+            new Vec3d(0.5f, -0.5f, 0.0f),
+            new Vec3d(-0.5f, -0.5f, 0.0f)};
 
     private static Vec3d[] cornerVecsRotations = {
             // top center
