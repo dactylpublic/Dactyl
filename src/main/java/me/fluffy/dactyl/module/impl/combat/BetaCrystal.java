@@ -173,7 +173,7 @@ public class BetaCrystal extends Module {
         EntityEnderCrystal crystal = (EntityEnderCrystal) mc.world.loadedEntityList.stream()
                 .filter(entity -> entity instanceof EntityEnderCrystal)
                 .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
-                .filter(entity -> CombatUtil.crystalIsBreakable(multiPoint.getValue(), (EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue()))
+                .filter(entity -> CombatUtil.crystalIsBreakable(multiPoint.getValue(), (EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), (faceplaceKeyOn ? 1.0d : minHitDamage.getValue()), enemyRange.getValue()))
                 .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuiBreak.getValue(), maxSelfBreak.getValue()))
                 .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal) entity, true, ticksExisted.getValue()))
                 .filter(entity -> canAttackCrystal((EntityEnderCrystal) entity))
