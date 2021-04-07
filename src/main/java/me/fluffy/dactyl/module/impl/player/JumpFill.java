@@ -86,7 +86,6 @@ public class JumpFill extends Module {
             int oldslot = isHoldingBlock ? blockSlot : mc.player.inventory.currentItem;
             int switchSlot = (isHoldingBlock ? blockSlot : CombatUtil.findBlockInHotbar(getBlockSetting()));
             boolean placedBlock = CombatUtil.placeBlockBurrow(targetPos, false, rotate.getValue(), false, (switchSlot != -1), true, switchSlot);
-            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
             if(switchSlot == -1) {
                 this.disable();
                 return;
