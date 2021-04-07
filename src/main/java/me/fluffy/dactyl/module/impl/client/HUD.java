@@ -71,7 +71,7 @@ public class HUD extends Module {
     public Setting<Integer> currentConfigOffset = new Setting<Integer>("ConfigOffset", 10, 0, 100, v->renderHud.getValue() && currentConfig.getValue());
     public Setting<Boolean> currentConfigGradient = new Setting<Boolean>("ConfigGradient", false, v->renderHud.getValue()&&currentConfig.getValue());
 
-    public Setting<Boolean> shadow = new Setting<Boolean>("Shadow", false, v->renderHud.getValue());
+    public Setting<Boolean> shadow = new Setting<Boolean>("Shadow", true, v->renderHud.getValue());
 
     public Setting<String> commandPrefix = new Setting<String>("CommandPrefix", "-");
 
@@ -470,7 +470,7 @@ public class HUD extends Module {
     private void updateSkeetRainbow() {
         ScaledResolution res = getRes();
         int zoomSpeed = 101 - 51;
-        hue = (System.currentTimeMillis() % (360 * zoomSpeed)) / (360f * zoomSpeed);
+        hue = (System.currentTimeMillis() % (360f * zoomSpeed)) / (360f * zoomSpeed);
         float tempHue = hue;
         for (int i = 0; i <= res.getScaledHeight(); i++) {
             colorY.put(i, Color.HSBtoRGB(tempHue, 255F / 255f, 1f));
@@ -614,22 +614,25 @@ public class HUD extends Module {
                 skeetWatermarkText = skeetWatermarkText + " | Build: " + Dactyl.VERSION;
 
                 // top pixels 0xFF383838
-                RenderUtil.drawRect(7, waterMarkOffset.getValue()+5, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+6, 0xFF383936);
+                RenderUtil.drawOutlinedRectangle(7, waterMarkOffset.getValue()+8.0f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+25f, 0xFF383936);
+                //RenderUtil.drawRect(7, waterMarkOffset.getValue()+7.0f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+8.0f, 0xFF383936);
 
                 // middle pixels 0xFF222524
-                RenderUtil.drawRect(7, waterMarkOffset.getValue()+6, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+10.5f, 0xFF222524);
+                RenderUtil.drawRect(8, waterMarkOffset.getValue()+9.0f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+10.5f, 0xFF222524);
 
                 // bottom pixels 0XFF383838
-                RenderUtil.drawRect(7, waterMarkOffset.getValue()+10.5f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+12, 0xFF383936);
+                RenderUtil.drawRect(8, waterMarkOffset.getValue()+10.5f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+12, 0xFF383936);
 
                 // rainbow (3-5 pixels)
-                RenderUtil.drawGradientRectHorizontal(7, waterMarkOffset.getValue()+12, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+14.5f, getColor(7, true), getColor((int) (Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 25), true));
+                RenderUtil.drawGradientRectHorizontal(8, waterMarkOffset.getValue()+12, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+13f, getColor(7, true), getColor((int) (Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 25), true));
 
                 // below rainbow 0xFF100E09
-                RenderUtil.drawRect(7, waterMarkOffset.getValue()+14.5f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+16.0f, 0xFF100E09);
+                RenderUtil.drawRect(8, waterMarkOffset.getValue()+13f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+14.5f, 0xFF100E09);
 
                 // text rect 0xFF0C0C0C
-                RenderUtil.drawRect(7, waterMarkOffset.getValue()+16.0f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+26.0f, 0xFF0C0C0C);
+                RenderUtil.drawRect(8, waterMarkOffset.getValue()+14.5f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+25f, 0xFF0C0C0C);
+
+                // left side
 
                 skeetFont.drawString(skeetWatermarkText, 10, waterMarkOffset.getValue()+16, 0xFFFFFFFF);
 

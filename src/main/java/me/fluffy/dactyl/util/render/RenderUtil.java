@@ -1113,7 +1113,7 @@ public class RenderUtil {
         return toRGBA(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     }
 
-    public static void drawOutlinedRectangle(int left, int top, int right, int bottom, int color) {
+    public static void drawOutlinedRectangle(double left, double top, double right, double bottom, int color) {
         drawHorizontalLine(left, right, top, color);
         drawHorizontalLine(left, right, bottom, color);
         drawVerticalLine(left, bottom, top, color);
@@ -1350,10 +1350,10 @@ public class RenderUtil {
         return (Minecraft.getMinecraft().displayWidth / 2);
     }
 
-    public static void drawHorizontalLine(int startX, int endX, int y, int color) {
+    public static void drawHorizontalLine(double startX, double endX, double y, int color) {
         if (endX < startX)
         {
-            int i = startX;
+            double i = startX;
             startX = endX;
             endX = i;
         }
@@ -1361,10 +1361,10 @@ public class RenderUtil {
         drawRect(startX, y, endX + 1, y + 1, color);
     }
 
-    public static void drawVerticalLine(int x, int startY, int endY, int color) {
+    public static void drawVerticalLine(double x, double startY, double endY, int color) {
         if (endY < startY)
         {
-            int i = startY;
+            double i = startY;
             startY = endY;
             endY = i;
         }
