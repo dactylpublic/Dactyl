@@ -14,6 +14,7 @@ import me.fluffy.dactyl.util.EntityUtil;
 import me.fluffy.dactyl.util.MathUtil;
 import me.fluffy.dactyl.util.TimeUtil;
 import me.fluffy.dactyl.util.render.RenderUtil;
+import me.fluffy.dactyl.util.render.font.CFontRenderer;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -26,6 +27,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.awt.*;
 import java.util.*;
 
 public class HUD extends Module {
@@ -56,6 +58,7 @@ public class HUD extends Module {
     public Setting<Rendering> renderingSetting = new Setting<Rendering>("Rendering", Rendering.UP, v->renderHud.getValue());
 
     public Setting<WatermarkType> watermarkTypeSetting = new Setting<WatermarkType>("Logo", WatermarkType.DACTYL_IE, v->renderHud.getValue());
+    public Setting<Boolean> skeetWatermark = new Setting<Boolean>("SkeetWatermark", true, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
     public Setting<String> customWatermark = new Setting<String>("CustomWatermark", "Trollgod.cc", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
     public Setting<Integer> waterMarkOffset = new Setting<Integer>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
     public Setting<Boolean> gradientLogo = new Setting<Boolean>("LogoGradient", false, v->renderHud.getValue());
@@ -85,10 +88,18 @@ public class HUD extends Module {
     private long serverLastUpdated;
     private static ItemStack totemStack = new ItemStack(Items.TOTEM_OF_UNDYING);
 
+    public float hue;
+
+    public HashMap<Integer, Integer> colorX = new HashMap<>();
+    public HashMap<Integer, Integer> colorY = new HashMap<>();
+
     @Override
     public void onClientUpdate() {
         if(mc.player == null) {
             return;
+        }
+        if(skeetWatermark.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE && renderHud.getValue()) {
+            updateSkeetRainbow();
         }
         if(arrayTimer.hasPassed(arrayListUpdates.getValue())) {
             updateArrayList();
@@ -415,6 +426,63 @@ public class HUD extends Module {
         }
     }
 
+    private int getColor(int offset, boolean isX) {
+        return getMappedColor(offset, isX, false);
+    }
+
+    private Color getCurrentColor() {
+        return Color.getHSBColor(this.hue, 255F / 255.0F, 1F);
+    }
+
+    private int getColorDarker(int offset, boolean isX) {
+        return getMappedColor(offset, isX, true);
+    }
+
+    private int getMappedColor(int offset, boolean isX, boolean darker) {
+        if(isX) {
+            if(colorX.get(offset) != null) {
+                if(darker) {
+                    return convertHex(colorX.get(offset)).darker().getRGB();
+                } else {
+                    return colorX.get(offset);
+                }
+            }
+        } else {
+            if(colorY.get(offset) != null) {
+                if(darker) {
+                    return convertHex(colorY.get(offset)).darker().getRGB();
+                } else {
+                    return colorY.get(offset);
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    public Color convertHex(int hexColor) {
+        int r = (hexColor & 0xFF0000) >> 16;
+        int g = (hexColor & 0xFF00) >> 8;
+        int b = (hexColor & 0xFF);
+        return new Color(r, g, b, 255);
+    }
+
+    private void updateSkeetRainbow() {
+        ScaledResolution res = getRes();
+        int zoomSpeed = 101 - 51;
+        hue = (System.currentTimeMillis() % (360 * zoomSpeed)) / (360f * zoomSpeed);
+        float tempHue = hue;
+        for (int i = 0; i <= res.getScaledHeight(); i++) {
+            colorY.put(i, Color.HSBtoRGB(tempHue, 255F / 255f, 1f));
+            tempHue += ((float) 5) / res.getScaledHeight();
+        }
+        float tempHue1 = hue;
+        for (int i = 0; i <= res.getScaledWidth(); i++) {
+            colorX.put(i, Color.HSBtoRGB(tempHue1, 255F / 255f, 1f));
+            tempHue1 += ((float) 5) / res.getScaledWidth();
+        }
+    }
+
     private boolean arrayListContainsModule(Module module) {
         for(ArrayListElement arrayListElement : arrayListElements) {
             if(arrayListElement.module == module) {
@@ -533,8 +601,41 @@ public class HUD extends Module {
         GlStateManager.disableLighting();
     }
 
+    private CFontRenderer skeetFont = new CFontRenderer(new Font("Verdana", Font.PLAIN, 16), true, true);
+
     private void doWatermark() {
         if(watermarkTypeSetting.getValue() != WatermarkType.NONE) {
+            if(skeetWatermark.getValue()) {
+                String skeetWatermarkText = watermarkTypeSetting.getValue() == WatermarkType.DACTYL ? "Dactyl" : "Dactyl.ie";
+                if(watermarkTypeSetting.getValue() == WatermarkType.CUSTOM) {
+                    skeetWatermarkText = customWatermark.getValue();
+                }
+
+                skeetWatermarkText = skeetWatermarkText + " | Build: " + Dactyl.VERSION;
+
+                // top pixels 0xFF383838
+                RenderUtil.drawRect(7, waterMarkOffset.getValue()+5, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+6, 0xFF383936);
+
+                // middle pixels 0xFF222524
+                RenderUtil.drawRect(7, waterMarkOffset.getValue()+6, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+10.5f, 0xFF222524);
+
+                // bottom pixels 0XFF383838
+                RenderUtil.drawRect(7, waterMarkOffset.getValue()+10.5f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+12, 0xFF383936);
+
+                // rainbow (3-5 pixels)
+                RenderUtil.drawGradientRectHorizontal(7, waterMarkOffset.getValue()+12, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+14.5f, getColor(7, true), getColor((int) (Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 25), true));
+
+                // below rainbow 0xFF100E09
+                RenderUtil.drawRect(7, waterMarkOffset.getValue()+14.5f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+16.0f, 0xFF100E09);
+
+                // text rect 0xFF0C0C0C
+                RenderUtil.drawRect(7, waterMarkOffset.getValue()+16.0f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+26.0f, 0xFF0C0C0C);
+
+                skeetFont.drawString(skeetWatermarkText, 10, waterMarkOffset.getValue()+16, 0xFFFFFFFF);
+
+                //RenderUtil.drawRect(7, waterMarkOffset.getValue()+6, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 25, waterMarkOffset.getValue()+15, 0xFF211F20);
+                return;
+            }
             String drawingWatermark = "";
             switch((WatermarkType)watermarkTypeSetting.getValue()) {
                 case DACTYL_IE:

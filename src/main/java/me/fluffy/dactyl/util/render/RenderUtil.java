@@ -76,7 +76,7 @@ public class RenderUtil {
         GlStateManager.enableTexture2D();
     }
 
-    public static void drawGradientRectHorizontal(int left, int top, int right, int bottom, int startColor, int endColor) {
+    public static void drawGradientRectHorizontal(float left, float top, float right, float bottom, int startColor, int endColor) {
         float f = (float)(startColor >> 24 & 255) / 255.0F;
         float f1 = (float)(startColor >> 16 & 255) / 255.0F;
         float f2 = (float)(startColor >> 8 & 255) / 255.0F;
