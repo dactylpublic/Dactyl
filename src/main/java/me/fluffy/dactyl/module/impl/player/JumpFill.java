@@ -25,6 +25,7 @@ public class JumpFill extends Module {
     Setting<Priority> prioritySetting = new Setting<Priority>("Prio", Priority.OBI);
     //Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", false);
     //Setting<Integer> packetOffset = new Setting<Integer>("POffset", 5, 1, 100);
+    Setting<Integer> packetOffset = new Setting<Integer>("POffset", 5, 1, 100);
     Setting<Boolean> rotate = new Setting<Boolean>("Rotate", false);
     public static JumpFill INSTANCE;
     public JumpFill() {
@@ -77,12 +78,10 @@ public class JumpFill extends Module {
             double startY = mc.player.posY;
             double startZ = mc.player.posZ;
 
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.419997086886978, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7500029, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.9999942, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.170005801788139, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.1700203017881385, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.42, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.75, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.01, mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.16, mc.player.posZ, mc.player.onGround));
             BlockPos targetPos = new BlockPos(mc.player.getPositionVector()).add(0, 0, 0);
             int oldslot = isHoldingBlock ? blockSlot : mc.player.inventory.currentItem;
             int switchSlot = (isHoldingBlock ? blockSlot : CombatUtil.findBlockInHotbar(getBlockSetting()));
@@ -92,10 +91,7 @@ public class JumpFill extends Module {
                 this.disable();
                 return;
             }
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 1.242620301394748, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 2.340058003576277, mc.player.posZ, mc.player.onGround));
-            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY, mc.player.posZ, mc.player.onGround));
-            //mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + packetOffset.getValue(), mc.player.posZ, mc.player.onGround));
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + packetOffset.getValue(), mc.player.posZ, mc.player.onGround));
             if(switchSlot != 420) {
                 CombatUtil.switchToSlot(true, oldslot);
             }
