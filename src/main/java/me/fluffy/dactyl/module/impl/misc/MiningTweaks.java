@@ -21,6 +21,7 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
@@ -42,6 +43,7 @@ public class MiningTweaks extends Module {
     public Setting<Boolean> onlyPickaxe = new Setting<Boolean>("OnlyPickaxe", true, v->(modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS));
     public Setting<Boolean> reset = new Setting<Boolean>("Reset", true);
     public Setting<Boolean> autoSwitch = new Setting<Boolean>("AutoSwitch", true, v->modeSetting.getValue() == MiningMode.BYPASS);
+    public Setting<Boolean> silentSwitch = new Setting<Boolean>("SilentSwitch", true, v->modeSetting.getValue() == MiningMode.BYPASS && autoSwitch.getValue());
     public Setting<Boolean> switchBack = new Setting<Boolean>("SwitchBack", true, v->modeSetting.getValue() == MiningMode.BYPASS && autoSwitch.getValue());
     public Setting<Boolean> noBreakDelay = new Setting <Boolean>("AntiDelay", false);
     public Setting<Boolean> renderPacketBlock = new Setting<Boolean>("Render", true, v -> (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS));
@@ -62,9 +64,13 @@ public class MiningTweaks extends Module {
     public BlockPos currentPos = null;
     public IBlockState currentBlockState = null;
     private final TimeUtil timer = new TimeUtil();
+    private final TimeUtil switchTimer = new TimeUtil();
     private int lastInvSlot = 0;
     boolean placedBlock = false;
     public boolean isBlockDoneMining = false;
+    public boolean hasSwitched = false;
+    public boolean canSwitchBack = false;
+    public boolean hasSwitchedBack = false;
 
     @Override
     public void onClientUpdate() {
@@ -168,12 +174,53 @@ public class MiningTweaks extends Module {
         }
     }
 
+    private int findPickaxe() {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            if (mc.player.inventory.getStackInSlot(i) == ItemStack.EMPTY || (mc.player.inventory.getStackInSlot(i).getItem() instanceof ItemBlock)) {
+                continue;
+            }
+            if (mc.player.inventory.getStackInSlot(i).getItem() instanceof ItemPickaxe) {
+                slot = i;
+                break;
+            }
+        }
+        return slot;
+    }
+
+
     @Override
     public void onRender3D(Render3DEvent event) {
+        if((modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
+            if(findPickaxe() != -1) {
+                if (this.currentPos != null) {
+                    if (mc.player.inventory.currentItem != findPickaxe()) {
+                        if(autoSwitch.getValue()) {
+                            lastInvSlot = mc.player.inventory.currentItem;
+                            if(!silentSwitch.getValue() || !switchBack.getValue()) {
+                                mc.player.inventory.currentItem = findPickaxe();
+                            }
+                            mc.player.connection.sendPacket(new CPacketHeldItemChange(findPickaxe()));
+                            hasSwitchedBack = false;
+                        }
+                    }
+                } else {
+                    if(switchBack.getValue() && autoSwitch.getValue()) {
+                        if (!hasSwitchedBack && mc.player.inventory.currentItem == findPickaxe()) {
+                            mc.player.inventory.currentItem = lastInvSlot;
+                            mc.player.connection.sendPacket(new CPacketHeldItemChange(lastInvSlot));
+                            hasSwitchedBack = true;
+                        }
+                    }
+                }
+            }
+        }
         if (renderPacketBlock.getValue() && this.currentPos != null && (modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
             Color color = new Color(this.timer.hasPassed((int)(2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 0 : 255, this.timer.hasPassed((int) (2000.0f * (20F / Dactyl.tickRateManager.getTickRate()))) ? 255 : 0, 0, 255);
             if(this.timer.hasPassed((int) (2000.0f * (20F / Dactyl.tickRateManager.getTickRate())))) {
                 this.isBlockDoneMining = true;
+            } else {
+                switchTimer.reset();
             }
             if(!renderBreakProgress.getValue()) {
                 /**
@@ -261,10 +308,6 @@ public class MiningTweaks extends Module {
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(), event.getFacing()));
-                    if(autoSwitch.getValue()) {
-                        lastInvSlot = mc.player.inventory.currentItem;
-                        doAutoToolUse(event);
-                    }
                     mc.player.swingArm(EnumHand.MAIN_HAND);
                     event.setCanceled(true);
                     break;

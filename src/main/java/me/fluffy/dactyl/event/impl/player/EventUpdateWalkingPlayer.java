@@ -17,10 +17,12 @@ public class EventUpdateWalkingPlayer extends ForgeEvent {
 
     public void setYaw(float yaw) {
         this.yaw = yaw;
+        this.rotationUsed = true;
     }
 
     public void setPitch(float pitch) {
         this.pitch = pitch;
+        this.rotationUsed = true;
     }
 
     public float getYaw() {
