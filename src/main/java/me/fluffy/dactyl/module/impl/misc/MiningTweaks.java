@@ -193,7 +193,7 @@ public class MiningTweaks extends Module {
     public void onRender3D(Render3DEvent event) {
         if((modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
             if(switchBack.getValue() && autoSwitch.getValue()) {
-                if(this.currentPos == null) {
+                if(this.currentPos == null || switchTimer.hasPassed(500)) {
                     if (!hasSwitchedBack) {
                         mc.player.inventory.currentItem = lastInvSlot;
                         mc.player.connection.sendPacket(new CPacketHeldItemChange(lastInvSlot));
