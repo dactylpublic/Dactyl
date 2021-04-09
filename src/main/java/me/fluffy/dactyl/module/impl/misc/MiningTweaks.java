@@ -194,7 +194,7 @@ public class MiningTweaks extends Module {
         if((modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
             if(switchBack.getValue() && autoSwitch.getValue()) {
                 if(this.currentPos == null) {
-                    if (!hasSwitchedBack && mc.player.inventory.currentItem == findPickaxe()) {
+                    if (!hasSwitchedBack) {
                         mc.player.inventory.currentItem = lastInvSlot;
                         mc.player.connection.sendPacket(new CPacketHeldItemChange(lastInvSlot));
                         hasSwitchedBack = true;
@@ -340,7 +340,9 @@ public class MiningTweaks extends Module {
             }
         }
         if (bestSlot != -1) {
-            mc.player.inventory.currentItem = bestSlot;
+            if(!silent) {
+                mc.player.inventory.currentItem = bestSlot;
+            }
             int i = this.mc.player.inventory.currentItem;
             if (i != mc.playerController.currentPlayerItem) {
                 if(!silent) {
