@@ -343,6 +343,7 @@ public class MiningTweaks extends Module {
             if(!silent) {
                 mc.player.inventory.currentItem = bestSlot;
             }
+            mc.player.connection.sendPacket(new CPacketHeldItemChange(bestSlot));
             int i = this.mc.player.inventory.currentItem;
             if (i != mc.playerController.currentPlayerItem) {
                 if(!silent) {
