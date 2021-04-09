@@ -192,27 +192,12 @@ public class MiningTweaks extends Module {
     @Override
     public void onRender3D(Render3DEvent event) {
         if((modeSetting.getValue() == MiningMode.PACKET || modeSetting.getValue() == MiningMode.BYPASS)) {
-            if(findPickaxe() != -1) {
-                if (this.currentPos != null) {
-                    if (!hasSwitched && mc.player.inventory.currentItem != findPickaxe()) {
-                        if(autoSwitch.getValue()) {
-                            lastInvSlot = mc.player.inventory.currentItem;
-                            if(!silentSwitch.getValue() || !switchBack.getValue()) {
-                                mc.player.inventory.currentItem = findPickaxe();
-                            }
-                            mc.player.connection.sendPacket(new CPacketHeldItemChange(findPickaxe()));
-                            hasSwitchedBack = false;
-                            hasSwitched = true;
-                        }
-                    }
-                } else {
-                    if(switchBack.getValue() && autoSwitch.getValue()) {
-                        if (hasSwitched && !hasSwitchedBack && mc.player.inventory.currentItem == findPickaxe()) {
-                            mc.player.inventory.currentItem = lastInvSlot;
-                            mc.player.connection.sendPacket(new CPacketHeldItemChange(lastInvSlot));
-                            hasSwitchedBack = true;
-                            hasSwitched = false;
-                        }
+            if(switchBack.getValue() && autoSwitch.getValue()) {
+                if(this.currentPos == null) {
+                    if (!hasSwitchedBack && mc.player.inventory.currentItem == findPickaxe()) {
+                        mc.player.inventory.currentItem = lastInvSlot;
+                        mc.player.connection.sendPacket(new CPacketHeldItemChange(lastInvSlot));
+                        hasSwitchedBack = true;
                     }
                 }
             }
@@ -310,6 +295,11 @@ public class MiningTweaks extends Module {
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, event.getPos(), event.getFacing()));
                     mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(), event.getFacing()));
+                    if(autoSwitch.getValue()) {
+                        lastInvSlot = mc.player.inventory.currentItem;
+                        doAutoToolUseNew(event, silentSwitch.getValue());
+                        hasSwitchedBack = false;
+                    }
                     mc.player.swingArm(EnumHand.MAIN_HAND);
                     event.setCanceled(true);
                     break;
@@ -331,6 +321,33 @@ public class MiningTweaks extends Module {
         }
         if(autoTool.getValue()) {
             doAutoToolClick(event);
+        }
+    }
+    private void doAutoToolUseNew(DamageBlockEvent event, boolean silent) {
+        int bestSlot = -1;
+        double max = 0;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack.isEmpty()) continue;
+            float speed = stack.getDestroySpeed(mc.world.getBlockState(event.getPos()));
+            int eff;
+            if (speed > 1) {
+                speed += ((eff = EnchantmentHelper.getEnchantmentLevel(Enchantments.EFFICIENCY, stack)) > 0 ? (Math.pow(eff, 2) + 1) : 0);
+                if (speed > max) {
+                    max = speed;
+                    bestSlot = i;
+                }
+            }
+        }
+        if (bestSlot != -1) {
+            mc.player.inventory.currentItem = bestSlot;
+            int i = this.mc.player.inventory.currentItem;
+            if (i != mc.playerController.currentPlayerItem) {
+                if(!silent) {
+                    mc.playerController.currentPlayerItem = i;
+                }
+                mc.playerController.connection.sendPacket(new CPacketHeldItemChange(mc.playerController.currentPlayerItem));
+            }
         }
     }
 
