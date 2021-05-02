@@ -88,7 +88,8 @@ public class BetaCrystal extends Module {
 
     // general
     public Setting<YawStepEnum> yawStepEnum = new Setting<YawStepEnum>("YawStep", YawStepEnum.BOTH, v->isViewGeneral());
-    public Setting<Integer> yawStep = new Setting<Integer>("StepAmount", 55, 1, 180, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
+    public Setting<Integer> yawStep = new Setting<Integer>("StepAmount", 55, 5, 180, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
+    public Setting<Integer> stepTicks = new Setting<Integer>("StepTicks", 1, 1, 20, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
     public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v->isViewGeneral());
     public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
     public Setting<Boolean> multiPointRotations = new Setting<Boolean>("PointRotations", false, v->isViewGeneral());
@@ -120,6 +121,9 @@ public class BetaCrystal extends Module {
 
     private final ArrayList<AttackedCrystal> attackedCrystals = new ArrayList<>();
     private final Set<BlockPos> placedCrystals = new HashSet<>();
+
+    private int breakStepTicks = 0;
+    private int placeStepTicks = 0;
 
     private float yaw;
     private float pitch;
@@ -198,8 +202,12 @@ public class BetaCrystal extends Module {
                 float yawDiff = (float) MathHelper.wrapDegrees(relativeYaw - mc.player.lastReportedYaw);
                 boolean finishedStep = true;
                 float currentSteppedYaw = 0f;
+                breakStepTicks++;
                 if (Math.abs(yawDiff) > yawStep.getValue().floatValue() && !(lastSteppedBreak == relativeYaw || lastSteppedPlace == relativeYaw)) {
-                    relativeYaw = (float) (mc.player.lastReportedYaw + (yawDiff * ((yawStep.getValue()) / Math.abs(yawDiff))));
+                    if(breakStepTicks >= stepTicks.getValue()) {
+                        relativeYaw = (float) (mc.player.lastReportedYaw + (yawDiff * ((yawStep.getValue()) / Math.abs(yawDiff))));
+                        breakStepTicks = 0;
+                    }
                     finishedStep = false;
                 }
                 if(lastSteppedBreak == relativeYaw || (lastSteppedPlace == relativeYaw)) {
@@ -331,8 +339,12 @@ public class BetaCrystal extends Module {
                     float yawDiff = (float) MathHelper.wrapDegrees(relativeYaw - mc.player.lastReportedYaw);
                     boolean finishedStep = true;
                     float currentSteppedYaw = 0f;
+                    placeStepTicks++;
                     if (Math.abs(yawDiff) > yawStep.getValue().floatValue() && !(lastSteppedPlace == relativeYaw)) {
-                        relativeYaw = (float) (mc.player.lastReportedYaw + (yawDiff * ((yawStep.getValue()) / Math.abs(yawDiff))));
+                        if(placeStepTicks >= stepTicks.getValue()) {
+                            relativeYaw = (float) (mc.player.lastReportedYaw + (yawDiff * ((yawStep.getValue()) / Math.abs(yawDiff))));
+                            placeStepTicks = 0;
+                        }
                         finishedStep = false;
                     }
                     if(lastSteppedPlace == relativeYaw) {
@@ -794,6 +806,7 @@ public class BetaCrystal extends Module {
         isRotatingBreak = false;
         isRotatingPlace = false;
         isRotatingUpdates = false;
+        breakStepTicks = placeStepTicks = 0;
         breakTimer.reset();
         checkTimer.reset();
         attackedCrystals.clear();
