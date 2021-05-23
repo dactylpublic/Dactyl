@@ -52,6 +52,7 @@ public class ModuleManager {
         modules.add(new PacketFly());
         modules.add(new AutoDupe());
         modules.add(new BypassCrystal());
+        modules.add(new FeetString());
 
         // misc
         modules.add(new FakePlayer());
