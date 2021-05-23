@@ -35,6 +35,10 @@ public class TotemManager {
         return poppedUsers.containsKey(user);
     }
 
+    public boolean hasPops(String user) {
+        return poppedUsers.get(user) != null;
+    }
+
     public int getPops(String user) {
         if(poppedUsers.get(user) != null) {
             return poppedUsers.get(user);

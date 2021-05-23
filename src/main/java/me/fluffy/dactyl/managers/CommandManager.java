@@ -23,6 +23,7 @@ public class CommandManager {
         commandList.add(new GrabCommand());
         commandList.add(new CreateKitCommand());
         commandList.add(new SelectKitCommand());
+        commandList.add(new ClearPopsCommand());
     }
 
     public List<Command> getCommandList() {
