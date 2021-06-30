@@ -53,6 +53,7 @@ public class ModuleManager {
         modules.add(new AutoDupe());
         modules.add(new BypassCrystal());
         modules.add(new FeetString());
+        modules.add(new Nuker());
 
         // misc
         modules.add(new FakePlayer());
