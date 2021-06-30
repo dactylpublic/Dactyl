@@ -121,6 +121,7 @@ public class ModuleManager {
         modules.add(new Colors());
         modules.add(new Components());
         modules.add(new Media());
+        modules.add(new Crasher());
 
         setup();
     }
