@@ -26,6 +26,7 @@ public class Surround extends Module {
     public Setting<Boolean> strafeDisable = new Setting<Boolean>("StrafeDisable", true);
     public Setting<Boolean> stepDisable = new Setting<Boolean>("StepDisable", true);
     public Setting<Boolean> autoDisable = new Setting<Boolean>("AutoDisable", false);
+    public Setting<Boolean> ignoreCrystal = new Setting<Boolean>("IgnoreCrystal", true);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
 
@@ -115,7 +116,7 @@ public class Surround extends Module {
             //Vec3d offset = CombatUtil.protectionoffsets[this.offsetStep];
             BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
             this.lastHotbarSlot = obi;
-            CombatUtil.placeBlock(placePosition, false, rotate.getValue(), true, true, allowEating.getValue(), obi);
+            CombatUtil.placeBlockSurround(placePosition, false, rotate.getValue(), true, true, allowEating.getValue(), obi, ignoreCrystal.getValue());
             this.offsetStep++;
             /*if (this.offsetStep >= CombatUtil.protectionoffsets.length) {
                 endLoop();

@@ -1,6 +1,7 @@
 package me.fluffy.dactyl;
 
 import me.fluffy.dactyl.config.Configuration;
+import me.fluffy.dactyl.config.NukerManager;
 import me.fluffy.dactyl.config.XRayManager;
 import me.fluffy.dactyl.config.friends.FriendManager;
 import me.fluffy.dactyl.gui.ClickGUI;
@@ -18,7 +19,7 @@ import org.lwjgl.opengl.Display;
 public class Dactyl {
     public static final String MODID = "dactyl";
     public static final String NAME = "Dactyl";
-    public static final String VERSION = "v1.6.2";
+    public static final String VERSION = "v1.6.3";
 
     public static Logger logger;
 
@@ -34,6 +35,7 @@ public class Dactyl {
     public static TickRateManager tickRateManager;
     public static TotemManager totemManager;
     public static XRayManager xRayManager;
+    public static NukerManager nukerManager;
 
     @Mod.EventHandler
     public void preInitialization(FMLPreInitializationEvent event) {
@@ -53,6 +55,7 @@ public class Dactyl {
         tickRateManager = new TickRateManager();
         totemManager = new TotemManager();
         xRayManager = new XRayManager();
+        nukerManager = new NukerManager();
     }
 
     @Mod.EventHandler
@@ -64,6 +67,7 @@ public class Dactyl {
         try {
             friendManager.save();
             xRayManager.save();
+            nukerManager.save();
             Configuration.save("", true);
         } catch(Exception exception) {
             exception.printStackTrace();

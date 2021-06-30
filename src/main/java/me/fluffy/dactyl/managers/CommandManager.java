@@ -24,6 +24,7 @@ public class CommandManager {
         commandList.add(new CreateKitCommand());
         commandList.add(new SelectKitCommand());
         commandList.add(new ClearPopsCommand());
+        commandList.add(new NukerBlocksCommand());
     }
 
     public List<Command> getCommandList() {

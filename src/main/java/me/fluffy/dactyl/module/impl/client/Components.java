@@ -26,6 +26,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.text.TextFormatting;
 
 import java.awt.*;
@@ -56,6 +57,12 @@ public class Components extends Module {
     public Setting<String> pvpInfoX = new Setting<String>("PvPX", "1", v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
     public Setting<String> pvpInfoY = new Setting<String>("PvPY", "50", v->pvpInfo.getValue()&&page.getValue()==AddonPage.PVPINFO);
 
+    // chest counter
+    public Setting<Boolean> chestCounterOption = new Setting<Boolean>("C-Counter", false, v->page.getValue()==AddonPage.CHESTCOUNTER);
+    public Setting<Boolean> doubleChestCounter = new Setting<Boolean>("Double-Cs", true,  v->chestCounterOption.getValue()&&page.getValue()==AddonPage.CHESTCOUNTER);
+    public Setting<String> chestX = new Setting<String>("ChestX", "1", v->chestCounterOption.getValue()&&page.getValue()==AddonPage.CHESTCOUNTER);
+    public Setting<String> chestY = new Setting<String>("ChestY", "80", v->chestCounterOption.getValue()&&page.getValue()==AddonPage.CHESTCOUNTER);
+
     public Components() {
         super("Addons", Category.CLIENT, true);
     }
@@ -67,6 +74,25 @@ public class Components extends Module {
         }
         doTargetHud();
         doPvPInfo();
+        doChestCounter();
+    }
+
+    private void doChestCounter() {
+        if(!chestCounterOption.getValue()) {
+            return;
+        }
+        int setX = convertString(chestX.getValue());
+        int setY = convertString(chestY.getValue());
+        Dactyl.fontUtil.drawStringWithShadow("Chests: " + getChestCount(), setX, setY, Colors.INSTANCE.getColor(setY, false));
+        if(doubleChestCounter.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow("Dubs: " + Math.floor(getChestCount() / 2), setX, setY+10, Colors.INSTANCE.getColor(setY+10, false));
+        }
+    }
+
+    private int getChestCount() {
+        long chest = mc.world.loadedTileEntityList.stream()
+                .filter(e -> e instanceof TileEntityChest).count();
+        return (int) chest;
     }
 
     private void doPvPInfo() {
@@ -313,6 +339,7 @@ public class Components extends Module {
 
     public enum AddonPage {
         TARGETHUD("THud"),
+        CHESTCOUNTER("C-Counter"),
         PVPINFO("PvP");
 
         private final String name;
