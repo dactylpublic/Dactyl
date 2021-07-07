@@ -53,21 +53,74 @@ public class CombatUtil {
 
     public static final Vec3d[] protectionoffsets = new Vec3d[] {new Vec3d(0.0D, 0.0D, 0.0D), new Vec3d(1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, 1.0D), new Vec3d(-1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, -1.0D), new Vec3d(1.0D, 0.0D, 0.0D), new Vec3d(0.0D, 0.0D, 1.0D), new Vec3d(-1.0D, 0.0D, 0.0D), new Vec3d(0.0D, 0.0D, -1.0D), new Vec3d(1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, 1.0D), new Vec3d(-1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, -1.0D)};
 
+    public static final Vec3d[] protectionoffsetsOnChest = new Vec3d[] {new Vec3d(1.0D, 0.0D, 0.0D), new Vec3d(-1.0D, 0.0D, 0.0D), new Vec3d(0.0D, 0.0D, 1.0D), new Vec3d(0.0D, 0.0D, -1.0D), new Vec3d(1.0D, 1.0D, 0.0D), new Vec3d(-1.0D, 1.0D, 0.0D), new Vec3d(0.0D, 1.0D, 1.0D), new Vec3d(0.0D, 1.0D, -1.0D)};
+
+
+
     public static final BlockPos[] surroundOffset = new BlockPos[] {new BlockPos(0, -1, 0), new BlockPos(0, 0, -1), new BlockPos(1, 0, 0), new BlockPos(0, 0, 1), new BlockPos(-1, 0, 0)};
 
     public static ArrayList<Vec3d> getProtectionOffsets() {
         ArrayList<Vec3d> vec3dArrayList = new ArrayList<>();
         BlockPos basePos = (new BlockPos(mc.player.getPositionVector())).down();
 
-        for(int i = 0; i < protectionoffsets.length; i++) {
-            Vec3d offset = CombatUtil.protectionoffsets[i];
-            BlockPos placePosition = new BlockPos(basePos.add(offset.x, offset.y, offset.z));
-            if(checkCanPlace(placePosition)) {
-                vec3dArrayList.add(offset);
+        if(isChestBelow()) {
+            for (int i = 0; i < protectionoffsetsOnChest.length; i++) {
+                Vec3d offset = protectionoffsetsOnChest[i];
+                BlockPos placePosition = new BlockPos(basePos.add(offset.x, offset.y, offset.z));
+                if (checkCanPlace(placePosition)) {
+                    vec3dArrayList.add(offset);
+                }
+            }
+        } else {
+            for (int i = 0; i < protectionoffsets.length; i++) {
+                Vec3d offset = CombatUtil.protectionoffsets[i];
+                BlockPos placePosition = new BlockPos(basePos.add(offset.x, offset.y, offset.z));
+                if (checkCanPlace(placePosition)) {
+                    vec3dArrayList.add(offset);
+                }
             }
         }
 
         return vec3dArrayList;
+    }
+
+    public static ArrayList<Vec3d> getProtectionOffsetsNew(boolean antiCrystal) {
+        ArrayList<Vec3d> vec3dArrayList = new ArrayList<>();
+        BlockPos basePos = (new BlockPos(mc.player.getPositionVector())).down();
+
+        if(isChestBelow()) {
+            for (int i = 0; i < protectionoffsetsOnChest.length; i++) {
+                Vec3d offset = protectionoffsetsOnChest[i];
+                BlockPos placePosition = new BlockPos(basePos.add(offset.x, offset.y, offset.z));
+                if (checkCanPlaceSurround(placePosition, antiCrystal)) {
+                    vec3dArrayList.add(offset);
+                }
+            }
+        } else {
+            for (int i = 0; i < protectionoffsets.length; i++) {
+                Vec3d offset = CombatUtil.protectionoffsets[i];
+                BlockPos placePosition = new BlockPos(basePos.add(offset.x, offset.y, offset.z));
+                if (checkCanPlaceSurround(placePosition, antiCrystal)) {
+                    vec3dArrayList.add(offset);
+                }
+            }
+        }
+
+        return vec3dArrayList;
+    }
+
+    private static boolean isChestBelow() {
+        return (!isBurrow() && isOnChest(mc.player));
+    }
+
+    public static boolean isOnChest(Entity entity) {
+        BlockPos blockPos = new BlockPos(entity.posX, entity.posY, entity.posZ);
+        return (mc.world.getBlockState(blockPos).getBlock().equals(Blocks.OBSIDIAN) || mc.world.getBlockState(blockPos).getBlock().equals(Blocks.ENDER_CHEST));
+    }
+
+    public static boolean isBurrow() {
+        Block block = mc.world.getBlockState(new BlockPos(mc.player.getPositionVector().add(0.0D, 0.2D, 0.0D))).getBlock();
+        return (block == Blocks.OBSIDIAN || block == Blocks.ENDER_CHEST);
     }
 
     public static BlockPos flooredPos() {
@@ -418,7 +471,7 @@ public class CombatUtil {
         return new Vec3d(entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * mc.getRenderPartialTicks(), entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * mc.getRenderPartialTicks(), entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * mc.getRenderPartialTicks());
     }
 
-    public static int findSurroundBlock(boolean ehcestPriority) {
+    public static int findSurroundBlockOld(boolean ehcestPriority) {
         int slot = -1;
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.inventory.getStackInSlot(i);
@@ -446,6 +499,37 @@ public class CombatUtil {
             }
         }
         return slot;
+    }
+
+    public static int findSurroundBlock(boolean holdingEchest) {
+        int slot = -1;
+        if(holdingEchest) {
+            return mc.player.inventory.currentItem;
+        } else {
+            for (int i = 0; i < 9; i++) {
+                ItemStack stack = mc.player.inventory.getStackInSlot(i);
+                if (stack != ItemStack.EMPTY && stack.getItem() instanceof ItemBlock) {
+                    Block block = ((ItemBlock) stack.getItem()).getBlock();
+                    if (block == Blocks.OBSIDIAN) {
+                        slot = i;
+                        break;
+                    }
+                }
+            }
+            if(slot == -1) {
+                for (int i = 0; i < 9; i++) {
+                    ItemStack stack = mc.player.inventory.getStackInSlot(i);
+                    if (stack != ItemStack.EMPTY && stack.getItem() instanceof ItemBlock) {
+                        Block block = ((ItemBlock) stack.getItem()).getBlock();
+                        if (block == Blocks.ENDER_CHEST) {
+                            slot = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            return slot;
+        }
     }
 
     public static int findBlockInHotbar(Block bc) {
@@ -575,6 +659,64 @@ public class CombatUtil {
         }
         return true;
     }
+
+    public static boolean placeBlockSurroundNew(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetRotate, boolean doSwitch, boolean silentSwitch, int toSwitch, boolean packetPlace, boolean changeRightClickDelay, boolean multiPointRotate) {
+        if(!checkCanPlace(blockPos)) {
+            return false;
+        }
+
+        EnumFacing placeSide = getPlaceSide(blockPos);
+        BlockPos adjacentBlock = blockPos.offset(placeSide);
+        EnumFacing opposingSide = placeSide.getOpposite();
+        if(!mc.world.getBlockState(adjacentBlock).getBlock().canCollideCheck(mc.world.getBlockState(adjacentBlock), false)) {
+            return false;
+        }
+        if(doSwitch) {
+            if(!offhand) {
+                if (silentSwitch) {
+                    mc.player.connection.sendPacket(new CPacketHeldItemChange(toSwitch));
+                } else {
+                    if (mc.player.inventory.currentItem != toSwitch) {
+                        mc.player.inventory.currentItem = toSwitch;
+                    }
+                }
+            }
+        }
+        boolean isSneak = false;
+        if(blackList.contains(mc.world.getBlockState(adjacentBlock).getBlock()) || shulkerList.contains(mc.world.getBlockState(adjacentBlock).getBlock())) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+            isSneak = true;
+        }
+        Vec3d hitVector = getHitVector(adjacentBlock, opposingSide);
+        if(rotate) {
+            if(multiPointRotate) {
+                final double[] angle = calculateLookAtBlock(blockPos);
+                mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float)angle[0], (float)angle[1], mc.player.onGround));
+            } else {
+                final float[] angle = getLegitRotations(hitVector);
+                mc.player.connection.sendPacket(new CPacketPlayer.Rotation(angle[0], angle[1], mc.player.onGround));
+            }
+        }
+
+        EnumHand actionHand = offhand ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+        if(packetPlace) {
+            float f = (float)(hitVector.x - adjacentBlock.getX());
+            float f1 = (float)(hitVector.y - adjacentBlock.getY());
+            float f2 = (float)(hitVector.z - adjacentBlock.getZ());
+            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(adjacentBlock, opposingSide, actionHand, f, f1, f2));
+        } else {
+            mc.playerController.processRightClickBlock(mc.player, mc.world, adjacentBlock, opposingSide, hitVector, actionHand);
+        }
+        mc.player.connection.sendPacket(new CPacketAnimation(actionHand));
+        if(isSneak) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+        }
+        if(changeRightClickDelay) {
+            mc.rightClickDelayTimer = 4;
+        }
+        return true;
+    }
+
 
     public static boolean placeBlockSurround(BlockPos blockPos, boolean offhand, boolean rotate, boolean packetRotate, boolean doSwitch, boolean silentSwitch, int toSwitch, boolean ignoreCrystal) {
         if(!checkCanPlaceSurround(blockPos, ignoreCrystal)) {
@@ -793,6 +935,33 @@ public class CombatUtil {
         }
         for (Entity entity : mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(pos))) {
             if (!(entity instanceof EntityItem) && !(entity instanceof EntityXPOrb) && !(entity instanceof EntityArrow) && (ignoreCrystal && !(entity instanceof EntityEnderCrystal))) {
+                return false;
+            }
+        }
+        return getPlaceSide(pos) != null;
+    }
+
+    public static EntityEnderCrystal getAntiCrystalable(BlockPos pos) {
+        if (!(mc.world.getBlockState(pos).getBlock() instanceof BlockAir) && !(mc.world.getBlockState(pos).getBlock() instanceof BlockLiquid)) {
+            return null;
+        }
+        for (Entity entity : mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(pos))) {
+            if(entity instanceof EntityEnderCrystal) {
+                return (EntityEnderCrystal)entity;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isAntiCrystalable(BlockPos pos) {
+        if (!(mc.world.getBlockState(pos).getBlock() instanceof BlockAir) && !(mc.world.getBlockState(pos).getBlock() instanceof BlockLiquid)) {
+            return false;
+        }
+        for (Entity entity : mc.world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(pos))) {
+            if(entity instanceof EntityEnderCrystal) {
+                return true;
+            }
+            if (!(entity instanceof EntityItem) && !(entity instanceof EntityXPOrb) && !(entity instanceof EntityArrow)) {
                 return false;
             }
         }

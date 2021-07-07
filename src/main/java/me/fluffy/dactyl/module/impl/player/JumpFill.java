@@ -1,10 +1,6 @@
 package me.fluffy.dactyl.module.impl.player;
 
-import me.fluffy.dactyl.event.impl.network.PacketEvent;
-import me.fluffy.dactyl.injection.inj.access.IMinecraft;
-import me.fluffy.dactyl.injection.inj.access.ITimer;
 import me.fluffy.dactyl.module.Module;
-import me.fluffy.dactyl.module.impl.combat.Surround;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.TimeUtil;
@@ -12,19 +8,12 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPacketConfirmTeleport;
-import net.minecraft.network.play.client.CPacketEntityAction;
-import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class JumpFill extends Module {
-    Setting<Priority> prioritySetting = new Setting<Priority>("Prio", Priority.OBI);
-    //Setting<Boolean> packetSwitch = new Setting<Boolean>("PacketSwitch", false);
-    //Setting<Integer> packetOffset = new Setting<Integer>("POffset", 5, 1, 100);
+    Setting<Boolean> onlyEchest = new Setting<Boolean>("OnlyEChest", false);
+    Setting<Priority> prioritySetting = new Setting<Priority>("Prio", Priority.OBI, v->!onlyEchest.getValue());
     Setting<Integer> packetOffset = new Setting<Integer>("POffset", 5, 1, 100);
     Setting<Boolean> rotate = new Setting<Boolean>("Rotate", false);
     public static JumpFill INSTANCE;
@@ -108,6 +97,9 @@ public class JumpFill extends Module {
     private Block getBlockSetting() {
         if(mc.player.getHeldItemMainhand() != ItemStack.EMPTY && mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock) {
             return Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem());
+        }
+        if(onlyEchest.getValue()) {
+            return Blocks.ENDER_CHEST;
         }
         switch(prioritySetting.getValue()) {
             case OBI:

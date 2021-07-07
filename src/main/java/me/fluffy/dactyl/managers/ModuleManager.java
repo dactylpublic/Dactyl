@@ -26,13 +26,13 @@ public class ModuleManager {
         modules.add(new Killaura());
         modules.add(new Criticals());
         modules.add(new AutoTrap());
-        modules.add(new Surround());
         modules.add(new SelfTrap());
         modules.add(new AutoArmor());
         modules.add(new HoleFill());
         modules.add(new CrystalBomber());
         modules.add(new BetaCrystal());
         modules.add(new AutoHoleMine());
+        modules.add(new Surround());
         //modules.add(new Auto32k());
 
         // player

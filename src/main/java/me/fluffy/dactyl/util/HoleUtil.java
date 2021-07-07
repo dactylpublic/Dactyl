@@ -2,6 +2,7 @@ package me.fluffy.dactyl.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -13,6 +14,19 @@ public class HoleUtil {
     public static final List<BlockPos> surrounded = Arrays.asList(new BlockPos(0, 0, -1), new BlockPos(-1, 0, 0), new BlockPos(1, 0, 0), new BlockPos(0, 0, 1));
 
     private static Minecraft mc = Minecraft.getMinecraft();
+
+    public static boolean isInAnyHole() {
+        Vec3d playerPos = CombatUtil.interpolateEntity(mc.player);
+        BlockPos blockpos = new BlockPos(playerPos.x, playerPos.y, playerPos.z);
+        int size = 0;
+        for(BlockPos bPos : holeBlocks) {
+            if(mc.world.getBlockState(blockpos.add(bPos)) != null && mc.world.getBlockState(blockpos.add(bPos)).getBlock() != null && mc.world.getBlockState(blockpos.add(bPos)).getBlock() != Blocks.AIR && mc.world.getBlockState(blockpos.add(bPos)).getBlock() != Blocks.LAVA && mc.world.getBlockState(blockpos.add(bPos)).getBlock() != Blocks.FLOWING_LAVA && mc.world.getBlockState(blockpos.add(bPos)).getBlock() != Blocks.FLOWING_WATER && mc.world.getBlockState(blockpos.add(bPos)).getBlock() != Blocks.WATER) {
+                size++;
+            }
+        }
+        return (size == 5);
+    }
+
     public static boolean isInHole() {
         Vec3d playerPos = CombatUtil.interpolateEntity(mc.player);
         BlockPos blockpos = new BlockPos(playerPos.x, playerPos.y, playerPos.z);
