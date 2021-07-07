@@ -45,7 +45,7 @@ public class Nametags extends Module {
     Setting<Boolean> totemPops = new Setting<Boolean>("TotemPops", true);
     Setting<Boolean> shortEnchants = new Setting<Boolean>("Enchants", true);
     Setting<Integer> scaling = new Setting<Integer>("Scaling", 3, 1, 5);
-    Setting<Boolean> border = new Setting<Boolean>("Border", true);
+    static Setting<Boolean> border = new Setting<Boolean>("Colors", true);
     Setting<Double> borderWidth = new Setting<Double>("BorderWidth", 1.0d, 0.1d, 3.0d, v->border.getValue());
 
     public static Nametags INSTANCE;
@@ -231,6 +231,9 @@ public class Nametags extends Module {
         }
         disableGL2D();
         GL11.glPopMatrix();*/
+        if(!border.getValue()) {
+            return;
+        }
         float alpha = (borderColor >> 24 & 255) / 255.0F;
         float red = (borderColor >> 16 & 255) / 255.0F;
         float green = (borderColor >> 8 & 255) / 255.0F;
