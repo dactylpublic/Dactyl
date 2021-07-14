@@ -25,6 +25,12 @@ public class MathUtil {
         return new BigDecimal(value).setScale(places, RoundingMode.HALF_UP).doubleValue();
     }
 
+    public static float roundFloat(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd.floatValue();
+    }
+
     public static double square(double a) {
         return a * a;
     }

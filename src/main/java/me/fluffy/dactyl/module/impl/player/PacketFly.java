@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.module.impl.player;
 
 import io.netty.util.internal.ConcurrentSet;
+import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.event.ForgeEvent;
 import me.fluffy.dactyl.event.impl.network.PacketEvent;
 import me.fluffy.dactyl.event.impl.player.EventUpdateWalkingPlayer;
@@ -8,14 +9,18 @@ import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.event.impl.world.SetOpaqueCubeEvent;
 import me.fluffy.dactyl.injection.inj.access.ISPacketPlayerPosLook;
 import me.fluffy.dactyl.module.Module;
+import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.ChatUtil;
+import me.fluffy.dactyl.util.MathUtil;
 import net.minecraft.client.gui.GuiDownloadTerrain;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
+import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.event.PlayerSPPushOutOfBlocksEvent;
@@ -33,6 +38,8 @@ public class PacketFly extends Module {
     public Setting<Double> tickCountFly = new Setting<Double>("Factor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
+    public Setting<Boolean> frequency = new Setting<Boolean>("Frequency", false);
+    public Setting<Boolean> debugMode = new Setting<Boolean>("Debug", false);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
     public PacketFly() {
         super("PacketFly", Category.PLAYER);
@@ -41,6 +48,13 @@ public class PacketFly extends Module {
     private int packetCounter = 0;
     private int currentTeleportId = 0;
     private int bypassCounter = 0;
+    private int frequencyTick = 0;
+    private float lastYaw, lastPitch;
+
+    private float debugVal1 = 0f;
+    private float debugVal2 = 0f;
+    private float debugVal3 = 0f;
+
     private final Map<Integer, TimeVec3d> posLooks = new ConcurrentHashMap<Integer, TimeVec3d>();
     private final Set<CPacketPlayer> playerPackets = new ConcurrentSet<>();
 
@@ -131,6 +145,18 @@ public class PacketFly extends Module {
         }
     }
 
+    @Override
+    public void onScreen() {
+        if(mc.player == null) {
+            return;
+        }
+        if(debugMode.getValue()) {
+            Dactyl.fontUtil.drawStringWithShadow("Current Packet Yaw: " + String.valueOf(debugVal1), 1, 30, Colors.INSTANCE.getColor(30, false));
+            Dactyl.fontUtil.drawStringWithShadow("Current Packet Yaw Divided: " + String.valueOf(debugVal2), 1, 40, Colors.INSTANCE.getColor(40, false));
+            Dactyl.fontUtil.drawStringWithShadow("Last Packet Yaw: " + String.valueOf(debugVal3), 1, 50, Colors.INSTANCE.getColor(50, false));
+        }
+    }
+
     @SubscribeEvent
     public void onPacket(PacketEvent event) {
         if(event.getType() == PacketEvent.PacketType.OUTGOING) {
@@ -147,7 +173,22 @@ public class PacketFly extends Module {
                 SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook)event.getPacket();
                 if (mc.player.isEntityAlive()) {
                     TimeVec3d posVec;
-                    if (mc.world.isBlockLoaded(new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ), false) && !(mc.currentScreen instanceof GuiDownloadTerrain) && !(mode.getValue().equals(Mode.SETBACK)) && (posVec = (TimeVec3d) posLooks.remove(sPacketPlayerPosLook.getTeleportId())) != null && posVec.x == sPacketPlayerPosLook.getX() && posVec.y == sPacketPlayerPosLook.getY() && posVec.z == sPacketPlayerPosLook.getZ()) {
+                    float dividedYaw = MathUtil.roundFloat(sPacketPlayerPosLook.getYaw() / 2, 2);
+                    float lastValidYaw = MathUtil.roundFloat(lastYaw, 2);
+
+                    debugVal1 = MathUtil.roundFloat(sPacketPlayerPosLook.getYaw(), 2);
+                    debugVal2 = dividedYaw;
+                    debugVal3 = lastValidYaw;
+
+                    boolean isNormalPacket = (mc.world.isBlockLoaded(new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ), false) && !(mc.currentScreen instanceof GuiDownloadTerrain) && !(mode.getValue().equals(Mode.SETBACK)) && (posVec = (TimeVec3d) posLooks.remove(sPacketPlayerPosLook.getTeleportId())) != null && posVec.x == sPacketPlayerPosLook.getX() && posVec.y == sPacketPlayerPosLook.getY() && posVec.z == sPacketPlayerPosLook.getZ());
+                    // lol nice pay to win patch 0x22 and bullet
+                    frequencyTick++;
+                    boolean isFrequencyPacket = (frequency.getValue() && sPacketPlayerPosLook.getYaw() == 0.0f);
+                    if(isFrequencyPacket && !((posVec = (TimeVec3d) posLooks.remove(sPacketPlayerPosLook.getTeleportId())) != null && posVec.x == sPacketPlayerPosLook.getX() && posVec.y == sPacketPlayerPosLook.getY() && posVec.z == sPacketPlayerPosLook.getZ())) {
+                        event.setCanceled(true);
+                        return;
+                    }
+                    if (isNormalPacket) {
                         event.setCanceled(true);
                         return;
                     }
@@ -155,6 +196,7 @@ public class PacketFly extends Module {
                 ((ISPacketPlayerPosLook)sPacketPlayerPosLook).setYaw(mc.player.rotationYaw);
                 ((ISPacketPlayerPosLook)sPacketPlayerPosLook).setPitch(mc.player.rotationPitch);
                 this.currentTeleportId = sPacketPlayerPosLook.getTeleportId();
+                this.lastYaw = sPacketPlayerPosLook.getYaw();
             }
         }
     }
@@ -207,6 +249,7 @@ public class PacketFly extends Module {
         this.packetCounter = 0;
         this.bypassCounter = 0;
         this.currentTeleportId = 0;
+        this.frequencyTick = 0;
         this.playerPackets.clear();
         this.posLooks.clear();
     }
