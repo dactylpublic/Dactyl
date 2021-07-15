@@ -1,10 +1,12 @@
 package me.fluffy.dactyl.module.impl.render;
 
 import me.fluffy.dactyl.event.impl.world.Render3DEvent;
+import me.fluffy.dactyl.injection.inj.access.IEntityRenderer;
 import me.fluffy.dactyl.injection.inj.access.IRenderManager;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.client.Colors;
 import me.fluffy.dactyl.setting.Setting;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityEnderPearl;
@@ -44,15 +46,15 @@ public class PearlTrails extends Module {
         if(mc.world == null || mc.player == null) {
             return;
         }
-        for (Map.Entry<Integer, EntityRenderVec> entry : locs.entrySet()) {
-            GL11.glPushMatrix();
-            GL11.glLineWidth(width.getValue().floatValue());
+        /*for (Map.Entry<Integer, EntityRenderVec> entry : locs.entrySet()) {
             GL11.glDisable(2929);
             GL11.glDisable(3553);
             GL11.glColor3d(1.0D, 1.0D, 1.0D);
             GL11.glEnable(2848);
             GL11.glEnable(3042);
             GL11.glBlendFunc(770, 771);
+            GL11.glPushMatrix();
+            GL11.glLineWidth(width.getValue().floatValue());
             GL11.glBegin(3);
             if(!gradient.getValue()) {
                 Color currentColor = (colorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(red.getValue(), green.getValue(), blue.getValue()));
@@ -65,11 +67,40 @@ public class PearlTrails extends Module {
                 GL11.glVertex3d(entityLineLoc.vector3d.x - ((IRenderManager) mc.getRenderManager()).getRenderPosX(), entityLineLoc.vector3d.y - ((IRenderManager) mc.getRenderManager()).getRenderPosY(), entityLineLoc.vector3d.z - ((IRenderManager) mc.getRenderManager()).getRenderPosZ());
             }
             GL11.glEnd();
+            GL11.glPopMatrix();
             GL11.glDisable(3042);
             GL11.glDisable(2848);
             GL11.glEnable(3553);
             GL11.glEnable(2929);
-            GL11.glPopMatrix();
+        }*/
+
+        for (Map.Entry<Integer, EntityRenderVec> entry : locs.entrySet()) {
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glLineWidth(width.getValue().floatValue());
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glDisable(GL11.GL_DEPTH_TEST);
+            GL11.glDepthMask(false);
+            GlStateManager.disableLighting();
+            GL11.glLoadIdentity();
+            ((IEntityRenderer)mc.entityRenderer).orient(mc.getRenderPartialTicks());
+            GL11.glBegin(GL11.GL_LINE_STRIP);
+            for (ColorVector3d entityLineLoc : ((EntityRenderVec)entry.getValue()).vectors) {
+                if(gradient.getValue()) {
+                    GL11.glColor4f(entityLineLoc.color.getRed()/255f, entityLineLoc.color.getGreen()/255f, entityLineLoc.color.getBlue()/255f, 1.0f);
+                } else {
+                    Color currentColor = (colorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(red.getValue(), green.getValue(), blue.getValue()));
+                    GL11.glColor4f(currentColor.getRed()/255f, currentColor.getGreen()/255f, currentColor.getBlue()/255f, 1.0f);
+                }
+                GL11.glVertex3d(entityLineLoc.vector3d.x - ((IRenderManager) mc.getRenderManager()).getRenderPosX(), entityLineLoc.vector3d.y - ((IRenderManager) mc.getRenderManager()).getRenderPosY(), entityLineLoc.vector3d.z - ((IRenderManager) mc.getRenderManager()).getRenderPosZ());
+            }
+            GL11.glEnd();
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GL11.glDepthMask(true);
+            GL11.glDisable(GL11.GL_BLEND);
+            GL11.glColor3d(1.0, 1.0, 1.0);
+            GlStateManager.enableLighting();
         }
 
         // add pearls from loaded entity list
@@ -87,6 +118,30 @@ public class PearlTrails extends Module {
                 }
             }
         }
+    }
+
+    public void drawLineFromPosToPos(final double posx, final double posy, final double posz, final double posx2, final double posy2, final double posz2, final double up, final float red, final float green, final float blue, final float opacity) {
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glLineWidth(width.getValue().floatValue());
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthMask(false);
+        GL11.glColor4f(red, green, blue, opacity);
+        GlStateManager.disableLighting();
+        GL11.glLoadIdentity();
+        ((IEntityRenderer)mc.entityRenderer).orient(mc.getRenderPartialTicks());
+        GL11.glBegin(1);
+        GL11.glVertex3d(posx, posy, posz);
+        GL11.glVertex3d(posx2, posy2, posz2);
+        GL11.glVertex3d(posx2, posy2, posz2);
+        GL11.glEnd();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthMask(true);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glColor3d(1.0, 1.0, 1.0);
+        GlStateManager.enableLighting();
     }
 
     private void attemptClear() {

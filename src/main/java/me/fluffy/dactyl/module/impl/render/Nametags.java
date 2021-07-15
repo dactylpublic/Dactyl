@@ -117,7 +117,7 @@ public class Nametags extends Module {
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
         GlStateManager.glNormal3f(0.0F, 1.0F, 0.0F);
-        GL11.glColor4f(1.0f, 10.0f, 1.0f, 1.0f);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         if(!Dactyl.fontUtil.isCustomFont()) {
             Dactyl.fontUtil.drawStringWithShadow(getDisplayName(player), -width, (int) -(Dactyl.fontUtil.getFontHeight() - 1), getDisplayColour(player));
         } else {

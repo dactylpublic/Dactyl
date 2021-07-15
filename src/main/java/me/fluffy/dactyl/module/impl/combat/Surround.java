@@ -24,6 +24,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Surround extends Module {
     public Setting<SurroundPage> pageSetting = new Setting<SurroundPage>("Page", SurroundPage.GENERAL);
@@ -37,6 +40,7 @@ public class Surround extends Module {
     public Setting<Boolean> nonLethalAttack = new Setting<Boolean>("NoLethal", true, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> antiCrystalRotate = new Setting<Boolean>("AntiCRotate", false, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> disableIfSafe = new Setting<Boolean>("DisableIfSafe", false, v->pageSetting.getValue()==SurroundPage.GENERAL);
+    public Setting<Boolean> multiThreaded = new Setting<Boolean>("MultiThreaded", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> echestHoldPrio = new Setting<Boolean>("EChestHoldPrio", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> changeRightClickDelay = new Setting<Boolean>("UpdateRCD", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
@@ -48,8 +52,11 @@ public class Surround extends Module {
     public Setting<Boolean> stepDisable = new Setting<Boolean>("StepDisable", true, v->pageSetting.getValue()==SurroundPage.DISABLERS);
     public Setting<Boolean> moveDisable = new Setting<Boolean>("MoveDisable", false, v->pageSetting.getValue()==SurroundPage.DISABLERS);
 
+
+    public static Surround INSTANCE;
     public Surround() {
         super("Surround", Category.COMBAT);
+        INSTANCE = this;
     }
 
     private BlockPos basePos;
@@ -57,7 +64,9 @@ public class Surround extends Module {
     private int playerHotbarSlot = -1;
     private int lastHotbarSlot = -1;
     private final TimeUtil timer = new TimeUtil();
+    private ProtectionOffsetsThread protectionOffsetsThread;
 
+    ArrayList<Vec3d> protectionOffsets = new ArrayList<>();
 
     @Override
     public void onClientUpdate() {
@@ -74,32 +83,48 @@ public class Surround extends Module {
         if(!timer.hasPassed(milliDelay.getValue()) && doDelay.getValue()) {
             return;
         }
-        ArrayList<Vec3d> protectionOffsets = new ArrayList<>(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
+        if(!multiThreaded.getValue()) {
+            protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
+        }
         for (int i = 0; i < blocksPerTick.getValue(); i++) {
-            if (this.offsetStep > protectionOffsets.size()-1) {
-                endLoop();
-                return;
-            }
-            boolean isHoldingEchest = (echestHoldPrio.getValue() && (mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock && ((ItemBlock)mc.player.getHeldItemMainhand().getItem()).getBlock() == Blocks.ENDER_CHEST));
-            int obi = CombatUtil.findSurroundBlock(isHoldingEchest);
-            if(obi == -1) {
-                mc.player.inventory.currentItem = playerHotbarSlot;
-                mc.playerController.updateController();
-                this.toggle();
-                return;
-            }
-            if(mc.player.inventory.currentItem != obi) {
-                mc.player.inventory.currentItem = obi;
-                mc.playerController.updateController();
-            }
-            Vec3d offset = protectionOffsets.get(offsetStep);
-            BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
-            doAntiCrystal(placePosition);
-            this.lastHotbarSlot = obi;
-            CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), changeRightClickDelay.getValue(), multiPointRotate.getValue());
-            this.offsetStep++;
+            try {
+                if (this.offsetStep > protectionOffsets.size() - 1) {
+                    endLoop();
+                    return;
+                }
+                boolean isHoldingEchest = (echestHoldPrio.getValue() && (mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock && ((ItemBlock) mc.player.getHeldItemMainhand().getItem()).getBlock() == Blocks.ENDER_CHEST));
+                int obi = CombatUtil.findSurroundBlock(isHoldingEchest);
+                if (obi == -1) {
+                    mc.player.inventory.currentItem = playerHotbarSlot;
+                    mc.playerController.updateController();
+                    this.toggle();
+                    return;
+                }
+                if (mc.player.inventory.currentItem != obi) {
+                    mc.player.inventory.currentItem = obi;
+                    mc.playerController.updateController();
+                }
+                Vec3d offset = protectionOffsets.get(offsetStep);
+                BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
+                doAntiCrystal(placePosition);
+                this.lastHotbarSlot = obi;
+                CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), changeRightClickDelay.getValue(), multiPointRotate.getValue());
+                this.offsetStep++;
+            } catch(Exception exception) {}
         }
         timer.reset();
+    }
+
+    public class ProtectionOffsetsThread extends Thread {
+        public void run() {
+            while (Surround.INSTANCE.isEnabled()) {
+                try {
+                    protectionOffsets.clear();
+                    protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
+                    TimeUnit.MILLISECONDS.sleep(5L);
+                } catch (Exception exception) {}
+            }
+        }
     }
 
     private void doAntiCrystal(BlockPos pos) {
@@ -155,6 +180,10 @@ public class Surround extends Module {
     public void onEnable() {
         if(mc.player == null || mc.player.inventory == null || mc.world == null) {
             return;
+        }
+        if(multiThreaded.getValue()) {
+            protectionOffsetsThread = new ProtectionOffsetsThread();
+            protectionOffsetsThread.start();
         }
         if(autoCenter.getValue()) {
             CombatUtil.centerToNearestblock();

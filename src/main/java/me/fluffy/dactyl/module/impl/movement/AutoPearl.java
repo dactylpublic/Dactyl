@@ -32,6 +32,9 @@ public class AutoPearl extends Module {
     }
 
     private void throwPearl() {
+        if(mc.player != null && mc.world != null && mc.currentScreen != null) {
+            return;
+        }
         final RayTraceResult result = mc.objectMouseOver;
         if (result != null && result.typeOfHit == RayTraceResult.Type.ENTITY) {
             Entity entity = result.entityHit;
