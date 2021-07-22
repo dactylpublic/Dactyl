@@ -48,6 +48,10 @@ public class ElytraFly extends Module {
             return;
         }
         if(autoTakeOff.getValue()) {
+            if(mc.player.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
+                ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50);
+                return;
+            }
             if(timerTakeOff.getValue() && !mc.player.isElytraFlying()) {
                 if(mc.player.onGround) {
                     ((ITimer)((IMinecraft)mc).getTimer()).setTickLength(50 / 0.2f);
