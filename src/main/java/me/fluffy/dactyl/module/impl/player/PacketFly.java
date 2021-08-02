@@ -39,6 +39,8 @@ public class PacketFly extends Module {
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> frequency = new Setting<Boolean>("Frequency", false);
+    public Setting<Integer> antiSetbackSpam = new Setting<>("Iowa", 0, 0, 10);
+    public Setting<Boolean> delayConfirmTeleport = new Setting<Boolean>("Arizona", false);
     public Setting<Boolean> debugMode = new Setting<Boolean>("Debug", false);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
     public PacketFly() {
@@ -57,6 +59,8 @@ public class PacketFly extends Module {
 
     private final Map<Integer, TimeVec3d> posLooks = new ConcurrentHashMap<Integer, TimeVec3d>();
     private final Set<CPacketPlayer> playerPackets = new ConcurrentSet<>();
+
+    private CPacketConfirmTeleport delayedPacket = null;
 
     @Override
     public void onClientUpdate() {
@@ -182,6 +186,7 @@ public class PacketFly extends Module {
 
                     boolean isNormalPacket = (mc.world.isBlockLoaded(new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ), false) && !(mc.currentScreen instanceof GuiDownloadTerrain) && !(mode.getValue().equals(Mode.SETBACK)) && (posVec = (TimeVec3d) posLooks.remove(sPacketPlayerPosLook.getTeleportId())) != null && posVec.x == sPacketPlayerPosLook.getX() && posVec.y == sPacketPlayerPosLook.getY() && posVec.z == sPacketPlayerPosLook.getZ());
                     // lol nice pay to win patch 0x22 and bullet
+                    // fluffy u should quit drugs ngl
                     frequencyTick++;
                     boolean isFrequencyPacket = (frequency.getValue() && sPacketPlayerPosLook.getYaw() == 0.0f);
                     if(isFrequencyPacket && !((posVec = (TimeVec3d) posLooks.remove(sPacketPlayerPosLook.getTeleportId())) != null && posVec.x == sPacketPlayerPosLook.getX() && posVec.y == sPacketPlayerPosLook.getY() && posVec.z == sPacketPlayerPosLook.getZ())) {
@@ -252,6 +257,7 @@ public class PacketFly extends Module {
         this.frequencyTick = 0;
         this.playerPackets.clear();
         this.posLooks.clear();
+        this.delayedPacket = null;
     }
 
     private boolean isPlayerCollisionBoundingBoxEmpty() {
@@ -270,14 +276,26 @@ public class PacketFly extends Module {
     }
 
     private void sendPackets(double d2, double d3, double d4, boolean b1) {
+        if (delayedPacket != null) {
+            mc.player.connection.sendPacket(delayedPacket);
+            delayedPacket = null;
+        }
         Vec3d vec3d = new Vec3d(d2, d3, d4);
         Vec3d vec3d2 = mc.player.getPositionVector().add(vec3d);
         Vec3d vec3d3 = outOfBoundsVec(vec3d, vec3d2);
         this.sendPlayerPacket(new CPacketPlayer.Position(vec3d2.x, vec3d2.y, vec3d2.z, mc.player.onGround));
         this.sendPlayerPacket(new CPacketPlayer.Position(vec3d3.x, vec3d3.y, vec3d3.z, mc.player.onGround));
+        for (int i = 0; i < antiSetbackSpam.getValue(); i++) {
+            this.sendPlayerPacket(new CPacketPlayer.Position(vec3d2.x, vec3d2.y, vec3d2.z, mc.player.onGround));
+        }
         if (b1) {
-            mc.player.connection.sendPacket(new CPacketConfirmTeleport(++this.currentTeleportId));
+            currentTeleportId++;
             this.posLooks.put(this.currentTeleportId, new TimeVec3d(vec3d2.x, vec3d2.y, vec3d2.z, System.currentTimeMillis()));
+            if (delayConfirmTeleport.getValue()) {
+                delayedPacket = new CPacketConfirmTeleport(this.currentTeleportId);
+            } else {
+                mc.player.connection.sendPacket(new CPacketConfirmTeleport(this.currentTeleportId));
+            }
         }
     }
 
