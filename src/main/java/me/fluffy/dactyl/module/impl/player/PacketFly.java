@@ -39,7 +39,7 @@ public class PacketFly extends Module {
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
 	public Setting<Boolean> delayConfirmTeleport = new Setting<Boolean>("Frequency", false);
-    public Setting<Integer> antiSetbackSpam = new Setting<>("Limit", 0, 0, 10);
+    public Setting<Integer> antiSetbackSpam = new Setting<Integer>("Limit", 0, 0, 10);
     public Setting<Boolean> debugMode = new Setting<Boolean>("Debug", false);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
     public PacketFly() {
