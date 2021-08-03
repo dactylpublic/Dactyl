@@ -39,8 +39,8 @@ public class PacketFly extends Module {
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
     public Setting<Boolean> frequency = new Setting<Boolean>("Frequency", false);
-    public Setting<Integer> antiSetbackSpam = new Setting<>("Iowa", 0, 0, 10);
-    public Setting<Boolean> delayConfirmTeleport = new Setting<Boolean>("Arizona", false);
+	public Setting<Boolean> delayConfirmTeleport = new Setting<Boolean>("Frequency", false);
+    public Setting<Integer> antiSetbackSpam = new Setting<>("Limit", 0, 0, 10);
     public Setting<Boolean> debugMode = new Setting<Boolean>("Debug", false);
     public Setting<Boolean> antiKick = new Setting<Boolean>("AntiKick", true);
     public PacketFly() {
@@ -187,12 +187,12 @@ public class PacketFly extends Module {
                     boolean isNormalPacket = (mc.world.isBlockLoaded(new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ), false) && !(mc.currentScreen instanceof GuiDownloadTerrain) && !(mode.getValue().equals(Mode.SETBACK)) && (posVec = (TimeVec3d) posLooks.remove(sPacketPlayerPosLook.getTeleportId())) != null && posVec.x == sPacketPlayerPosLook.getX() && posVec.y == sPacketPlayerPosLook.getY() && posVec.z == sPacketPlayerPosLook.getZ());
                     // lol nice pay to win patch 0x22 and bullet
                     // fluffy u should quit drugs ngl
-                    frequencyTick++;
+                    /*frequencyTick++;
                     boolean isFrequencyPacket = (frequency.getValue() && sPacketPlayerPosLook.getYaw() == 0.0f);
                     if(isFrequencyPacket && !((posVec = (TimeVec3d) posLooks.remove(sPacketPlayerPosLook.getTeleportId())) != null && posVec.x == sPacketPlayerPosLook.getX() && posVec.y == sPacketPlayerPosLook.getY() && posVec.z == sPacketPlayerPosLook.getZ())) {
                         event.setCanceled(true);
                         return;
-                    }
+                    }*/
                     if (isNormalPacket) {
                         event.setCanceled(true);
                         return;
