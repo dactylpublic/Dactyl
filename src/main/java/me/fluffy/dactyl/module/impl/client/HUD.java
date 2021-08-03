@@ -59,12 +59,12 @@ public class HUD extends Module {
 
     public Setting<WatermarkType> watermarkTypeSetting = new Setting<WatermarkType>("Logo", WatermarkType.DACTYL_IE, v->renderHud.getValue());
     public Setting<Boolean> skeetWatermark = new Setting<Boolean>("SkeetWatermark", true, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
-    public Setting<String> customWatermark = new Setting<String>("CustomWatermark", "Trollgod.cc", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
+    public Setting<String> customWatermark = new Setting<String>("CustomWatermark", "jennifergoddess.us", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
     public Setting<Integer> waterMarkOffset = new Setting<Integer>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
     public Setting<Boolean> gradientLogo = new Setting<Boolean>("LogoGradient", false, v->renderHud.getValue());
 
     public Setting<Boolean> welcomer = new Setting<Boolean>("Welcomer", true, v->renderHud.getValue());
-    public Setting<String> customWelcomer = new Setting<String>("CustomWelcomer", "Hello <p>, welcome to Dactyl.ie >:)", v->renderHud.getValue()&&welcomer.getValue());
+    public Setting<String> customWelcomer = new Setting<String>("CustomWelcomerr", "Hello <p>, welcome to jennifergoddess.us", v->renderHud.getValue()&&welcomer.getValue());
     public Setting<Boolean> welcomerGradient = new Setting<Boolean>("WelcomeGradient", true, v->renderHud.getValue()&&welcomer.getValue());
 
     public Setting<Boolean> currentConfig = new Setting<Boolean>("CurrentConfig", false, v->renderHud.getValue());
