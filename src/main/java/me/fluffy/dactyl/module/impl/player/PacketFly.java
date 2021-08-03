@@ -38,7 +38,6 @@ public class PacketFly extends Module {
     public Setting<Double> tickCountFly = new Setting<Double>("Factor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
-    public Setting<Boolean> frequency = new Setting<Boolean>("Frequency", false);
 	public Setting<Boolean> delayConfirmTeleport = new Setting<Boolean>("Frequency", false);
     public Setting<Integer> antiSetbackSpam = new Setting<>("Limit", 0, 0, 10);
     public Setting<Boolean> debugMode = new Setting<Boolean>("Debug", false);
