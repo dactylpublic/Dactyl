@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PacketFly extends Module {
     public Setting<Mode> mode = new Setting<Mode>("Mode", Mode.FACTOR);
-    public Setting<Double> tickCountFly = new Setting<Double>("Factor", 1d, 0.5d, 10d, v->mode.getValue().equals(Mode.FACTOR));
+    public Setting<Float> tickCountFly = new Setting<Float>("Factor", 1f, 0.5f, 10f, v->mode.getValue().equals(Mode.FACTOR));
     public Setting<Type> typeSetting = new Setting<Type>("Type", Type.DOWN);
     public Setting<PhaseMode> phaseSetting = new Setting<PhaseMode>("Phase", PhaseMode.FULL);
 	public Setting<Boolean> delayConfirmTeleport = new Setting<Boolean>("Frequency", false);
@@ -108,13 +108,13 @@ public class PacketFly extends Module {
         double[] dirSpeed = getSpeed(phaseSetting.getValue().equals(PhaseMode.FULL) && isPhasing ? 0.031 : 0.26);
         bypassCounter++;
         if(mode.getValue().equals(Mode.FACTOR)) {
-            //double currentFlyingFactor = (isPhasing ? tickCountPhase.getValue() : tickCountFly.getValue());
-            double currentFlyingFactor = tickCountFly.getValue();
-            BigDecimal bigDecimal = BigDecimal.valueOf(currentFlyingFactor);
-            int intPart = bigDecimal.intValue();
-            int timesTicks = (int) ((currentFlyingFactor-intPart)*10);
-            int factorTicks = (bypassCounter <= timesTicks ? ((int)Math.ceil(currentFlyingFactor)) : ((int)(currentFlyingFactor)));
-            for (int i = 1; i <= factorTicks; ++i) {
+            float rawFactor = tickCountFly.getValue();
+            int factorInt = (int) Math.floor(rawFactor);
+            float extraFactor = rawFactor - (float) factorInt;
+            if (Math.random() <= extraFactor) {
+                factorInt++;
+            }
+            for (int i = 1; i <= factorInt; ++i) {
                 mc.player.motionX = dirSpeed[0] * (double) i;
                 mc.player.motionY = ySpeed * (double) i;
                 mc.player.motionZ = dirSpeed[1] * (double) i;
