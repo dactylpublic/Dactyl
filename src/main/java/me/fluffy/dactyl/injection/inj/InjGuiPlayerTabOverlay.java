@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.awt.*;
 import java.util.List;
 
-@Mixin(GuiPlayerTabOverlay.class)
+@Mixin(value = GuiPlayerTabOverlay.class, priority = 200000)
 public class InjGuiPlayerTabOverlay {
     @Redirect(method = "renderPlayerlist", at = @At(value = "INVOKE", target = "Ljava/util/List;subList(II)Ljava/util/List;"))
     public List subList(List list, int fromIndex, int toIndex) {

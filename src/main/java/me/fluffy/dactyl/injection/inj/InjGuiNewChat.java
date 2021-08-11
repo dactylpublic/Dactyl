@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(GuiNewChat.class)
+@Mixin(value = GuiNewChat.class, priority = 200000)
 public class InjGuiNewChat {
     @Redirect(method = "drawChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiNewChat;drawRect(IIIII)V", ordinal = 0))
     private void drawChat(int left, int top, int right, int bottom, int color) {
