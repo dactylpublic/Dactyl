@@ -116,6 +116,7 @@ public class ModuleManager {
         modules.add(new NewChunks());
         modules.add(new EnchantColor());
         modules.add(new PearlTrails());
+        modules.add(new PigView());
 
         // client
         modules.add(new ClickGuiModule());
