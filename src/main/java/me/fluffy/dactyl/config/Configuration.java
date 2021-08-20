@@ -79,7 +79,8 @@ public class Configuration {
                         }
                     }
                 }
-            } catch (FileNotFoundException exception) {
+            } catch (Exception exception) {
+                Dactyl.logger.info("Failed loading module " + mod.getName());
                 exception.printStackTrace();
             }
         }

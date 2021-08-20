@@ -21,7 +21,6 @@ import java.util.Iterator;
 
 public class Offhand extends Module {
     Setting<Boolean> strictSwap = new Setting<Boolean>("StrictSwap", false);
-    Setting<Boolean> moveBypass = new Setting<Boolean>("MoveBypass", false, vis->strictSwap.getValue());
 
     // gapple
     Setting<Bind> gappleBind = new Setting<Bind>("Gapple", new Bind(Keyboard.KEY_NONE));
@@ -86,20 +85,9 @@ public class Offhand extends Module {
         if(strictSwap.getValue()) {
             if (strictSwitchMap.size() > 0) {
                 Iterator<Integer> iterator = strictSwitchMap.keySet().iterator();
-                while (iterator.hasNext()) {
+                if(iterator.hasNext()) {
                     Integer key = iterator.next();
-                    double oldMotionX = mc.player.motionX;
-                    double oldMotionY = mc.player.motionY;
-                    double oldMotionZ = mc.player.motionZ;
-                    if(moveBypass.getValue()) {
-                        mc.player.motionX = mc.player.motionY = mc.player.motionZ = 0.0d;
-                    }
                     CombatUtil.switchOffhandStrict(key, strictSwitchMap.get(key));
-                    if(moveBypass.getValue()) {
-                        mc.player.motionX = oldMotionX;
-                        mc.player.motionY = oldMotionY;
-                        mc.player.motionZ = oldMotionZ;
-                    }
                     int newVal = strictSwitchMap.get(key) + 1;
                     strictSwitchMap.put(key, newVal);
                     if (strictSwitchMap.get(key) > 2) {

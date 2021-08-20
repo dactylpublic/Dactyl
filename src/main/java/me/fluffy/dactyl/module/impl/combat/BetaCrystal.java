@@ -46,7 +46,7 @@ public class BetaCrystal extends Module {
     // place
     public Setting<Boolean> doPlace = new Setting<Boolean>("Place", true, v->isViewPlace());
     public Setting<WallsRange> placeTrace = new Setting<WallsRange>("PlaceTrace", WallsRange.RANGE, v->isViewPlace() && doPlace.getValue());
-    public Setting<Integer> placeSpeed = new Setting<Integer>("PlaceSpeed", 20, 1, 20, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> placeSpeed = new Setting<Double>("PlaceSpeed", 20d, 1d, 20d, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0d, 1.0d, 13.0d, v->isViewPlace() && doPlace.getValue() && antiSuiPlace.getValue());
     public Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, v->isViewPlace() && doPlace.getValue());
@@ -58,7 +58,7 @@ public class BetaCrystal extends Module {
     public Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 6.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 3.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue() && (placeTrace.getValue() == WallsRange.RANGE));
-    public Setting<Boolean> strictDirection = new Setting<Boolean>("StrictDirection", false, v->isViewPlace() && doPlace.getValue());
+    //public Setting<Boolean> strictDirection = new Setting<Boolean>("StrictDirection", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, v->isViewPlace() && doPlace.getValue());
     public Setting<Boolean> doRecalcOverride = new Setting<Boolean>("Override", false, v->isViewPlace() && doPlace.getValue());
     public Setting<Double> recalcDmgOverride = new Setting<Double>("RecalcOverride", 8.5d, 1.0d, 16.0d, v->isViewPlace() && doPlace.getValue() && antiRecalc.getValue() && doRecalcOverride.getValue());
@@ -191,7 +191,7 @@ public class BetaCrystal extends Module {
         if(crystal != null) {
             currentAttacking = crystal;
         }
-        if (!breakTimer.hasPassed(1000L / breakSpeed.getValue().intValue())) {
+        if (!breakTimer.hasPassed((long) (1000L / breakSpeed.getValue()))) {
             return;
         }
         double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
@@ -382,7 +382,7 @@ public class BetaCrystal extends Module {
                     this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition).getName() + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
                 }
             }
-            if (placeTimer.hasPassed(1000 / placeSpeed.getValue())) {
+            if (placeTimer.hasPassed((long) (1000 / placeSpeed.getValue()))) {
                 if (finalizePlace) {
                     if (placeHand == null) {
                         this.setModuleInfo("");
@@ -394,10 +394,10 @@ public class BetaCrystal extends Module {
 
                     CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placePosition);
                     if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
-                        if(strictDirection.getValue()) {
+                        /*if(strictDirection.getValue()) {
                             RayTraceResult res = CombatUtil.getStrictDirection(placePosition);
                             traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
-                        }
+                        }*/
                         mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
                     }
                     if (swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
@@ -589,10 +589,10 @@ public class BetaCrystal extends Module {
             CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placeRender);
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
             if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
-                if(strictDirection.getValue()) {
+                /*if(strictDirection.getValue()) {
                     RayTraceResult res = CombatUtil.getStrictDirection(placeRender);
                     traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
-                }
+                }*/
                 mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
             }
         }

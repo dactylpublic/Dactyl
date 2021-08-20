@@ -1,6 +1,7 @@
 package me.fluffy.dactyl.module.impl.movement;
 
 import me.fluffy.dactyl.event.ForgeEvent;
+import me.fluffy.dactyl.event.impl.action.KeyboardMoveEvent;
 import me.fluffy.dactyl.event.impl.player.MoveEvent;
 import me.fluffy.dactyl.event.impl.world.EntityRemovedEvent;
 import me.fluffy.dactyl.injection.inj.access.IMinecraft;
@@ -12,12 +13,14 @@ import me.fluffy.dactyl.util.ChatUtil;
 import me.fluffy.dactyl.util.CombatUtil;
 import me.fluffy.dactyl.util.MathUtil;
 import me.fluffy.dactyl.util.TimeUtil;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.MobEffects;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.input.Keyboard;
 
 import java.util.Objects;
 
@@ -25,10 +28,11 @@ public class Strafe extends Module {
     Setting<Boolean> useTimer = new Setting<Boolean>("UseTimer", true);
     Setting<Boolean> autoSprint = new Setting<Boolean>("AutoSprint", true);
     Setting<Boolean> addSpeed = new Setting<Boolean>("Custom", false);
+    Setting<Boolean> strictAirEating = new Setting<Boolean>("StrictAirEat", false);
     Setting<String> speedAddition = new Setting<String>("SpeedAddition", "0.272", v->addSpeed.getValue());
     Setting<Boolean> extraSpeed = new Setting<Boolean>("Extra", false);
     Setting<Boolean> damageBoost = new Setting<Boolean>("DMGBoost", false);
-    Setting<String> sneakAddition = new Setting<String>("SneakSpeed", "1.00");
+    Setting<Integer> sneakSpeed = new Setting<Integer>("SneakPercent", 90, 1, 100);
     Setting<Double> vanillaSpeed = new Setting<Double>("VanillaSpeed", 6.0d, 0.1d, 10.0d, vis->extraSpeed.getValue());
     Setting<SkipMode> skipModeSetting = new Setting<SkipMode>("Skips", SkipMode.TICK);
     Setting<Integer> skipTickHops = new Setting<Integer>("SkipTicks", 1, 1, 10, vis->skipModeSetting.getValue() == SkipMode.TICK);
@@ -85,7 +89,12 @@ public class Strafe extends Module {
         if(mc == null || mc.player == null) {
             return;
         }
-
+        if(strictAirEating.getValue()) {
+            // make sure we arent always sneaking
+            if (!(mc.player.isHandActive() && !mc.player.isRiding()) && !Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode()) && mc.player.isSneaking()) {
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
+            }
+        }
         if(damageTimer.hasPassed(1750)) {
             damageMultiplier = 1.0d;
             damageTimer.reset();
@@ -106,6 +115,12 @@ public class Strafe extends Module {
     public void onMove(MoveEvent event) {
         if(event.getStage() != ForgeEvent.Stage.PRE) {
             return;
+        }
+        if(strictAirEating.getValue()) {
+            // sneak if we are eating
+            if (mc.player.isHandActive() && !mc.player.isRiding()) {
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
+            }
         }
         if(Freecam.INSTANCE.isEnabled()) {
             return;
@@ -235,11 +250,7 @@ public class Strafe extends Module {
             baseSpeed = 0.272;
         }
         if(mc.player.isSneaking()) {
-            try{
-                baseSpeed = Double.valueOf(sneakAddition.getValue());
-            } catch(Exception e) {
-                baseSpeed = 0.354;
-            }
+            baseSpeed = sneakSpeed.getValue() / 100d;
         }
         if (mc.player.isPotionActive(MobEffects.SPEED)) {
             final int amplifier = Objects.requireNonNull(mc.player.getActivePotionEffect(MobEffects.SPEED)).getAmplifier();

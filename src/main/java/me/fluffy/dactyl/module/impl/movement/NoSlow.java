@@ -8,6 +8,7 @@ import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.player.Freecam;
 import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;

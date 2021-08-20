@@ -2297,7 +2297,7 @@ public class CombatUtil {
             RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), hitVector);
             // rayTraceResult is null if player can see
             if(rayTraceResult == null) {
-                finalResult = new RayTraceResult(hitVector, facing);
+                finalResult = new RayTraceResult(hitVector, facing.getOpposite());
                 return finalResult;
             }
         }
