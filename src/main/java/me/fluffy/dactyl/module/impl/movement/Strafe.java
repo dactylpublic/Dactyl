@@ -16,6 +16,7 @@ import me.fluffy.dactyl.util.TimeUtil;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.MobEffects;
+import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -57,6 +58,8 @@ public class Strafe extends Module {
     private final TimeUtil timer = new TimeUtil();
     private final TimeUtil damageTimer = new TimeUtil();
 
+    private boolean wasSneak = false;
+
     @SubscribeEvent
     public void onEntityRemove(EntityRemovedEvent event) {
         if(mc.world != null && mc.player != null && damageBoost.getValue() && event.getEntity() != null && event.getEntity() instanceof EntityEnderCrystal) {
@@ -90,9 +93,16 @@ public class Strafe extends Module {
             return;
         }
         if(strictAirEating.getValue()) {
-            // make sure we arent always sneaking
-            if (!(mc.player.isHandActive() && !mc.player.isRiding()) && !Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode()) && mc.player.isSneaking()) {
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
+            if (mc.player.isHandActive() && !mc.player.isRiding()) {
+                if(!wasSneak) {
+                    mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+                    wasSneak = true;
+                }
+            } else {
+                if(wasSneak) {
+                    mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+                    wasSneak = false;
+                }
             }
         }
         if(damageTimer.hasPassed(1750)) {
@@ -115,12 +125,6 @@ public class Strafe extends Module {
     public void onMove(MoveEvent event) {
         if(event.getStage() != ForgeEvent.Stage.PRE) {
             return;
-        }
-        if(strictAirEating.getValue()) {
-            // sneak if we are eating
-            if (mc.player.isHandActive() && !mc.player.isRiding()) {
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
-            }
         }
         if(Freecam.INSTANCE.isEnabled()) {
             return;

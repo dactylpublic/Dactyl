@@ -10,6 +10,8 @@ import me.fluffy.dactyl.setting.Setting;
 import me.fluffy.dactyl.util.CombatUtil;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiIngameMenu;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.*;
@@ -109,14 +111,16 @@ public class NoSlow extends Module {
 
     private void handleStrictInventory() {
         if(strictInventory.getValue()) {
-            if (mc.player.isActiveItemStackBlocking()) {
-                mc.playerController.onStoppedUsingItem(mc.player);
-            }
-            if (mc.player.isSneaking()) {
-                mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
-            }
-            if (mc.player.isSprinting()) {
-                mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
+            if(mc.currentScreen != null && ((mc.currentScreen instanceof GuiInventory) || (mc.currentScreen instanceof GuiChat) || (mc.currentScreen instanceof GuiIngameMenu))) {
+                if (mc.player.isActiveItemStackBlocking()) {
+                    mc.playerController.onStoppedUsingItem(mc.player);
+                }
+                if (mc.player.isSneaking()) {
+                    mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+                }
+                if (mc.player.isSprinting()) {
+                    mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
+                }
             }
         }
     }

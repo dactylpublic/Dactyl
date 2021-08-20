@@ -391,15 +391,9 @@ public class BetaCrystal extends Module {
                         return;
                     }
                     placedCrystals.add(placePosition);
-
-                    CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placePosition);
-                    if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
-                        /*if(strictDirection.getValue()) {
-                            RayTraceResult res = CombatUtil.getStrictDirection(placePosition);
-                            traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
-                        }*/
-                        mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
-                    }
+                    RayTraceResult res = CombatUtil.getPlaceDirection(placePosition, multiPoint.getValue());
+                    CombatUtil.AutoCrystalTraceResult traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
+                    mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
                     if (swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
                         mc.player.swingArm(placeHand);
                     }
@@ -570,9 +564,6 @@ public class BetaCrystal extends Module {
         return false;
     }
 
-
-
-
     private void attackCrystal(Entity entity) {
         Criticals.INSTANCE.ignoring = true;
         mc.playerController.attackEntity(mc.player, entity);
@@ -586,15 +577,10 @@ public class BetaCrystal extends Module {
         }
         Criticals.INSTANCE.ignoring = false;
         if (ignoreValidExploit.getValue() && (runLogic.getValue() == BreakLogic.HOLDING) && placeRender != null) {
-            CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placeRender);
             EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
-            if(traceResult != null && traceResult.result != null && traceResult.facing != null) {
-                /*if(strictDirection.getValue()) {
-                    RayTraceResult res = CombatUtil.getStrictDirection(placeRender);
-                    traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
-                }*/
-                mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
-            }
+            RayTraceResult res = CombatUtil.getPlaceDirection(placeRender, multiPoint.getValue());
+            CombatUtil.AutoCrystalTraceResult traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
+            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
         }
         breakTimer.reset();
     }

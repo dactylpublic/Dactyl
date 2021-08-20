@@ -12,6 +12,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Keyboard;
@@ -45,6 +46,8 @@ public class Offhand extends Module {
 
     // other
     Setting<Integer> modeUpdates = new Setting<Integer>("Updates", 2, 1, 2);
+    Setting<Integer> switchesPerSec = new Setting<Integer>("SwitchesPerS", 4, 1, 50, v->strictSwap.getValue());
+    Setting<Integer> swapDelay = new Setting<Integer>("SwapDelay", 2, 1, 10, v->strictSwap.getValue());
     Setting<EmergencyMode> emergencyMode = new Setting<EmergencyMode>("ZeroKey", EmergencyMode.EGAP);
     Setting<Boolean> deathCheck = new Setting<Boolean>("DangerCheck", true);
     Setting<Double> dangerDistance = new Setting<Double>("DangerDist", 10.0, 1.0D, 13.5D, vis->deathCheck.getValue());
@@ -62,7 +65,11 @@ public class Offhand extends Module {
 
     private final HashMap<Integer, Integer> strictSwitchMap = new HashMap<>();
 
+    public final TimeUtil sps = new TimeUtil();
     public final TimeUtil lastSwitch = new TimeUtil();
+
+    public int ticksNotTotemed = 0;
+    public int switches = 0;
 
     private OffhandMode offhandMode = OffhandMode.TOTEM;
 
@@ -70,6 +77,8 @@ public class Offhand extends Module {
     public void onToggle() {
         strictSwitchMap.clear();
         lastSwitch.reset();
+        switches = 0;
+        ticksNotTotemed = 0;
         offhandMode = OffhandMode.TOTEM;
     }
 
@@ -81,11 +90,24 @@ public class Offhand extends Module {
         String itemCount = String.valueOf(mc.player.getHeldItemOffhand().getCount()+(mc.player.inventory.mainInventory.stream().filter(itemStack -> itemStack.getItem() == mc.player.getHeldItemOffhand().getItem()).mapToInt(ItemStack::getCount).sum()));
         this.setDisplayName(getModuleNameFromItem(mc.player.getHeldItemOffhand().getItem()));
         this.setModuleInfo(itemCount);
-
+        if(strictSwap.getValue() && lastSwitch.hasPassed(1250) && mc.player.onGround) {
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY, mc.player.posZ, mc.player.onGround));
+            lastSwitch.reset();
+        }
+        if(sps.hasPassed(1000)) {
+            switches = 0;
+            sps.reset();
+        }
+        if(strictSwap.getValue() && !mc.player.onGround) {
+            return;
+        }
         if(strictSwap.getValue()) {
             if (strictSwitchMap.size() > 0) {
                 Iterator<Integer> iterator = strictSwitchMap.keySet().iterator();
                 if(iterator.hasNext()) {
+                    if(switches++ >= switchesPerSec.getValue()) {
+                        return;
+                    }
                     Integer key = iterator.next();
                     CombatUtil.switchOffhandStrict(key, strictSwitchMap.get(key));
                     int newVal = strictSwitchMap.get(key) + 1;
@@ -137,6 +159,9 @@ public class Offhand extends Module {
         if(needsSwitching) {
             switchToItem(getRelativeItem(offhandMode));
         } else if(switchToTotem) {
+            if(strictSwap.getValue() && ticksNotTotemed++ < swapDelay.getValue()) {
+                return;
+            }
             offhandMode = OffhandMode.TOTEM;
             switchToTotem();
         }
