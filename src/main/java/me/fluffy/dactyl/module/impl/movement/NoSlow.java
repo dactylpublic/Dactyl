@@ -111,16 +111,14 @@ public class NoSlow extends Module {
 
     private void handleStrictInventory() {
         if(strictInventory.getValue()) {
-            if(mc.currentScreen != null && ((mc.currentScreen instanceof GuiInventory) || (mc.currentScreen instanceof GuiChat) || (mc.currentScreen instanceof GuiIngameMenu))) {
-                if (mc.player.isActiveItemStackBlocking()) {
-                    mc.playerController.onStoppedUsingItem(mc.player);
-                }
-                if (mc.player.isSneaking()) {
-                    mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
-                }
-                if (mc.player.isSprinting()) {
-                    mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
-                }
+            if (mc.player.isActiveItemStackBlocking()) {
+                mc.playerController.onStoppedUsingItem(mc.player);
+            }
+            //if (mc.player.isSneaking()) {
+            //    mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+            //}
+            if (mc.player.isSprinting()) {
+                mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
             }
         }
     }
