@@ -52,7 +52,6 @@ public class ModuleManager {
         modules.add(new PacketFly());
         modules.add(new AutoDupe());
         modules.add(new BypassCrystal());
-        modules.add(new FeetString());
         modules.add(new Nuker());
 
         // misc
@@ -71,7 +70,6 @@ public class ModuleManager {
         modules.add(new Locator());
         modules.add(new ChatTimestamps());
         modules.add(new Regear());
-        modules.add(new AutoDuelWin());
         modules.add(new HClip());
         modules.add(new VClip());
 

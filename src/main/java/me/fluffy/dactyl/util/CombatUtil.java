@@ -1554,7 +1554,7 @@ public class CombatUtil {
         return placePosition;
     }
 
-    public static BlockPos getBestPlacePosNew(boolean multiPoint, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
+    public static BlockPos getBestPlacePosNew(int ticksExistedMax, boolean multiPoint, boolean antiSuicide, double maxSelfDmg, double minDamage, double startFacePlaceHealth, BetaCrystal.WallsRange wallsRange, double placeTraceRange, double enemyRange, boolean oneBlockCA, double placeRange) {
         BlockPos placePosition = null;
         final List<BlockPos> placePositions = findPossiblePlacePoses(oneBlockCA, placeRange);
         final List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
@@ -1567,6 +1567,9 @@ public class CombatUtil {
                 continue;
             }
             if(((EntityLivingBase)entity).getHealth() <= 0.0f ||  ((EntityLivingBase)entity).isDead) {
+                continue;
+            }
+            if(entity.ticksExisted < ticksExistedMax) {
                 continue;
             }
             for(BlockPos blockPos : placePositions) {

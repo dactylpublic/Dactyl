@@ -708,6 +708,39 @@ public class RenderUtil {
         GlStateManager.popMatrix();
     }
 
+    public static void drawSelectionBoundingBox(AxisAlignedBB box, float red, float green, float blue, float alpha) {
+        drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, red, green, blue, alpha);
+    }
+
+    public static void drawBoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float alpha) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        drawBoundingBox(bufferbuilder, minX, minY, minZ, maxX, maxY, maxZ, red, green, blue, alpha);
+        tessellator.draw();
+    }
+
+    public static void drawBoundingBox(BufferBuilder buffer, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float alpha) {
+        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+    }
+
     public static void drawFixedBoxESP(BlockPos pos, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {
         IBlockState iblockstate = Minecraft.getMinecraft().world.getBlockState(pos);
         Vec3d interp = EntityUtil.interpolateEntity((Entity)Minecraft.getMinecraft().player, Minecraft.getMinecraft().getRenderPartialTicks());
@@ -735,7 +768,7 @@ public class RenderUtil {
                 RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
             }
             if (outline) {
-                RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+                drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);
@@ -768,7 +801,7 @@ public class RenderUtil {
                 RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
             }
             if (outline) {
-                RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+                drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);
@@ -801,7 +834,7 @@ public class RenderUtil {
                 RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
             }
             if (outline) {
-                RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+                drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);

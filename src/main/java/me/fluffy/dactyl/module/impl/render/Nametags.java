@@ -45,7 +45,8 @@ public class Nametags extends Module {
     Setting<Boolean> totemPops = new Setting<Boolean>("TotemPops", true);
     Setting<Boolean> shortEnchants = new Setting<Boolean>("Enchants", true);
     Setting<Integer> scaling = new Setting<Integer>("Scaling", 3, 1, 5);
-    static Setting<Boolean> border = new Setting<Boolean>("Colors", true);
+    static Setting<Boolean> background = new Setting<Boolean>("BG", true);
+    static Setting<Boolean> border = new Setting<Boolean>("Border", true);
     Setting<Double> borderWidth = new Setting<Double>("BorderWidth", 1.0d, 0.1d, 3.0d, v->border.getValue());
 
     public static Nametags INSTANCE;
@@ -223,38 +224,31 @@ public class Nametags extends Module {
     }
 
     public static void drawBorderedRect(float x, float y, float x1, float y1, float width, int internalColor, int borderColor) {
-        /*GL11.glPushMatrix();
-        enableGL2D();
-        RenderUtil.drawRect(x + width, y + width, x1 - width, y1 - width, internalColor);
-        if(border.getValue()) {
-            RenderUtil.drawBetterColoredRect(x + borderWidth, y + borderWidth, x1 - borderWidth, y1 - borderWidth, borderWidth, borderColor);
-        }
-        disableGL2D();
-        GL11.glPopMatrix();*/
-        if(!border.getValue()) {
-            return;
-        }
         float alpha = (borderColor >> 24 & 255) / 255.0F;
         float red = (borderColor >> 16 & 255) / 255.0F;
         float green = (borderColor >> 8 & 255) / 255.0F;
         float blue = (borderColor & 255) / 255.0F;
         GlStateManager.pushMatrix();
         enableGL2D();
-        RenderUtil.drawRect(x, y, x1, y1, internalColor);
-        GL11.glColor4f(red, green, blue, alpha);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glLineWidth(width);
-        GL11.glBegin(GL11.GL_LINE_STRIP);
-        GL11.glVertex2f(x, y);
-        GL11.glVertex2f(x, y1);
-        GL11.glVertex2f(x1, y1);
-        GL11.glVertex2f(x1, y);
-        GL11.glVertex2f(x, y);
-        GL11.glEnd();
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
+        if(background.getValue()) {
+            RenderUtil.drawRect(x, y, x1, y1, internalColor);
+        }
+        if(border.getValue()) {
+            GL11.glColor4f(red, green, blue, alpha);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glLineWidth(width);
+            GL11.glBegin(GL11.GL_LINE_STRIP);
+            GL11.glVertex2f(x, y);
+            GL11.glVertex2f(x, y1);
+            GL11.glVertex2f(x1, y1);
+            GL11.glVertex2f(x1, y);
+            GL11.glVertex2f(x, y);
+            GL11.glEnd();
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glDisable(GL11.GL_BLEND);
+        }
         disableGL2D();
         GlStateManager.popMatrix();
     }

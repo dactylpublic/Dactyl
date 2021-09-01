@@ -91,6 +91,7 @@ public class BetaCrystal extends Module {
     public Setting<Integer> yawStep = new Setting<Integer>("StepAmount", 55, 5, 180, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
     public Setting<Integer> stepTicks = new Setting<Integer>("StepTicks", 1, 1, 20, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
     public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v->isViewGeneral());
+    public Setting<Integer> loginWaitTicks = new Setting<Integer>("LoginTicks", 0, 1, 500, v->isViewGeneral());
     public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
     public Setting<Boolean> multiPointRotations = new Setting<Boolean>("PointRotations", false, v->isViewGeneral());
     public Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v->isViewGeneral());
@@ -101,6 +102,8 @@ public class BetaCrystal extends Module {
     public Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, v->isViewRender());
     public Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, v->isViewRender());
     public Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, v->isViewRender());
+    public Setting<Boolean> fadeOut = new Setting<Boolean>("FadeOut", true, v->isViewRender());
+    //public Setting<Double> fadeOutTime = new Setting<Double>("FadeTime", 0.7d, 0.1d, 10.0d, v->isViewRender() && fadeOut.getValue());
     public Setting<Boolean> outline = new Setting<Boolean>("Outline", true, v->isViewRender());
     public Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, v->isViewRender() && outline.getValue());
     public Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, v->isViewRender());
@@ -120,6 +123,7 @@ public class BetaCrystal extends Module {
     private final TimeUtil checkTimer = new TimeUtil();
 
     private final ArrayList<AttackedCrystal> attackedCrystals = new ArrayList<>();
+    private final ArrayList<RenderPosition> renderPositions = new ArrayList<>();
     private final Set<BlockPos> placedCrystals = new HashSet<>();
 
     private int breakStepTicks = 0;
@@ -270,7 +274,7 @@ public class BetaCrystal extends Module {
             doRecalc = true;
         }
 
-        BlockPos placePosition = CombatUtil.getBestPlacePosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+        BlockPos placePosition = CombatUtil.getBestPlacePosNew(loginWaitTicks.getValue(), multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
 
         if(!doRecalc) {
             if(doRecalcOverride.getValue() && CombatUtil.getDamageBestPosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) >= recalcDmgOverride.getValue()) {
@@ -440,7 +444,28 @@ public class BetaCrystal extends Module {
     @Override
     public void onRender3D(Render3DEvent event) {
         if (renderESP.getValue()) {
+            if(fadeOut.getValue()) {
+                renderPositions.removeIf(pos -> pos.alpha <= 0);
+                Iterator<RenderPosition> renderPositionIterator = renderPositions.iterator();
+                try {
+                    while (renderPositionIterator.hasNext()) {
+                        RenderPosition next = renderPositionIterator.next();
+                        next.update();
+                        if (!colorSync.getValue()) {
+                            RenderUtil.drawBoxESP(next.pos, new Color(colorRed.getValue(), colorGreen.getValue(), colorBlue.getValue(), next.alpha), lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                        } else {
+                            Color syncColor = Colors.INSTANCE.convertHex(Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(1, false), next.alpha));
+                            RenderUtil.drawBoxESP(next.pos, syncColor, lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                        }
+                    }
+                } catch (Exception e) {}
+            }
             if (placeRender != null && CombatUtil.isHoldingCrystal()) {
+                if(fadeOut.getValue()) {
+                    if (!isRenderedPosition(placeRender)) {
+                        renderPositions.add(new RenderPosition(placeRender));
+                    }
+                }
                 if (!colorSync.getValue()) {
                     RenderUtil.drawBoxESP(placeRender, new Color(colorRed.getValue(), colorGreen.getValue(), colorBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
                 } else {
@@ -799,6 +824,14 @@ public class BetaCrystal extends Module {
         placedCrystals.clear();
     }
 
+    public boolean isRenderedPosition(BlockPos pos) {
+        RenderPosition renderPosition = renderPositions.stream()
+                .filter(renderPos -> renderPos.pos == pos)
+                .min(Comparator.comparing(renderPos -> renderPos.timer.getPassedTime()))
+                .orElse(null);
+        return renderPosition != null;
+    }
+
     public class AttackedCrystal {
         public EntityEnderCrystal attacked;
         public TimeUtil timer;
@@ -807,6 +840,21 @@ public class BetaCrystal extends Module {
             this.attacked = attacked;
             this.amount = amount;
             this.timer = new TimeUtil();
+        }
+    }
+
+    public class RenderPosition {
+        public BlockPos pos;
+        public int alpha = 0xAA;
+        public TimeUtil timer;
+        public RenderPosition(BlockPos pos) {
+            this.pos = pos;
+            this.timer = new TimeUtil();
+        }
+
+        private void update() {
+            if (this.alpha > 0)
+                this.alpha -= 2;
         }
     }
 

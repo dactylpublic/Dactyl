@@ -24,6 +24,7 @@ public class FastItem extends Module {
     Setting<Boolean> bows = new Setting<Boolean>("Bows", false);
     Setting<Boolean> autoKickBow = new Setting<Boolean>("AutoKickBow", false, v->!bows.getValue());
     Setting<Integer> delay = new Setting<Integer>("Delay", 3, 1, 10);
+    Setting<Integer> bowDelay = new Setting<Integer>("BowDelay", 3, 1, 10);
     Setting<Boolean> ghostFix = new Setting<Boolean>("GhostFix", true);
     public FastItem() {
         super("FastItem", Category.PLAYER);
@@ -53,7 +54,7 @@ public class FastItem extends Module {
 
     private void handleBow() {
         if (bows.getValue()) {
-            if(mc.player.getHeldItemMainhand().getItem().equals(Items.BOW) && mc.player.isHandActive() && mc.player.getItemInUseMaxCount() >= delay.getValue()) {
+            if(mc.player.getHeldItemMainhand().getItem().equals(Items.BOW) && mc.player.isHandActive() && mc.player.getItemInUseMaxCount() >= bowDelay.getValue()) {
                 mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, mc.player.getHorizontalFacing()));
                 mc.player.connection.sendPacket(new CPacketPlayerTryUseItem(mc.player.getActiveHand()));
                 mc.player.stopActiveHand();
