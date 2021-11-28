@@ -197,7 +197,7 @@ public class Step extends Module {
     private String getStepModInfo() {
         switch((StepMode)stepModeSetting.getValue()) {
             case AAC:
-                return "AAC";
+                return "NCP";
             case NORMAL:
                 return "Normal";
             case VANILLA:
@@ -211,7 +211,7 @@ public class Step extends Module {
     public enum StepMode {
         NORMAL("Normal"),
         VANILLA("Vanilla"),
-        AAC("AAC");
+        AAC("NCP");
 
         public String name;
 
