@@ -18,6 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PingSpoof extends Module {
     Setting<Integer> delay = new Setting<Integer>("Delay", 120, 10, 1400);
+    //below setting is for cc. its literally just the same as normal ping spoof but with CPacketConfirmTransaction
+    public Setting<Boolean> ConfirmTransaction = new Setting<Boolean>("ConfirmTransaction", false);
     public PingSpoof() {
         super("PingSpoof", Category.PLAYER);
     }
@@ -37,6 +39,14 @@ public class PingSpoof extends Module {
             event.setCanceled(true);
             synchronized (this.packetsMap) {
                 this.packetsMap.put((Packet<?>) event.getPacket(), System.currentTimeMillis() + delay.getValue().longValue());
+            }
+        }
+        if (ConfirmTransaction.getValue()) {
+            if ((event.getPacket() instanceof CPacketConfirmTransaction) && !this.packetsMap.keySet().contains(event.getPacket())) {
+                event.setCanceled(true);
+                synchronized (this.packetsMap) {
+                    this.packetsMap.put((Packet<?>) event.getPacket(), System.currentTimeMillis() + delay.getValue().longValue());
+                }
             }
         }
     }
