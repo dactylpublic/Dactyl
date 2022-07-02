@@ -1,5 +1,6 @@
 package me.fluffy.dactyl.module.impl.client;
 
+import akka.actor.Kill;
 import me.fluffy.dactyl.Dactyl;
 import me.fluffy.dactyl.module.Module;
 import me.fluffy.dactyl.module.impl.combat.AutoCrystal;
@@ -231,30 +232,34 @@ public class Components extends Module {
         Entity t = null;
         switch(targetHudPrio.getValue()) {
             case CAURA:
-                t = mc.world.getPlayerEntityByName(AutoCrystal.INSTANCE.getModuleInfo());
+                if (AutoCrystal.INSTANCE != null) {
+                    t = mc.world.getPlayerEntityByName(AutoCrystal.INSTANCE.getModuleInfo());
+                }
                 break;
             case KAURA:
-                t = mc.world.getPlayerEntityByName(Killaura.INSTANCE.getModuleInfo());
+                if (Killaura.INSTANCE != null) {
+                    t = mc.world.getPlayerEntityByName(Killaura.INSTANCE.getModuleInfo());
+                }
                 break;
             case DIST:
                 t = getClosest();
                 break;
         }
         if(t == null) {
-            if(targetHudPrio.getValue() == THudPrio.CAURA) {
+            if(targetHudPrio.getValue() == THudPrio.CAURA && Killaura.INSTANCE != null) {
                 t = mc.world.getPlayerEntityByName(Killaura.INSTANCE.getModuleInfo());
             } else if(targetHudPrio.getValue() == THudPrio.KAURA) {
                 t = getClosest();
-            } else {
+            } else if (AutoCrystal.INSTANCE != null) {
                 t = mc.world.getPlayerEntityByName(AutoCrystal.INSTANCE.getModuleInfo());
             }
         }
         if(t == null) {
             if(targetHudPrio.getValue() == THudPrio.CAURA) {
                 t = getClosest();
-            } else if(targetHudPrio.getValue() == THudPrio.KAURA) {
+            } else if(targetHudPrio.getValue() == THudPrio.KAURA && AutoCrystal.INSTANCE != null) {
                 t = mc.world.getPlayerEntityByName(AutoCrystal.INSTANCE.getModuleInfo());
-            } else {
+            } else if (Killaura.INSTANCE != null) {
                 t = mc.world.getPlayerEntityByName(Killaura.INSTANCE.getModuleInfo());
             }
         }
