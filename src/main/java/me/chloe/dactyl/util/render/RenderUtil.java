@@ -599,6 +599,9 @@ public class RenderUtil {
         tessellator.draw();
     }
 
+    public static double roundToHalf(double d) {
+        return Math.round(d * 2) / 2.0;
+    }
 
     public static void drawLine(double startX, double startY, double startZ, double endX, double endY, double endZ, int weight, Color color) {
         GlStateManager.pushMatrix();
@@ -606,7 +609,7 @@ public class RenderUtil {
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
         bufferBuilder.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
         bufferBuilder.pos(startX, startY, startZ).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-        bufferBuilder.pos(endX, endY, endZ)    .color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        bufferBuilder.pos(endX, endY, endZ).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         GlStateManager.color(1, 1, 1, 1);
         GlStateManager.disableDepth();
         GlStateManager.enableBlend();
