@@ -696,37 +696,56 @@ public class RenderUtil {
         GlStateManager.popMatrix();
     }
 
-    public static void drawSelectionBoundingBox(AxisAlignedBB box, float red, float green, float blue, float alpha) {
-        drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, red, green, blue, alpha);
+    public static void drawBoundingBox(final AxisAlignedBB bb, final float width, final int argb) {
+        final int a = argb >>> 24 & 0xFF;
+        final int r = argb >>> 16 & 0xFF;
+        final int g = argb >>> 8 & 0xFF;
+        final int b = argb & 0xFF;
+        drawBoundingBox(bb, width, r, g, b, a);
     }
 
-    public static void drawBoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float alpha) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
+    public static void drawBoundingBox(final AxisAlignedBB bb, final float width, final int red, final int green, final int blue, final int alpha) {
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.disableDepth();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+        GL11.glEnable(2848);
+        GL11.glHint(3154, 4354);
+        GL11.glLineWidth(width);
+        final Tessellator tessellator = Tessellator.getInstance();
+        final BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
-        drawBoundingBox(bufferbuilder, minX, minY, minZ, maxX, maxY, maxZ, red, green, blue, alpha);
+        bufferbuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
         tessellator.draw();
-    }
-
-    public static void drawBoundingBox(BufferBuilder buffer, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float alpha) {
-        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        tessellator.draw();
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        tessellator.draw();
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+        tessellator.draw();
+        GL11.glDisable(2848);
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
     }
 
     public static void drawFixedBoxESP(BlockPos pos, Color color, float lineWidth, boolean outline, boolean box, int boxAlpha) {
@@ -756,7 +775,7 @@ public class RenderUtil {
                 RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
             }
             if (outline) {
-                drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+                drawBoundingBox(bb, lineWidth, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);
@@ -764,6 +783,45 @@ public class RenderUtil {
             GlStateManager.enableTexture2D();
             GlStateManager.disableBlend();
             GlStateManager.popMatrix();
+        }
+    }
+
+    public static void drawBox(final BufferBuilder buffer, final float x, final float y, final float z, final float w, final float h, final float d, final int r, final int g, final int b, final int a, final int sides) {
+        if ((sides & 0x1) != 0x0) {
+            buffer.pos((double)(x + w), (double)y, (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)y, (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)y, (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)y, (double)z).color(r, g, b, a).endVertex();
+        }
+        if ((sides & 0x2) != 0x0) {
+            buffer.pos((double)(x + w), (double)(y + h), (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)(y + h), (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)(y + h), (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)(y + h), (double)(z + d)).color(r, g, b, a).endVertex();
+        }
+        if ((sides & 0x4) != 0x0) {
+            buffer.pos((double)(x + w), (double)y, (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)y, (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)(y + h), (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)(y + h), (double)z).color(r, g, b, a).endVertex();
+        }
+        if ((sides & 0x8) != 0x0) {
+            buffer.pos((double)x, (double)y, (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)y, (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)(y + h), (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)(y + h), (double)(z + d)).color(r, g, b, a).endVertex();
+        }
+        if ((sides & 0x10) != 0x0) {
+            buffer.pos((double)x, (double)y, (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)y, (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)(y + h), (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)x, (double)(y + h), (double)z).color(r, g, b, a).endVertex();
+        }
+        if ((sides & 0x20) != 0x0) {
+            buffer.pos((double)(x + w), (double)y, (double)(z + d)).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)y, (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)(y + h), (double)z).color(r, g, b, a).endVertex();
+            buffer.pos((double)(x + w), (double)(y + h), (double)(z + d)).color(r, g, b, a).endVertex();
         }
     }
 
@@ -789,7 +847,7 @@ public class RenderUtil {
                 RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
             }
             if (outline) {
-                drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+                drawBoundingBox(bb, lineWidth, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);
@@ -822,7 +880,7 @@ public class RenderUtil {
                 RenderGlobal.renderFilledBox(bb, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, boxAlpha / 255.0F);
             }
             if (outline) {
-                drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
+                drawBoundingBox(bb, lineWidth, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
             }
             GL11.glDisable(2848);
             GlStateManager.depthMask(true);
