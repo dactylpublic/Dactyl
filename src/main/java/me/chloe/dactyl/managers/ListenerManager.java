@@ -2,7 +2,7 @@ package me.chloe.dactyl.managers;
 
 import me.chloe.dactyl.listener.impl.*;
 import me.chloe.dactyl.listener.Listener;
-import me.fluffy.dactyl.listener.impl.*;
+import me.chloe.dactyl.listener.impl.*;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;

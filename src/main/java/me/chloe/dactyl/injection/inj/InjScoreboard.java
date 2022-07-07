@@ -33,8 +33,8 @@ public class InjScoreboard {
 
     /**
      * @author fluffy
-     * removes the stupid log spam with bad scoreboard setups
-     * "Removes the team from the scoreboard, updates all player memberships and broadcasts the deletion to all players"
+     * @Reason removes the stupid log spam with bad scoreboard setups
+     *         "Removes the team from the scoreboard, updates all player memberships and broadcasts the deletion to all players"
      */
     @Overwrite
     public void removeTeam(ScorePlayerTeam playerTeam) {
@@ -52,6 +52,7 @@ public class InjScoreboard {
 
     /**
      * @author fluffy
+     * @Reason Removes player from a team.
      */
     @Overwrite
     public void removePlayerFromTeam(String username, ScorePlayerTeam playerTeam)
