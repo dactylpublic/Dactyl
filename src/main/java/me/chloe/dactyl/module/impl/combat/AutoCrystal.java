@@ -98,6 +98,7 @@ public class AutoCrystal extends Module {
     public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
     public Setting<Boolean> multiPointRotations = new Setting<Boolean>("PointRotations", false, v->isViewGeneral());
     public Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v->isViewGeneral());
+    public Setting<Boolean> toobeeRotate = new Setting<Boolean>("2bRotate", false, v->isViewGeneral() /*for some reason this works on 2b????*/);
     public Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, v->isViewGeneral());
     public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 16.0D, v->isViewGeneral());
 
@@ -791,7 +792,7 @@ public class AutoCrystal extends Module {
                 mc.player.rotationYawHead = yaw;
             }
             event.setPitch(pitch);
-            if(debugRotate.getValue()) {
+            if(debugRotate.getValue() || toobeeRotate.getValue()) {
                 mc.player.rotationYaw = yaw;
                 mc.player.rotationPitch = pitch;
             }
