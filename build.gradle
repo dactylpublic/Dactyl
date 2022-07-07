@@ -36,7 +36,7 @@ minecraft {
     version = "1.12.2-14.23.0.2531"
     runDir = "run"
     mappings = "stable_39"
-    coreMod = "me.fluffy.dactyl.injection.core.DactylInjectionCore"
+    coreMod = "me.chloe.dactyl.injection.core.DactylInjectionCore"
 }
 
 repositories {
@@ -115,7 +115,7 @@ jar {
                 'tweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
                 'TweakOrder': 0,
                 'FMLCorePluginContainsFMLMod': 'true',
-                'FMLCorePlugin': 'me.fluffy.dactyl.injection.core.DactylInjectionCore',
+                'FMLCorePlugin': 'me.chloe.dactyl.injection.core.DactylInjectionCore',
                 'ForceLoadAsMod': 'true',
                 'FMLAT': 'dactyl_at.cfg'
         )

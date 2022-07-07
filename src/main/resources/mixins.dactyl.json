@@ -1,7 +1,7 @@
 {
   "required": true,
   "compatibilityLevel": "JAVA_8",
-  "package": "me.fluffy.dactyl.injection.inj",
+  "package": "me.chloe.dactyl.injection.inj",
   "refmap": "mixins.dactyl.refmap.json",
   "mixins": [
     "InjAbstractHorse",
