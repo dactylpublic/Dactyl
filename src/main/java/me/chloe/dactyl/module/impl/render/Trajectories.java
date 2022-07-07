@@ -17,17 +17,13 @@ public class Trajectories extends Module {
     private MathUtil.Result result = null;
 
     @Override
-    public void onClientUpdate() {
+    public void onRender3D(Render3DEvent event) {
         if(mc.player == null || mc.world == null) {
             return;
         }
         MathUtil.Projectiles projectile = MathUtil.getProjectile(mc.player);
         if(projectile != null) result = MathUtil.calculate(mc.player, projectile);
         else result = null;
-    }
-
-    @Override
-    public void onRender3D(Render3DEvent event) {
         if(result != null) {
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glDisable(GL11.GL_LIGHTING);

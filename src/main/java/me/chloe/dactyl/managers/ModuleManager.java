@@ -8,13 +8,7 @@ import me.chloe.dactyl.module.impl.player.*;
 import me.chloe.dactyl.module.impl.render.*;
 import me.chloe.dactyl.event.impl.world.Render3DEvent;
 import me.chloe.dactyl.module.Module;
-import me.chloe.dactyl.module.impl.client.*;
-import me.chloe.dactyl.module.impl.combat.*;
-import me.chloe.dactyl.module.impl.misc.*;
 import me.chloe.dactyl.module.impl.misc.Blink;
-import me.chloe.dactyl.module.impl.player.*;
-import me.chloe.dactyl.module.impl.movement.*;
-import me.chloe.dactyl.module.impl.render.*;
 import me.chloe.dactyl.setting.Setting;
 
 import java.lang.reflect.Field;
@@ -36,7 +30,7 @@ public class ModuleManager {
         modules.add(new AutoArmor());
         modules.add(new HoleFill());
         modules.add(new CrystalBomber());
-        modules.add(new BetaCrystal());
+        modules.add(new AutoCrystal());
         modules.add(new AutoHoleMine());
         modules.add(new Surround());
         //modules.add(new Auto32k());

@@ -1,17 +1,14 @@
 package me.chloe.dactyl.module.impl.combat;
 
-import me.chloe.dactyl.event.impl.network.PacketEvent;
-import me.chloe.dactyl.util.Bind;
-import me.chloe.dactyl.util.CombatUtil;
-import me.chloe.dactyl.util.RotationUtil;
-import me.chloe.dactyl.util.TimeUtil;
 import me.chloe.dactyl.Dactyl;
 import me.chloe.dactyl.event.ForgeEvent;
-import me.chloe.dactyl.event.impl.action.EventKeyPress;
+import me.chloe.dactyl.event.impl.network.PacketEvent;
 import me.chloe.dactyl.event.impl.player.EventUpdateWalkingPlayer;
-import me.chloe.dactyl.event.impl.world.EntityRemovedEvent;
+import me.chloe.dactyl.util.Bind;
+import me.chloe.dactyl.util.CombatUtil;
+import me.chloe.dactyl.util.TimeUtil;
+import me.chloe.dactyl.event.impl.action.EventKeyPress;
 import me.chloe.dactyl.event.impl.world.Render3DEvent;
-import me.chloe.dactyl.injection.inj.access.ICPacketPlayer;
 import me.chloe.dactyl.injection.inj.access.ICPacketUseEntity;
 import me.chloe.dactyl.module.Module;
 import me.chloe.dactyl.module.impl.client.Colors;
@@ -22,9 +19,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketSoundEffect;
@@ -32,7 +29,6 @@ import net.minecraft.network.play.server.SPacketSpawnObject;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -44,259 +40,127 @@ import org.lwjgl.input.Keyboard;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class AutoCrystal extends Module {
-    Setting<SettingPage> settingPage = new Setting<SettingPage>("Setting", SettingPage.PLACE);
+
+    public Setting<SettingPage> page = new Setting<SettingPage>("Setting", SettingPage.PLACE);
+
     // place
-    Setting<Boolean> doCaPlace = new Setting<Boolean>("Place", true, vis -> settingPage.getValue() == SettingPage.PLACE);
-    Setting<Boolean> tracePlace = new Setting<Boolean>("PlaceTrace", false, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Integer> placeDelay = new Setting<Integer>("PlaceDelay", 45, 0, 250, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0D, 1.0D, 13.5D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && antiSuiPlace.getValue());
-    Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> antiMultiLethal = new Setting<Boolean>("LethalNoMulti", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> lethalMin = new Setting<Double>("LethalMin", 10.0D, 1.0D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && antiMultiLethal.getValue());
-    Setting<Boolean> antiping = new Setting<Boolean>("AntiMulti", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> minPlaceDMG = new Setting<Double>("MinDamage", 6.0D, 1.0D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> facePlaceStart = new Setting<Double>("FacePlaceH", 8.0D, 1.0D, 36.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> doublePlace = new Setting<Boolean>("PlaceExploit", false, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue(), "Weird exploit");
-    Setting<Boolean> noPlaceWhenAttack = new Setting<Boolean>("NoPlaceAttack", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 5.5D, 1.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 4.5D, 0.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue() && tracePlace.getValue());
-    Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFace", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Double> minCountDmg = new Setting<Double>("MinCountDMG", 4.0D, 0.1D, 12.0D, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Boolean> facePlaceHold = new Setting<Boolean>("FPHold", true, vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
-    Setting<Bind> facePlaceKey = new Setting<Bind>("FacePlaceKey", new Bind(Keyboard.KEY_NONE), vis -> settingPage.getValue() == SettingPage.PLACE && doCaPlace.getValue());
+    public Setting<Boolean> doPlace = new Setting<Boolean>("Place", true, v->isViewPlace());
+    public Setting<WallsRange> placeTrace = new Setting<WallsRange>("PlaceTrace", WallsRange.RANGE, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> placeSpeed = new Setting<Double>("PlaceSpeed", 20d, 1d, 20d, v->isViewPlace() && doPlace.getValue());
+    public Setting<Boolean> antiSuiPlace = new Setting<Boolean>("AntiSelfPop", true, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> placeMaxSelf = new Setting<Double>("MaxSelfPlace", 10.0d, 1.0d, 13.0d, v->isViewPlace() && doPlace.getValue() && antiSuiPlace.getValue());
+    public Setting<Boolean> placeRotate = new Setting<Boolean>("PlaceRotate", true, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> minDamage = new Setting<Double>("MinDamage", 6.0d, 1.0d, 13.0d, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> facePlaceH = new Setting<Double>("FPHealth", 10.0d, 1.0d, 36.0d, v->isViewPlace() && doPlace.getValue());
+    public Setting<Boolean> ignoreValidExploit = new Setting<Boolean>("IgnoreInvalid", true, v->isViewPlace() && doPlace.getValue(), "PlaceExploit from old ca");
+    //public Setting<Boolean> spawnPacketExploit = new Setting<Boolean>("SpawnExploit", true, v->isViewPlace() && doPlace.getValue(), "New PlaceExploit lol");
+    public Setting<Boolean> noPlaceAttack = new Setting<Boolean>("NoPlaceAttack", true, v->isViewPlace() && doPlace.getValue());
+    public Setting<Boolean> oneBlockCA = new Setting<Boolean>("1.13+", false, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> placeRange = new Setting<Double>("PlaceRange", 6.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> wallsPlace = new Setting<Double>("WallsPlace", 3.0d, 1.0d, 6.0d, v->isViewPlace() && doPlace.getValue() && (placeTrace.getValue() == WallsRange.RANGE));
+    //public Setting<Boolean> strictDirection = new Setting<Boolean>("StrictDirection", false, v->isViewPlace() && doPlace.getValue());
+    public Setting<Boolean> antiRecalc = new Setting<Boolean>("AntiRecalc", true, v->isViewPlace() && doPlace.getValue());
+    public Setting<Boolean> doRecalcOverride = new Setting<Boolean>("Override", false, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> recalcDmgOverride = new Setting<Double>("RecalcOverride", 8.5d, 1.0d, 16.0d, v->isViewPlace() && doPlace.getValue() && antiRecalc.getValue() && doRecalcOverride.getValue());
+    public Setting<Boolean> countFacePlace = new Setting<Boolean>("CountFP", true, v->isViewPlace() && doPlace.getValue());
+    public Setting<Double> minCountDmg = new Setting<Double>("MinCountDmg", 3.0d, 0.1d, 12.0d, v->isViewPlace() && doPlace.getValue());
+    public Setting<Integer> maxInRange = new Setting<Integer>("MaxPlaced", 1, 1, 5, v->isViewPlace() && doPlace.getValue());
+    public Setting<Boolean> facePlaceHold = new Setting<Boolean>("FPHold", true, v->isViewPlace() && doPlace.getValue());
+    public Setting<Bind> facePlaceKey = new Setting<Bind>("FPKey", new Bind(Keyboard.KEY_NONE), v->isViewPlace() && doPlace.getValue());
 
     // break
-    Setting<Boolean> doCaBreak = new Setting<Boolean>("Break", true, vis -> settingPage.getValue() == SettingPage.BREAK);
-    Setting<Boolean> offhandSwing = new Setting<Boolean>("OffhandSwing", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Boolean> traceBreak = new Setting<Boolean>("BreakTrace", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<AttackLogic> attackLogic = new Setting<AttackLogic>("AttackLogic", AttackLogic.CSLOT, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Integer> breakDelay = new Setting<Integer>("BreakDelay", 65, 0, 350, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Boolean> antiStuck = new Setting<Boolean>("AntiStuck", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Integer> hitAttempts = new Setting<Integer>("HitAttempts", 5, 1, 15, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiStuck.getValue());
-    Setting<Boolean> soundRemove = new Setting<Boolean>("SoundRemove", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<BreakLogic> breakLogic = new Setting<BreakLogic>("BreakLogic", BreakLogic.DOESDMG, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> doesDamageMin = new Setting<Double>("DoesDMGMin", 2.3D, 0.1D, 13.5D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && (breakLogic.getValue() == BreakLogic.DOESDMG || breakLogic.getValue() == BreakLogic.BOTH));
-    Setting<Boolean> antiSuicide = new Setting<Boolean>("AntiSuicide", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Boolean> setDeadSetting = new Setting<Boolean>("PyroMode", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> maxSelfDMG = new Setting<Double>("MaxSelfDMG", 8.0D, 1.0D, 13.5D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && antiSuicide.getValue());
-    Setting<Boolean> breakRotate = new Setting<Boolean>("BreakRotate", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> breakRange = new Setting<Double>("BreakRange", 5.5D, 1.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 4.5D, 0.0D, 6.0D, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && traceBreak.getValue());
-    Setting<Boolean> strictBreak = new Setting<Boolean>("StrictBreak", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Integer> ticksExisted = new Setting<Integer>("TicksExisted", 3, 1, 50, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && strictBreak.getValue());
-    Setting<Boolean> predict = new Setting<Boolean>("Predict", true, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue());
-    Setting<Boolean> waitPredict = new Setting<Boolean>("WaitPredict", false, vis -> settingPage.getValue() == SettingPage.BREAK && doCaBreak.getValue() && predict.getValue());
+    public Setting<Boolean> doBreak = new Setting<Boolean>("Break", true, v->isViewBreak());
+    public Setting<WallsRange> breakTrace = new Setting<WallsRange>("BreakTrace", WallsRange.RANGE, v->isViewBreak() && doBreak.getValue());
+    public Setting<BreakLogic> runLogic = new Setting<BreakLogic>("RunLogic", BreakLogic.HOLDING, v->isViewBreak() && doBreak.getValue());
+    public Setting<Double> breakSpeed = new Setting<Double>("BreakSpeed", 20.0d, 1.0d, 20.0d, v->isViewBreak() && doBreak.getValue());
+    public Setting<Integer> hitsPerSecond = new Setting<Integer>("HitsPerSec", 5, 1, 20, v->isViewBreak() && doBreak.getValue());
+    public Setting<Boolean> soundRemove = new Setting<Boolean>("SoundRemove", true, v->isViewBreak() && doBreak.getValue());
+    public Setting<Boolean> breakRotate = new Setting<Boolean>("BreakRotate", true, v->isViewBreak() && doBreak.getValue());
+    public Setting<PassLogic> passLogic = new Setting<PassLogic>("HitLogic", PassLogic.DOESDMG, v->isViewBreak() && doBreak.getValue());
+    public Setting<Double> minHitDamage = new Setting<Double>("MinHitDamage", 1.2d, 0.5d, 10.0d, v->isViewBreak() && doBreak.getValue() && passLogic.getValue() == PassLogic.DOESDMG);
+    public Setting<Double> breakRange = new Setting<Double>("BreakRange", 6.0d, 1.0d, 6.0d, v->isViewBreak() && doBreak.getValue());
+    public Setting<Double> wallsBreak = new Setting<Double>("WallsBreak", 3.5d, 1.0d, 6.0d, v->isViewBreak() && doBreak.getValue() && breakTrace.getValue() == WallsRange.RANGE);
+    public Setting<Boolean> antiSuiBreak = new Setting<Boolean>("AntiSuicide", true, v->isViewBreak() && doBreak.getValue());
+    public Setting<Double> maxSelfBreak = new Setting<Double>("MaxSelfBreak", 8.0d, 1.0d, 13.0d, v->isViewBreak() && doBreak.getValue() && antiSuiBreak.getValue());
+    public Setting<Integer> ticksExisted = new Setting<Integer>("TicksExisted", 0, 0, 10, v->isViewBreak() && doBreak.getValue());
+    public Setting<Boolean> preAttackRotate = new Setting<Boolean>("PreRotate", true, v->isViewBreak() && doBreak.getValue() && breakRotate.getValue());
+    public Setting<Boolean> preAttack = new Setting<Boolean>("PreAttack", true, v->isViewBreak() && doBreak.getValue());
 
-    // misc
-    Setting<AuraLogic> auraOrder = new Setting<AuraLogic>("Order", AuraLogic.BREAKPLACE, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<UpdateLogic> updateLogic = new Setting<UpdateLogic>("RotateLogic", UpdateLogic.PACKET, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> yawStep = new Setting<Boolean>("YawStep", false, vis -> settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
-    Setting<Boolean> doLogicalBreakStep = new Setting<Boolean>("LogicalBreakYaw", false, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
-    Setting<Integer> yawStepTicks = new Setting<Integer>("StepAmt", 10, 1, 180, vis -> yawStep.getValue() && settingPage.getValue() == SettingPage.MISC && updateLogic.getValue() == UpdateLogic.WALKING);
-    //Setting<Boolean> cancelUntilYaw = new Setting<Boolean>("CancelUntilYaw", true, v->yawStep.getValue() && settingPage.getValue() == SettingPage.MISC);
-    //Setting<Boolean> extraRotPackets = new Setting<Boolean>("ExtraPackets", false, vis->settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> constRotate = new Setting<Boolean>("ConstRotate", false, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 13.0D, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BREAK, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> fasterResetRot = new Setting<Boolean>("FastRReset", false, v -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> cancelSwap = new Setting<Boolean>("CancelOnSwap", false, vis -> settingPage.getValue() == SettingPage.MISC);
-    Setting<Boolean> africanMode = new Setting<Boolean>("AfricanMode", false, vis -> settingPage.getValue() == SettingPage.MISC);
+    // general
+    public Setting<YawStepEnum> yawStepEnum = new Setting<YawStepEnum>("YawStep", YawStepEnum.BOTH, v->isViewGeneral());
+    public Setting<Integer> yawStep = new Setting<Integer>("StepAmount", 55, 5, 180, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
+    public Setting<Integer> stepTicks = new Setting<Integer>("StepTicks", 1, 1, 20, v->isViewGeneral() && yawStepEnum.getValue() != YawStepEnum.OFF);
+    public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v->isViewGeneral());
+    public Setting<Integer> loginWaitTicks = new Setting<Integer>("LoginTicks", 0, 1, 500, v->isViewGeneral());
+    public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
+    public Setting<Boolean> multiPointRotations = new Setting<Boolean>("PointRotations", false, v->isViewGeneral());
+    public Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v->isViewGeneral());
+    public Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, v->isViewGeneral());
+    public Setting<Double> enemyRange = new Setting<Double>("EnemyRange", 10.0D, 1.0D, 16.0D, v->isViewGeneral());
 
     // render
-    Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, vis -> settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, vis -> settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, vis -> settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> outline = new Setting<Boolean>("Outline", true, vis -> settingPage.getValue() == SettingPage.RENDER);
-    Setting<Boolean> slowerClear = new Setting<Boolean>("SlowerReset", true, vis -> settingPage.getValue() == SettingPage.RENDER);
-    Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, vis -> settingPage.getValue() == SettingPage.RENDER && outline.getValue());
-    Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER);
-    Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER && !colorSync.getValue());
-    Setting<Integer> colorGreen = new Setting<Integer>("Green", 175, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER && !colorSync.getValue());
-    Setting<Integer> colorBlue = new Setting<Integer>("Blue", 255, 1, 255, vis -> settingPage.getValue() == SettingPage.RENDER && !colorSync.getValue());
+    public Setting<Boolean> renderESP = new Setting<Boolean>("Render", true, v->isViewRender());
+    public Setting<Boolean> damageText = new Setting<Boolean>("Damage", true, v->isViewRender());
+    public Setting<Boolean> colorSync = new Setting<Boolean>("ColorSync", false, v->isViewRender());
+    public Setting<Boolean> fadeOut = new Setting<Boolean>("FadeOut", true, v->isViewRender());
+    //public Setting<Double> fadeOutTime = new Setting<Double>("FadeTime", 0.7d, 0.1d, 10.0d, v->isViewRender() && fadeOut.getValue());
+    public Setting<Boolean> outline = new Setting<Boolean>("Outline", true, v->isViewRender());
+    public Setting<Double> lineWidth = new Setting<Double>("LineWidth", 1.5d, 0.1d, 2.0d, v->isViewRender() && outline.getValue());
+    public Setting<Integer> boxAlpha = new Setting<Integer>("BoxAlpha", 45, 1, 255, v->isViewRender());
+    public Setting<Integer> colorRed = new Setting<Integer>("Red", 5, 1, 255, v->isViewRender() && !colorSync.getValue());
+    public Setting<Integer> colorGreen = new Setting<Integer>("Green", 175, 1, 255, v->isViewRender() && !colorSync.getValue());
+    public Setting<Integer> colorBlue = new Setting<Integer>("Blue", 255, 1, 255, v->isViewRender() && !colorSync.getValue());
 
 
     public static AutoCrystal INSTANCE;
-
-
-    private final ConcurrentHashMap<EntityEnderCrystal, Integer> attackedCrystals = new ConcurrentHashMap<>();
-
-    private final TimeUtil placeTimer = new TimeUtil();
-    private final TimeUtil breakTimer = new TimeUtil();
-    private final TimeUtil checkTimer = new TimeUtil();
-    private final TimeUtil antiStuckTimer = new TimeUtil();
-    private final TimeUtil placeResetTimer = new TimeUtil();
-    private final TimeUtil modInfoTimer = new TimeUtil();
-    private final TimeUtil novolaTimer = new TimeUtil();
-
-
-    private static float yaw;
-    private static float pitch;
-    private static boolean isRotating;
-    private float oldYaw, oldPitch;
-    private static boolean togglePitch = false;
-    private CPacketUseEntity predictPacket = null;
-    private static BlockPos crystalRender = null;
-    private static BlockPos oldPlacePos = null;
-    private static boolean hasReachedYaw = false;
-    private static float lastTargetYaw = -1f;
-    private static float currentRotationYaw = -1f;
-    private static float lastRotatedSteppedYaw = 0f;
-    private static float currentRotationStepped = 0f;
-    private static float lastRotatedSteppedYawPlace = 0f;
-    private static float currentRotationSteppedPlace = 0f;
-    private static boolean hasFinishedYawSteporoskiPlace = true;
-    private static float targetRotationYaw = -1f;
-    private static boolean hasFinishedYawSteporoski = true;
-    private static float currentRotationPitch = -1f;
-
-
-    private static boolean isRotatingUpdates;
-    private static boolean isRotatingPlace;
-    private static boolean isRotatingBreak;
-    private static float updatesYaw = 0f;
-    private static float updatesPitch = 0f;
-
-    private static double damage = 0.0d;
-    private static int yawTicks = 0;
-    private EntityEnderCrystal currentAttacking = null;
-    public boolean faceplaceKeyOn = false;
-
-    private final Set<BlockPos> placedCrystals = new HashSet<>();
-
     public AutoCrystal() {
-        super("AutoCrystal",
-                Category.COMBAT,
-                "Place and break crystals (used for Player Versus Player EnderCrystal combat)");
+        super("AutoCrystal", Category.COMBAT,
+                "An attempt at making a better ca for both strict and non-strict servers");
         INSTANCE = this;
     }
 
+    private final TimeUtil breakTimer = new TimeUtil();
+    private final TimeUtil placeTimer = new TimeUtil();
+
+    private final TimeUtil checkTimer = new TimeUtil();
+
+    private final ArrayList<AttackedCrystal> attackedCrystals = new ArrayList<>();
+    private final ArrayList<RenderPosition> renderPositions = new ArrayList<>();
+    private final Set<BlockPos> placedCrystals = new HashSet<>();
+
+    private int breakStepTicks = 0;
+    private int placeStepTicks = 0;
+
+    private float yaw;
+    private float pitch;
+    private boolean isRotatingBreak;
+    private boolean isRotatingPlace;
+    private boolean isRotatingUpdates;
+
+    private float lastSteppedPlace;
+    private float lastSteppedBreak;
+
+    private static BlockPos placeRender = null;
+    private static BlockPos oldPlacePos = null;
+    private static double damage = 0.0d;
+    public boolean faceplaceKeyOn = false;
+
+    private EntityEnderCrystal currentAttacking = null;
 
     @SubscribeEvent
-    public void onPacket(PacketEvent event) {
-        if (updateLogic.getValue() == UpdateLogic.PACKET) {
-            if (event.getType() == PacketEvent.PacketType.OUTGOING) {
-                if (event.getPacket() instanceof CPacketPlayer && isRotating) {
-                    CPacketPlayer packet = (CPacketPlayer) event.getPacket();
-                    ((ICPacketPlayer) packet).setYaw(yaw);
-                    if (rotateHead.getValue()) {
-                        mc.player.rotationYawHead = yaw;
-                    }
-                    ((ICPacketPlayer) packet).setPitch(pitch);
-                }
-            }
-        }
-        if (event.getType() == PacketEvent.PacketType.INCOMING) {
-            if (soundRemove.getValue()) {
-                if (event.getPacket() instanceof SPacketSoundEffect) {
-                    SPacketSoundEffect packet = (SPacketSoundEffect) event.getPacket();
-                    if (packet.getCategory() == SoundCategory.BLOCKS && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
-                        Iterator<Entity> entityLoadedList = mc.world.loadedEntityList.iterator();
-                        try {
-                            while (entityLoadedList.hasNext()) {
-                                Entity e = entityLoadedList.next();
-                                if (e == null) continue;
-                                if (e instanceof EntityEnderCrystal) {
-                                    if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
-                                        e.setDead();
-                                        if (attackedCrystals.containsKey(e)) {
-                                            attackedCrystals.remove(e);
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (Exception exceeept) {
-                        }
-                    }
-                }
-            }
-            if (event.getPacket() instanceof SPacketSpawnObject) {
-                SPacketSpawnObject packetSpawnObject = (SPacketSpawnObject) event.getPacket();
-                if (doCaBreak.getValue() && predict.getValue()) {
-                    if (packetSpawnObject.getType() == 51) {
-                        BlockPos pos = new BlockPos(packetSpawnObject.getX(), packetSpawnObject.getY(), packetSpawnObject.getZ());
-                        if (placedCrystals.contains(pos.down())) {
-                            for (EntityPlayer p : mc.world.playerEntities) {
-                                if (p == null || mc.player.equals(p) || p.getDistanceSq(pos) > (((enemyRange.getValue() + placeRange.getValue())) * ((enemyRange.getValue() + placeRange.getValue()))) || !Dactyl.friendManager.isFriend(p.getName())) {
-                                    continue;
-                                }
-                                float playerHealth = p.getHealth() + p.getAbsorptionAmount();
-                                if (CombatUtil.calculateDamage(pos, (Entity) p) > playerHealth + 0.5D) {
-                                    return;
-                                }
-                            }
-                            CPacketUseEntity attackPacket = new CPacketUseEntity();
-                            ((ICPacketUseEntity) attackPacket).setEntityId(packetSpawnObject.getEntityID());
-                            ((ICPacketUseEntity) attackPacket).setAction(CPacketUseEntity.Action.ATTACK);
-                            if (waitPredict.getValue()) {
-                                predictPacket = attackPacket;
-                                return;
-                            }
-                            mc.player.connection.sendPacket(attackPacket);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public void onKeyPress(EventKeyPress event) {
-        if (mc.player == null || mc.world == null) {
-            return;
-        }
-        if (facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
-            if (!facePlaceHold.getValue()) {
-                if (event.getKey() == facePlaceKey.getValue().getKey()) {
-                    faceplaceKeyOn = !faceplaceKeyOn;
-                }
-            }
+    public void onUpdate(EventUpdateWalkingPlayer event) {
+        doFPKey();
+        if(event.getStage() == ForgeEvent.Stage.PRE) {
+            breakCrystals();
         } else {
-            faceplaceKeyOn = false;
+            placeCrystals();
         }
     }
 
-
-    @SubscribeEvent
-    public void onRemoveEntity(EntityRemovedEvent event) {
-        if (event.getEntity() == null) {
-            return;
-        }
-        if (event.getEntity() instanceof EntityEnderCrystal) {
-            /*if(attackedCrystals.containsKey(event.getEntity())) {
-                attackedCrystals.remove(event.getEntity());
-            }*/
-            try {
-                Iterator<EntityEnderCrystal> crystalIterator = attackedCrystals.keySet().iterator();
-                while (crystalIterator.hasNext()) {
-                    crystalIterator.next();
-                    if (attackedCrystals.containsKey(event.getEntity())) {
-                        crystalIterator.remove();
-                        //attackedCrystals.remove(e);
-                    }
-                }
-            } catch (Exception fuckyou) {
-            }
-        }
-    }
-
-
-    public void doAutoCrystal(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
-        if (antiStuckTimer.hasPassed(1000)) {
-            attackedCrystals.clear();
-        }
-        if (placeResetTimer.hasPassed(5000)) {
-            placedCrystals.clear();
-        }
+    private void doFPKey() {
         if (facePlaceHold.getValue()) {
             if (facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
                 if (Keyboard.isKeyDown(facePlaceKey.getValue().getKey())) {
@@ -306,178 +170,96 @@ public class AutoCrystal extends Module {
                 }
             }
         }
-        if (auraOrder.getValue() == AuraLogic.BREAKPLACE) {
-            doBreak(eventUpdateWalkingPlayer);
-            doPlace(eventUpdateWalkingPlayer);
-        } else {
-            doPlace(eventUpdateWalkingPlayer);
-            doBreak(eventUpdateWalkingPlayer);
-        }
     }
 
-    @SubscribeEvent
-    public void onUpdateRotates(EventUpdateWalkingPlayer event) {
-        if(updateLogic.getValue() == UpdateLogic.WALKING) {
-            //if(event.getStage() == ForgeEvent.Stage.PRE) {
-            // do rotate
-            if(isRotatingUpdates) {
-                event.setYaw(updatesYaw);
-                event.setPitch(updatesPitch);
-                if (rotateHead.getValue()) {
-                    mc.player.rotationYawHead = yaw;
-                }
-            }
-            //}
-        }
-    }
 
-    private void doBreak(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
-        if (!doCaBreak.getValue()) {
-            return;
-        }
-        if (attackLogic.getValue() == AttackLogic.CSLOT) {
-            if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
-                this.setModuleInfo("");
-                resetRots();
-                resetRotsBreak();
-                currentAttacking = null;
-                checkTimer.reset();
-                return;
-            }
-            if (!checkTimer.hasPassed(75L)) {
+    private void breakCrystals() {
+        if(!doBreak.getValue()) return;
+
+        if (runLogic.getValue() == BreakLogic.HOLDING) {
+            if(!canDoBreak()) {
                 return;
             }
         }
+
         EntityEnderCrystal crystal = (EntityEnderCrystal) mc.world.loadedEntityList.stream()
                 .filter(entity -> entity instanceof EntityEnderCrystal)
                 .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
-                .filter(entity -> CombatUtil.isBreakableCrystal((EntityEnderCrystal) entity, traceBreak.getValue(), wallsBreak.getValue(), antiSuicide.getValue(), maxSelfDMG.getValue(), breakLogic.getValue(), doesDamageMin.getValue(), enemyRange.getValue()))
-                .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuicide.getValue(), maxSelfDMG.getValue()))
-                .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal) entity, strictBreak.getValue(), ticksExisted.getValue()))
-                .filter(this::passesAntiStuck)
+                .filter(entity -> CombatUtil.crystalIsBreakable(multiPoint.getValue(), (EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), (faceplaceKeyOn ? 1.0d : minHitDamage.getValue()), enemyRange.getValue()))
+                .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuiBreak.getValue(), maxSelfBreak.getValue()))
+                .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal) entity, true, true, ticksExisted.getValue()))
+                .filter(entity -> canAttackCrystal((EntityEnderCrystal) entity))
                 .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
                 .orElse(null);
-        if (crystal == null || (cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65))) {
+        if (crystal == null) {
             resetRots();
-            resetRotsBreak();
+            resetRotField(false);
             currentAttacking = null;
             return;
         }
         if(crystal != null) {
             currentAttacking = crystal;
         }
-        if (!breakTimer.hasPassed(breakDelay.getValue())) {
+        if (!breakTimer.hasPassed((long) (1000L / breakSpeed.getValue()))) {
             return;
         }
-        if (updateLogic.getValue() == UpdateLogic.WALKING) {
-            double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
-            if(rotateHead.getValue()) {
-                mc.player.rotationYawHead = getYawStepBreak(rots[0]);
-            }
-            if (eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
-                if (breakRotate.getValue()) {
-                    float finishedYaw = (float)rots[0];
-                    float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-                    if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue() && !(lastRotatedSteppedYaw == finishedYaw || (doLogicalBreakStep.getValue() && lastRotatedSteppedYawPlace == finishedYaw))) {
-                        finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
-                        hasFinishedYawSteporoski = false;
-                    } else {
-                        hasFinishedYawSteporoski = true;
+        double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
+
+        if (breakRotate.getValue()) {
+            if(yawStepEnum.getValue() == YawStepEnum.BOTH || yawStepEnum.getValue() == YawStepEnum.BREAK) {
+                float relativeYaw = (float)rots[0];
+                float yawDiff = (float) MathHelper.wrapDegrees(relativeYaw - mc.player.lastReportedYaw);
+                boolean finishedStep = true;
+                float currentSteppedYaw = 0f;
+                breakStepTicks++;
+                if (Math.abs(yawDiff) > yawStep.getValue().floatValue() && !(lastSteppedBreak == relativeYaw || lastSteppedPlace == relativeYaw)) {
+                    if(breakStepTicks >= stepTicks.getValue()) {
+                        relativeYaw = (float) (mc.player.lastReportedYaw + (yawDiff * ((yawStep.getValue()) / Math.abs(yawDiff))));
+                        breakStepTicks = 0;
                     }
-                    if(lastRotatedSteppedYaw == finishedYaw || (doLogicalBreakStep.getValue() && lastRotatedSteppedYawPlace == finishedYaw)) {
-                        finishedYaw = lastRotatedSteppedYaw;
-                        hasFinishedYawSteporoski = true;
-                        currentRotationStepped = finishedYaw;
-                    } else {
-                        if(hasFinishedYawSteporoski) {
-                            currentRotationStepped = finishedYaw;
-                        }
-                    }
-                    updatesYaw = finishedYaw;
-                    updatesPitch = (float) rots[1];
-                    if (debugRotate.getValue()) {
-                        mc.player.rotationYaw = updatesYaw;
-                        mc.player.rotationPitch = updatesPitch;
-                    }
-                    isRotatingUpdates = true;
-                    isRotatingBreak = true;
-                    //return;
-                    //System.out.println("Break Yaw: " + (float)rots[0]);
-                    //eventUpdateWalkingPlayer.setYaw(finishedYaw);
-                    //eventUpdateWalkingPlayer.setPitch((float) rots[1]);
+                    finishedStep = false;
                 }
-            } else if(eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.POST) {
-                if(!hasFinishedYawSteporoski && breakRotate.getValue()) {
+                if(lastSteppedBreak == relativeYaw || (lastSteppedPlace == relativeYaw)) {
+                    relativeYaw = lastSteppedBreak;
+                    finishedStep = true;
+                    currentSteppedYaw = relativeYaw;
+                } else {
+                    if(finishedStep) {
+                        currentSteppedYaw = relativeYaw;
+                    }
+                }
+                yaw = relativeYaw;
+                pitch = (float) rots[1];
+                isRotatingUpdates = true;
+                isRotatingBreak = true;
+                if(!finishedStep) {
                     return;
                 }
-                lastRotatedSteppedYaw = currentRotationStepped;
+                currentAttacking = crystal;
+                lastSteppedBreak = currentSteppedYaw;
+                attackCrystal(crystal);
+            } else {
+                yaw = (float) rots[0];
+                pitch = (float) rots[1];
+                isRotatingUpdates = true;
+                isRotatingBreak = true;
                 currentAttacking = crystal;
                 attackCrystal(crystal);
             }
-        } else if (updateLogic.getValue() == UpdateLogic.PACKET) {
-            if (breakRotate.getValue()) {
-                double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
-                setRotations(rots[0], rots[1]);
-            }
-            currentAttacking = crystal;
-            attackCrystal(crystal);
-        } else if (updateLogic.getValue() == UpdateLogic.FIELD) {
-            if (breakRotate.getValue()) {
-                double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
-                RotationUtil.setPlayerRotations((float) rots[0], (float) rots[1]);
-            }
-            currentAttacking = crystal;
-            attackCrystal(crystal);
-        }
-
-    }
-
-    private float getYawStepBreak(double yaw) {
-        float finishedYaw = (float) yaw;
-        float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-        if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue()) {
-            finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
-        }
-        if(lastRotatedSteppedYaw == finishedYaw || (doLogicalBreakStep.getValue() && lastRotatedSteppedYawPlace == finishedYaw)) {
-            finishedYaw = lastRotatedSteppedYaw;
-        }
-        return finishedYaw;
-    }
-
-    private float getYawStepPlace(double yaw) {
-        float finishedYaw = (float) yaw;
-        float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-        if (Math.abs(yawDiff) > yawStepTicks.getValue().floatValue() && yawStep.getValue()) {
-            finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
-        }
-        if(lastRotatedSteppedYawPlace == finishedYaw) {
-            finishedYaw = lastRotatedSteppedYawPlace;
-        }
-        return finishedYaw;
-    }
-
-    private boolean passesAntiStuck(Entity entity) {
-        return !(attackedCrystals.containsKey(entity) && attackedCrystals.get(entity) > (hitAttempts.getValue()) && antiStuck.getValue());
-    }
-
-    private void doPlace(EventUpdateWalkingPlayer eventUpdateWalkingPlayer) {
-        if (!doCaPlace.getValue()) {
-            this.setModuleInfo("");
-            resetRots();
-            resetRotsPlace();
             return;
         }
+        isRotatingBreak = false;
+        attackCrystal(crystal);
+    }
 
-        if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
+    private void placeCrystals() {
+        if (!doPlace.getValue()) {
             this.setModuleInfo("");
-            crystalRender = null;
-            damage = 0.0d;
             resetRots();
-            resetRotsPlace();
-            checkTimer.reset();
+            resetRotField(true);
             return;
         }
-        if (!checkTimer.hasPassed(125L)) {
+        if(!canDoPlace()) {
             return;
         }
         boolean doRecalc = true;
@@ -486,14 +268,25 @@ public class AutoCrystal extends Module {
             if (oldPlacePos == null) {
                 doRecalc = true;
             } else {
-                if (CombatUtil.placePosStillSatisfies(oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                if (CombatUtil.placePosStillValid(multiPoint.getValue(), oldPlacePos, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
                     doRecalc = false;
                 } else {
                     doRecalc = true;
                 }
             }
         }
-        BlockPos placePosition = CombatUtil.getBestPlacePosition(antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+        if(faceplaceKeyOn) {
+            doRecalc = true;
+        }
+
+        BlockPos placePosition = CombatUtil.getBestPlacePosNew(loginWaitTicks.getValue(), multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+
+        if(!doRecalc) {
+            if(doRecalcOverride.getValue() && CombatUtil.getDamageBestPosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) >= recalcDmgOverride.getValue()) {
+                doRecalc = true;
+            }
+        }
+
 
         if (oldPlacePos != null && !doRecalc) {
             placePosition = oldPlacePos;
@@ -502,7 +295,7 @@ public class AutoCrystal extends Module {
 
         EnumHand placeHand = null;
 
-        if (CombatUtil.getBestPlacePosIgnoreAlreadyPlaced(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
+        if (CombatUtil.getBestPlacePosIgnoreAlreadyPlacedNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue()) == null) {
             this.setModuleInfo("");
         }
 
@@ -512,186 +305,182 @@ public class AutoCrystal extends Module {
             placeHand = EnumHand.OFF_HAND;
         }
         if (placePosition != null) {
-            if (getCrystalsInRange() >= maxInRange.getValue() || (noPlaceWhenAttack.getValue() && currentAttacking != null)) {
+            boolean isAttacking = false;
+            if(noPlaceAttack.getValue()) {
+                if(currentAttacking == null) {
+                    EntityEnderCrystal crystal = (EntityEnderCrystal) mc.world.loadedEntityList.stream()
+                            .filter(entity -> entity instanceof EntityEnderCrystal)
+                            .filter(entity -> mc.player.getDistance(entity) <= breakRange.getValue())
+                            .filter(entity -> CombatUtil.crystalIsBreakable(multiPoint.getValue(), (EntityEnderCrystal) entity, breakTrace.getValue(), wallsBreak.getValue(), antiSuiBreak.getValue(), maxSelfBreak.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue()))
+                            .filter(entity -> CombatUtil.wontSelfPop((EntityEnderCrystal) entity, antiSuiBreak.getValue(), maxSelfBreak.getValue()))
+                            .filter(entity -> CombatUtil.passesStrictBreak((EntityEnderCrystal) entity, true, false, ticksExisted.getValue()))
+                            .min(Comparator.comparing(entity -> mc.player.getDistance(entity)))
+                            .orElse(null);
+                    isAttacking = (crystal != null);
+                } else {
+                    isAttacking = true;
+                }
+            }
+            if (getCrystalsInRange() >= maxInRange.getValue() || (noPlaceAttack.getValue() && isAttacking)) {
                 boolean doReset = true;
-                if (slowerClear.getValue()) {
-                    if (crystalRender != null) {
-                        if (CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
-                            doReset = false;
-                        }
+                if (placeRender != null) {
+                    if (CombatUtil.renderPosStillValid(multiPoint.getValue(), placeRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                        doReset = false;
                     }
                 }
                 if (doReset) {
-                    crystalRender = null;
+                    placeRender = null;
                     damage = 0.0d;
                 }
-                //resetRots();
                 return;
             }
-            crystalRender = placePosition;
+            placeRender = placePosition;
             oldPlacePos = placePosition;
             boolean finalizePlace = true;
-            damage = CombatUtil.getDamageBestPos(antiSuicide.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
-            double[] rots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
-            double[] constRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() + 0.5, placePosition.getZ() + 0.5);
-            double[] finalRotations = (constRotate.getValue() ? constRots : rots);
+            damage = CombatUtil.getDamageBestPosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
+            double[] finalRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
+            if(multiPointRotations.getValue()) {
+                finalRots = CombatUtil.calculateLookAtBlock(placePosition);
+            }
             if (placeRotate.getValue()) {
-                if(updateLogic.getValue() == UpdateLogic.WALKING) {
-                    if(rotateHead.getValue()) {
-                        mc.player.rotationYawHead = getYawStepPlace(finalRotations[0]);
+                if(yawStepEnum.getValue() == YawStepEnum.PLACE || yawStepEnum.getValue() == YawStepEnum.BOTH) {
+                    float relativeYaw = (float)finalRots[0];
+                    float yawDiff = (float) MathHelper.wrapDegrees(relativeYaw - mc.player.lastReportedYaw);
+                    boolean finishedStep = true;
+                    float currentSteppedYaw = 0f;
+                    placeStepTicks++;
+                    if (Math.abs(yawDiff) > yawStep.getValue().floatValue() && !(lastSteppedPlace == relativeYaw)) {
+                        if(placeStepTicks >= stepTicks.getValue()) {
+                            relativeYaw = (float) (mc.player.lastReportedYaw + (yawDiff * ((yawStep.getValue()) / Math.abs(yawDiff))));
+                            placeStepTicks = 0;
+                        }
+                        finishedStep = false;
                     }
-                }
-                if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
-                    float finishedYaw = (float) finalRotations[0];
-                    float yawDiff = (float) MathHelper.wrapDegrees(finishedYaw - mc.player.lastReportedYaw);
-                    if (Math.abs(yawDiff) > yawStepTicks.getValue() && yawStep.getValue() && (lastRotatedSteppedYawPlace != finishedYaw)) {
-                        finishedYaw = (mc.player.lastReportedYaw + (yawDiff * ((yawStepTicks.getValue().floatValue()) / Math.abs(yawDiff))));
-                        hasFinishedYawSteporoskiPlace = false;
+                    if(lastSteppedPlace == relativeYaw) {
+                        relativeYaw = lastSteppedPlace;
+                        finishedStep = true;
+                        currentSteppedYaw = relativeYaw;
                     } else {
-                        hasFinishedYawSteporoskiPlace = true;
-                    }
-                    if(lastRotatedSteppedYawPlace == finishedYaw) {
-                        finishedYaw = lastRotatedSteppedYawPlace;
-                        hasFinishedYawSteporoskiPlace = true;
-                        currentRotationSteppedPlace = finishedYaw;
-                    } else {
-                        if(hasFinishedYawSteporoskiPlace) {
-                            currentRotationSteppedPlace = finishedYaw;
+                        if(finishedStep) {
+                            currentSteppedYaw = relativeYaw;
                         }
                     }
-                    updatesYaw = finishedYaw;
-                    updatesPitch = (float) finalRotations[1];
-                    if (debugRotate.getValue()) {
-                        mc.player.rotationYaw = updatesYaw;
-                        mc.player.rotationPitch = updatesPitch;
-                    }
+                    yaw = relativeYaw;
+                    pitch = (float) finalRots[1];
                     isRotatingUpdates = true;
                     isRotatingPlace = true;
-                    //return;
-                    //eventUpdateWalkingPlayer.setYaw(finishedYaw);
-                    //eventUpdateWalkingPlayer.setPitch();
-                } else if (updateLogic.getValue() != UpdateLogic.WALKING) {
-                    doRotations(updateLogic.getValue(), finalRotations);
-                }
-            }
-            if(!hasFinishedYawSteporoskiPlace && placeRotate.getValue()) {
-                finalizePlace = false;
-            } else {
-                lastRotatedSteppedYawPlace = currentRotationSteppedPlace;
-            }
-            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5));
-            EnumFacing facing = null;
-            // placing that works on 2b :^)
-            if (rayTraceResult == null || rayTraceResult.sideHit == null) {
-                rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
-                if (rayTraceResult != null) {
-                    if (rayTraceResult.sideHit != null) {
-                        facing = rayTraceResult.sideHit;
+                    if(!finishedStep) {
+                        finalizePlace = false;
+                    } else {
+                        lastSteppedPlace = currentSteppedYaw;
                     }
+                } else {
+                    yaw = (float) finalRots[0];
+                    pitch = (float) finalRots[1];
+                    isRotatingUpdates = true;
+                    isRotatingPlace = true;
                 }
-            } else {
-                facing = rayTraceResult.sideHit;
             }
-            if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
+            if (placeHand == null) {
                 this.setModuleInfo("");
                 resetRots();
-                resetRotsPlace();
+                resetRotField(true);
                 return;
             } else {
                 if (CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition) != null) {
                     this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), placePosition).getName() + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
                 }
             }
-            if (placeTimer.hasPassed(placeDelay.getValue())) {
-                if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer.getStage() != ForgeEvent.Stage.POST) {
-                    finalizePlace = false;
-                }
+            if (placeTimer.hasPassed((long) (1000 / placeSpeed.getValue()))) {
                 if (finalizePlace) {
-                    if (placeHand == null || cancelSwap.getValue() && !Offhand.INSTANCE.lastSwitch.hasPassed(65)) {
+                    if (placeHand == null) {
                         this.setModuleInfo("");
                         resetRots();
-                        resetRotsPlace();
+                        resetRotField(true);
                         return;
                     }
-                    if (waitPredict.getValue() && predictPacket != null) {
-                        mc.player.connection.sendPacket(predictPacket);
-                        predictPacket = null;
-                    }
-                    //if(extraRotPackets.getValue()) {
-                    //    mc.player.connection.sendPacket(new CPacketPlayer(mc.player.onGround));
-                    //}
-                    if (africanMode.getValue()) {
-                        for (int i = 0; i < 30; i++) {
-                            mc.player.connection.sendPacket(new CPacketPlayer(false));
-                        }
-                    }
                     placedCrystals.add(placePosition);
-                    mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
+                    RayTraceResult res = CombatUtil.getPlaceDirection(placePosition, multiPoint.getValue());
+                    CombatUtil.AutoCrystalTraceResult traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
+                    mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placePosition, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
                     if (swingSetting.getValue() == SwingLogic.PLACE || swingSetting.getValue() == SwingLogic.BOTH) {
                         mc.player.swingArm(placeHand);
                     }
                     placeTimer.reset();
                 }
             }
-            if (isRotating) {
-                if (togglePitch) {
-                    mc.player.rotationPitch += (float) 4.0E-4;
-                    togglePitch = false;
-                } else {
-                    mc.player.rotationPitch -= (float) 4.0E-4;
-                    togglePitch = true;
-                }
-            }
         } else {
-            //this.setModuleInfo("");
             boolean doReset = true;
-            if (slowerClear.getValue()) {
-                if (crystalRender != null) {
-                    if (CombatUtil.renderPosStillSatisfies(crystalRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minPlaceDMG.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
-                        doReset = false;
-                    }
+            if (placeRender != null) {
+                if (CombatUtil.renderPosStillValid(multiPoint.getValue(), placeRender, antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue())) {
+                    doReset = false;
                 }
             }
             if (doReset) {
-                crystalRender = null;
+                placeRender = null;
                 damage = 0.0d;
-                if (!fasterResetRot.getValue()) {
-                    resetRots();
-                    resetRotsPlace();
-                }
-            } else {
-                if (!fasterResetRot.getValue()) {
-                    if(currentRotationYaw != -1f && currentRotationPitch != -1f) {
-                        if (updateLogic.getValue() == UpdateLogic.WALKING) {
-                            if (updateLogic.getValue() == UpdateLogic.WALKING && eventUpdateWalkingPlayer != null && eventUpdateWalkingPlayer.getStage() == ForgeEvent.Stage.PRE) {
-                                eventUpdateWalkingPlayer.setYaw(currentRotationYaw);
-                                eventUpdateWalkingPlayer.setPitch(currentRotationPitch);
-                            }
-                        }
-                    }
-                }
-            }
-            if (fasterResetRot.getValue()) {
                 resetRots();
-                resetRotsPlace();
+                resetRotField(true);
             }
         }
+    }
+
+    private EnumFacing getStrictDirection(BlockPos pos) {
+        double lastDist = 69.0d;
+        EnumFacing finalFacing = EnumFacing.UP;
+        for(EnumFacing facing : EnumFacing.values()) {
+            Vec3d offset = new Vec3d(pos).add(0.5d, 0.5f, 0.5d).add(new Vec3d(facing.getDirectionVec()).scale(0.5d));
+            double dist = mc.player.getDistance(offset.x, offset.y, offset.z);
+            if(dist <= lastDist) {
+                if(facing != EnumFacing.UP && facing != EnumFacing.DOWN) {
+                    if(dist > 0.5 && (mc.world.getBlockState(pos.offset(facing.getOpposite())) != null && mc.world.getBlockState(pos.offset(facing)).getBlock() != null && mc.world.getBlockState(pos.offset(facing)).getBlock() != Blocks.AIR)) {
+                        System.out.println(mc.world.getBlockState(pos.offset(facing)).getBlock().getLocalizedName());
+                        finalFacing = facing;
+                    }
+                } else {
+                    finalFacing = facing;
+                }
+                lastDist = dist;
+            }
+        }
+        return finalFacing;
     }
 
     @Override
     public void onRender3D(Render3DEvent event) {
         if (renderESP.getValue()) {
-            if (crystalRender != null && CombatUtil.isHoldingCrystal()) {
+            if(fadeOut.getValue()) {
+                renderPositions.removeIf(pos -> pos.alpha <= 0);
+                Iterator<RenderPosition> renderPositionIterator = renderPositions.iterator();
+                try {
+                    while (renderPositionIterator.hasNext()) {
+                        RenderPosition next = renderPositionIterator.next();
+                        next.update();
+                        if (!colorSync.getValue()) {
+                            RenderUtil.drawBoxESP(next.pos, new Color(colorRed.getValue(), colorGreen.getValue(), colorBlue.getValue(), next.alpha), lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                        } else {
+                            Color syncColor = Colors.INSTANCE.convertHex(Colors.INSTANCE.changeAlpha(Colors.INSTANCE.getColor(1, false), next.alpha));
+                            RenderUtil.drawBoxESP(next.pos, syncColor, lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                        }
+                    }
+                } catch (Exception e) {}
+            }
+            if (placeRender != null && CombatUtil.isHoldingCrystal()) {
+                if(fadeOut.getValue()) {
+                    if (!isRenderedPosition(placeRender)) {
+                        renderPositions.add(new RenderPosition(placeRender));
+                    }
+                }
                 if (!colorSync.getValue()) {
-                    RenderUtil.drawBoxESP(crystalRender, new Color(colorRed.getValue(), colorGreen.getValue(), colorBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                    RenderUtil.drawBoxESP(placeRender, new Color(colorRed.getValue(), colorGreen.getValue(), colorBlue.getValue(), 255), lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
                 } else {
                     Color syncColor = Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false));
-                    RenderUtil.drawBoxESP(crystalRender, syncColor, lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
+                    RenderUtil.drawBoxESP(placeRender, syncColor, lineWidth.getValue().floatValue(), outline.getValue(), true, boxAlpha.getValue());
                 }
             }
         }
         if (damageText.getValue()) {
-            if (crystalRender != null && CombatUtil.isHoldingCrystal()) {
+            if (placeRender != null && CombatUtil.isHoldingCrystal()) {
                 List<Entity> playerEnts = new ArrayList<Entity>((Collection<? extends Entity>) mc.world.playerEntities.stream().filter(entityPlayer -> !Dactyl.friendManager.isFriend(entityPlayer.getName())).collect(Collectors.toList()));
                 double highestDMG = 0f;
                 for (Entity entity : playerEnts) {
@@ -706,108 +495,18 @@ public class AutoCrystal extends Module {
                     }
                     float dmgCalculation = 0.0f;
                     try {
-                        dmgCalculation = CombatUtil.calculateDamage(crystalRender, entity);
+                        dmgCalculation = CombatUtil.calculateDamage(placeRender, entity);
                     } catch (NullPointerException exception) {
                     }
                     if (dmgCalculation > highestDMG) {
                         highestDMG = dmgCalculation;
                     }
                 }
-                //String dmgTextRender = ((Math.floor(damage) == damage) ? Integer.valueOf((int)damage) : String.format("%.1f", damage)) + "";
                 String dmgTextRender = ((Math.floor(highestDMG) == highestDMG) ? Integer.valueOf((int) highestDMG) : String.format("%.1f", highestDMG)) + "";
-                RenderUtil.drawText(crystalRender, dmgTextRender);
+                RenderUtil.drawText(placeRender, dmgTextRender);
             }
         }
     }
-
-    private void doRotations(UpdateLogic logic, double[] rots) {
-        switch(logic) {
-            case FIELD:
-                RotationUtil.setPlayerRotations((float)rots[0], (float)rots[1]);
-                break;
-            case PACKET:
-                setRotations(rots[0], rots[1]);
-                break;
-        }
-    }
-
-
-
-    private void attackCrystal(Entity entity) {
-        Criticals.INSTANCE.ignoring = true;
-        mc.playerController.attackEntity(mc.player, entity);
-        if (swingSetting.getValue() == SwingLogic.BREAK || swingSetting.getValue() == SwingLogic.BOTH) {
-            mc.player.swingArm(offhandSwing.getValue() ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
-        }
-        if (attackedCrystals.containsKey(entity)) {
-            attackedCrystals.put((EntityEnderCrystal) entity, attackedCrystals.get(entity) + 1);
-        } else {
-            attackedCrystals.put((EntityEnderCrystal) entity, 1);
-        }
-        BlockPos brokenPos = new BlockPos(entity.posX, entity.posY, entity.posZ);
-        if (CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos) != null) {
-            this.setModuleInfo(CombatUtil.getGreatestDamageOnPlayer(enemyRange.getValue(), brokenPos).getName() + (faceplaceKeyOn ? " | " + TextFormatting.GREEN + "FP" : ""));
-        }
-        Criticals.INSTANCE.ignoring = false;
-        if (doublePlace.getValue() && (attackLogic.getValue() == AttackLogic.CSLOT) && crystalRender != null) {
-            RayTraceResult rayTraceResult = mc.world.rayTraceBlocks(new Vec3d(mc.player.posX + 0.5, mc.player.posY + 1.0, mc.player.posZ + 0.5), new Vec3d(crystalRender));
-            EnumFacing facing = null;
-            // placing that works on 2b :^)
-            if (rayTraceResult == null || rayTraceResult.sideHit == null) {
-                rayTraceResult = new RayTraceResult(new Vec3d(0.5, 1.0, 0.5), EnumFacing.UP);
-                if (rayTraceResult != null) {
-                    if (rayTraceResult.sideHit != null) {
-                        facing = rayTraceResult.sideHit;
-                    }
-                }
-            } else {
-                facing = rayTraceResult.sideHit;
-            }
-            EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
-            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(crystalRender, facing, placeHand, (float) rayTraceResult.hitVec.x, (float) rayTraceResult.hitVec.y, (float) rayTraceResult.hitVec.z));
-        }
-        if(setDeadSetting.getValue()) {
-            entity.setDead();
-            mc.world.removeAllEntities();
-        }
-        breakTimer.reset();
-    }
-
-    private void setRotations(double newYaw, double newPitch) {
-        yaw = (float) newYaw;
-        pitch = (float) newPitch;
-        if (debugRotate.getValue()) {
-            mc.player.rotationYaw = yaw;
-            mc.player.rotationPitch = pitch;
-        }
-        isRotating = true;
-    }
-
-    private static void resetRotsPlace() {
-        isRotatingPlace = false;
-    }
-
-    private static void resetRotsBreak() {
-        isRotatingBreak = false;
-    }
-
-    private static void resetRots() {
-        if((isRotatingBreak || isRotatingPlace) && (AutoCrystal.INSTANCE.updateLogic.getValue() == UpdateLogic.WALKING)) {
-            return;
-        }
-        if(isRotatingUpdates) {
-            updatesYaw = mc.player.rotationYaw;
-            updatesPitch = mc.player.rotationPitch;
-            isRotatingUpdates = false;
-        }
-        if (isRotating) {
-            yaw = mc.player.rotationYaw;
-            pitch = mc.player.rotationPitch;
-            isRotating = false;
-            yawTicks = 0;
-        }
-    }
-
 
     private int getCrystalsInRange() {
         int crystalCount = 0;
@@ -817,23 +516,14 @@ public class AutoCrystal extends Module {
         for (Map.Entry<Entity, Float> entry : this.damageMap().entrySet()) {
             Entity crystal = entry.getKey();
             float damage = ((Float) entry.getValue()).floatValue();
-            boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystal((EntityEnderCrystal) crystal, (faceplaceKeyOn ? 36.0d : facePlaceStart.getValue()), tracePlace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
+            boolean isFacePlaceCrystal = CombatUtil.isFacePlaceCrystalNew(multiPoint.getValue(), (EntityEnderCrystal) crystal, (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), placeRange.getValue(), enemyRange.getValue());
             if ((damage >= minCountDmg.getValue() || (isFacePlaceCrystal && countFacePlace.getValue())) && ((mc.player.getDistance(crystal) <= placeRange.getValue()))) {
-                if (antiMultiLethal.getValue() && damage >= lethalMin.getValue()) {
-                    crystalCount = maxInRange.getValue();
-                    return crystalCount;
-                }
                 crystalCount++;
             }
         }
         if (crystalCount == 0 && (maxInRange.getValue() == 1)) {
             if (currentAttacking != null) {
                 crystalCount += 1;
-            }
-        }
-        if (!novolaTimer.hasPassed(50) && antiping.getValue()) {
-            if (crystalCount == 0) {
-                crystalCount = 1;
             }
         }
         return crystalCount;
@@ -850,7 +540,7 @@ public class AutoCrystal extends Module {
             if (mc.player.getDistance(loadedEntity) > breakRange.getValue()) {
                 continue;
             }
-            if (!CombatUtil.getMapCrystalPlace((EntityEnderCrystal) loadedEntity, placeRange.getValue(), tracePlace.getValue(), wallsPlace.getValue(), antiSuicide.getValue(), maxSelfDMG.getValue(), breakLogic.getValue(), doesDamageMin.getValue(), enemyRange.getValue())) {
+            if (!CombatUtil.getMapCrystalPlaceNew(multiPoint.getValue(), (EntityEnderCrystal) loadedEntity, placeRange.getValue(), placeTrace.getValue(), wallsPlace.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), passLogic.getValue(), minHitDamage.getValue(), enemyRange.getValue())) {
                 continue;
             }
             float highestDMG = 0f;
@@ -875,108 +565,355 @@ public class AutoCrystal extends Module {
         return dmgMap;
     }
 
-    @SubscribeEvent
-    public void onUpdateWalking(EventUpdateWalkingPlayer event) {
-        if (updateLogic.getValue() == UpdateLogic.WALKING) {
-            doAutoCrystal(event);
-        } else if (updateLogic.getValue() == UpdateLogic.FIELD) {
-            if (event.getStage() == ForgeEvent.Stage.PRE) {
-                RotationUtil.updateRotations();
-                doAutoCrystal(event);
-            } else if (event.getStage() == ForgeEvent.Stage.POST) {
-                RotationUtil.restoreRotations();
+    private boolean canDoPlace() {
+        if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
+            this.setModuleInfo("");
+            placeRender = null;
+            damage = 0.0d;
+            resetRots();
+            resetRotField(true);
+            checkTimer.reset();
+            return false;
+        }
+        if (!checkTimer.hasPassed(125L)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean placedOnPos(BlockPos pos) {
+        Iterator<BlockPos> placed = placedCrystals.iterator();
+        try {
+            while (placed.hasNext()) {
+                BlockPos next = placed.next();
+                if(pos.getX() == next.getX() && pos.getY() == next.getY() && pos.getZ() == next.getZ()) {
+                    return true;
+                }
             }
+        } catch (Exception e) {}
+        return false;
+    }
+
+    private void attackCrystal(Entity entity) {
+        Criticals.INSTANCE.ignoring = true;
+        mc.playerController.attackEntity(mc.player, entity);
+        if (swingSetting.getValue() == SwingLogic.BREAK || swingSetting.getValue() == SwingLogic.BOTH) {
+            mc.player.swingArm(mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
+        }
+        if(!alreadyAttacked(entity)) {
+            attackedCrystals.add(new AttackedCrystal((EntityEnderCrystal)entity, 1));
+        } else {
+            incrementAttacked((EntityEnderCrystal) entity);
+        }
+        Criticals.INSTANCE.ignoring = false;
+        if (ignoreValidExploit.getValue() && (runLogic.getValue() == BreakLogic.HOLDING) && placeRender != null) {
+            EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+            RayTraceResult res = CombatUtil.getPlaceDirection(placeRender, multiPoint.getValue());
+            CombatUtil.AutoCrystalTraceResult traceResult = new CombatUtil.AutoCrystalTraceResult(res.sideHit, res);
+            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
+        }
+        breakTimer.reset();
+    }
+
+    private boolean canDoBreak() {
+        if (mc.player.getHeldItemMainhand().getItem() != Items.END_CRYSTAL && mc.player.getHeldItemOffhand().getItem() != Items.END_CRYSTAL) {
+            this.setModuleInfo("");
+            resetRots();
+            resetRotField(false);
+            currentAttacking = null;
+            checkTimer.reset();
+            return false;
+        }
+        if (!checkTimer.hasPassed(75L)) {
+            return false;
+        } else {
+            return true;
         }
     }
 
-    @Override
-    public void onClientUpdate() {
+
+
+    private void incrementAttacked(EntityEnderCrystal entity) {
+        Iterator<AttackedCrystal> crystals = attackedCrystals.iterator();
+        try {
+            while (crystals.hasNext()) {
+                AttackedCrystal next = crystals.next();
+                if(next.attacked == entity) {
+                    next.amount++;
+                }
+            }
+        } catch (Exception e) {}
+    }
+
+    private boolean alreadyAttacked(Entity entity) {
+        Iterator<AttackedCrystal> crystals = attackedCrystals.iterator();
+        try {
+            while (crystals.hasNext()) {
+                AttackedCrystal next = crystals.next();
+                if(next.attacked == (EntityEnderCrystal)entity) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {}
+        return false;
+    }
+
+    private boolean canAttackCrystal(EntityEnderCrystal crystal) {
+        Iterator<AttackedCrystal> crystals = attackedCrystals.iterator();
+        try {
+            while (crystals.hasNext()) {
+                AttackedCrystal next = crystals.next();
+                if(next.attacked == crystal && mc.world.getEntityByID(next.attacked.entityId) == null) {
+                    crystals.remove();
+                    break;
+                }
+                if(next.timer.hasPassed(1000)) {
+                    next.amount = 0;
+                    next.timer.reset();
+                }
+                if(next.attacked == crystal) {
+                    if(next.amount > hitsPerSecond.getValue()) {
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {}
+        return true;
+    }
+
+    @SubscribeEvent
+    public void onKeyPress(EventKeyPress event) {
         if (mc.player == null || mc.world == null) {
             return;
         }
-        if (modInfoTimer.hasPassed(100)) {
-            if (StringUtils.stripControlCodes(this.getModuleInfo()).contains(" | FP") && !faceplaceKeyOn) {
-                this.setModuleInfo(StringUtils.stripControlCodes(this.getModuleInfo()).replace(" | FP", ""));
+        if (facePlaceKey.getValue().getKey() != Keyboard.KEY_NONE) {
+            if (!facePlaceHold.getValue()) {
+                if (event.getKey() == facePlaceKey.getValue().getKey()) {
+                    faceplaceKeyOn = !faceplaceKeyOn;
+                }
             }
-            modInfoTimer.reset();
-        }
-        if (updateLogic.getValue() == UpdateLogic.PACKET) {
-            doAutoCrystal(null);
+        } else {
+            faceplaceKeyOn = false;
         }
     }
 
+    @SubscribeEvent
+    public void onPacket(PacketEvent event) {
+        if(event.getType() == PacketEvent.PacketType.INCOMING) {
+            if (soundRemove.getValue()) {
+                if (event.getPacket() instanceof SPacketSoundEffect) {
+                    SPacketSoundEffect packet = (SPacketSoundEffect) event.getPacket();
+                    if (packet.getCategory() == SoundCategory.BLOCKS && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
+                        Iterator<Entity> entityLoadedList = mc.world.loadedEntityList.iterator();
+                        try {
+                            while (entityLoadedList.hasNext()) {
+                                Entity e = entityLoadedList.next();
+                                if (e == null) continue;
+                                if (e instanceof EntityEnderCrystal) {
+                                    if (e.getDistance(packet.getX(), packet.getY(), packet.getZ()) <= 6.0f) {
+                                        e.setDead();
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {}
+                    }
+                }
+            }
+
+            if(preAttack.getValue()) {
+                if (event.getPacket() instanceof SPacketSpawnObject) {
+                    SPacketSpawnObject packetSpawnObject = (SPacketSpawnObject) event.getPacket();
+                    if (doBreak.getValue()) {
+                        if (packetSpawnObject.getType() == 51) {
+                            BlockPos pos = new BlockPos(packetSpawnObject.getX(), packetSpawnObject.getY(), packetSpawnObject.getZ());
+                            BlockPos placedPos = pos.down();
+                            if (placedOnPos(pos.down())) {
+                                for (EntityPlayer p : mc.world.playerEntities) {
+                                    if (p == null || mc.player.equals(p) || p.getDistanceSq(pos) > (((enemyRange.getValue() + placeRange.getValue())) * ((enemyRange.getValue() + placeRange.getValue()))) || !Dactyl.friendManager.isFriend(p.getName())) {
+                                        continue;
+                                    }
+                                    float playerHealth = p.getHealth() + p.getAbsorptionAmount();
+                                    if (CombatUtil.calculateDamage(pos, (Entity) p) > playerHealth + 0.5D) {
+                                        return;
+                                    }
+                                }
+                                if(preAttackRotate.getValue()) {
+                                    double[] rots = CombatUtil.calculateLookAt(pos.getX() + 0.5, pos.getY() - 0.5, pos.getZ() + 0.5);
+                                    yaw = (float) rots[0];
+                                    pitch = (float) rots[1];
+                                    isRotatingUpdates = true;
+                                    isRotatingBreak = true;
+                                }
+                                CPacketUseEntity attackPacket = new CPacketUseEntity();
+                                ((ICPacketUseEntity) attackPacket).setEntityId(packetSpawnObject.getEntityID());
+                                ((ICPacketUseEntity) attackPacket).setAction(CPacketUseEntity.Action.ATTACK);
+                                mc.player.connection.sendPacket(attackPacket);
+                                /*if(spawnPacketExploit.getValue()) {
+                                    if ((runLogic.getValue() == BreakLogic.HOLDING) && placeRender != null) {
+                                        CombatUtil.AutoCrystalTraceResult traceResult = CombatUtil.getNormalTrace(placeRender);
+                                        EnumHand placeHand = (mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+                                        if(!(mc.player.getHeldItemMainhand().getItem() == Items.END_CRYSTAL) && !(mc.player.getHeldItemOffhand().getItem() == Items.END_CRYSTAL)) {
+                                            return;
+                                        }
+                                        if(placeHand != null && traceResult != null && traceResult.result != null && traceResult.facing != null) {
+                                            mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(placeRender, traceResult.facing, placeHand, (float) traceResult.result.hitVec.x, (float) traceResult.result.hitVec.y, (float) traceResult.result.hitVec.z));
+                                        }
+                                    }
+                                }*/
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*@Override
+    public void onScreen2D(float partialTicks) {
+        if(mc.player == null || mc.world == null) {
+            return;
+        }
+        if(isRotatingUpdates) {
+            Dactyl.fontUtil.drawStringWithShadow("Yaw: " + String.valueOf(yaw), 1, 20, 0xfffce700);
+            Dactyl.fontUtil.drawStringWithShadow("Pitch: " + String.valueOf(pitch), 1, 30, 0xfffce700);
+        }
+    }*/
+
+
+    @SubscribeEvent
+    public void onUpdateRotate(EventUpdateWalkingPlayer event) {
+        if(!placeRotate.getValue() && !breakRotate.getValue()) {
+            return;
+        }
+        if(isRotatingUpdates) {
+            event.setYaw(yaw);
+            if(rotateHead.getValue()) {
+                mc.player.rotationYawHead = yaw;
+            }
+            event.setPitch(pitch);
+            if(debugRotate.getValue()) {
+                mc.player.rotationYaw = yaw;
+                mc.player.rotationPitch = pitch;
+            }
+        }
+    }
+
+    private void resetRots() {
+        if((isRotatingBreak || isRotatingPlace)) {
+            return;
+        }
+        if(isRotatingUpdates) {
+            yaw = mc.player.rotationYaw;
+            pitch = mc.player.rotationPitch;
+            isRotatingUpdates = false;
+        }
+    }
+
+    private void resetRotField(boolean place) {
+        if(place) {
+            isRotatingPlace = false;
+        } else {
+            isRotatingBreak = false;
+        }
+    }
 
     @Override
-    public void onToggle() {
-        resetToggle();
-    }
-
-    private void resetToggle() {
-        placeTimer.reset();
+    public void onDisable() {
+        isRotatingBreak = false;
+        isRotatingPlace = false;
+        isRotatingUpdates = false;
+        breakStepTicks = placeStepTicks = 0;
         breakTimer.reset();
         checkTimer.reset();
-        placeResetTimer.reset();
-        modInfoTimer.reset();
-        novolaTimer.reset();
-        antiStuckTimer.reset();
-        placedCrystals.clear();
         attackedCrystals.clear();
-        crystalRender = null;
-        predictPacket = null;
-        oldPlacePos = null;
-        currentAttacking = null;
-        damage = 0.0d;
-        faceplaceKeyOn = false;
-        hasReachedYaw = false;
-        resetRots();
-        resetRotsPlace();
-        resetRotsPlace();
+        placedCrystals.clear();
     }
 
-    public Set<BlockPos> getPlacedCrystals() {
-        return this.placedCrystals;
+    public boolean isRenderedPosition(BlockPos pos) {
+        RenderPosition renderPosition = renderPositions.stream()
+                .filter(renderPos -> renderPos.pos == pos)
+                .min(Comparator.comparing(renderPos -> renderPos.timer.getPassedTime()))
+                .orElse(null);
+        return renderPosition != null;
     }
 
-    private enum SwingLogic {
+    public class AttackedCrystal {
+        public EntityEnderCrystal attacked;
+        public TimeUtil timer;
+        public int amount;
+        public AttackedCrystal(EntityEnderCrystal attacked, int amount) {
+            this.attacked = attacked;
+            this.amount = amount;
+            this.timer = new TimeUtil();
+        }
+    }
+
+    public class RenderPosition {
+        public BlockPos pos;
+        public int alpha = 0xAA;
+        public TimeUtil timer;
+        public RenderPosition(BlockPos pos) {
+            this.pos = pos;
+            this.timer = new TimeUtil();
+        }
+
+        private void update() {
+            if (this.alpha > 0)
+                this.alpha -= 2;
+        }
+    }
+
+    public enum YawStepEnum {
+        OFF,
+        PLACE,
+        BREAK,
+        BOTH
+    }
+
+    public enum SwingLogic {
         PLACE,
         BREAK,
         BOTH,
         NONE
     }
 
-    private enum AttackLogic {
-        CSLOT,
+    public enum PassLogic {
+        DOESDMG,
         ALWAYS
     }
 
-    private enum UpdateStage {
-        PRE,
-        POST,
-        NONE
-    }
-
-    private enum AuraLogic {
-        BREAKPLACE,
-        PLACEBREAK
-    }
-
-    private enum UpdateLogic {
-        WALKING,
-        PACKET,
-        FIELD
-    }
-
     public enum BreakLogic {
-        ALWAYS,
-        PLACED,
-        DOESDMG,
-        BOTH
+        HOLDING,
+        ALWAYS
     }
 
-    private enum SettingPage {
+    public enum WallsRange {
+        OFF,
+        RANGE,
+        ANTI
+    }
+
+
+    public enum SettingPage {
         PLACE,
         BREAK,
-        MISC,
+        GENERAL,
         RENDER
+    }
+
+    private boolean isViewPlace() {
+        return page.getValue() == SettingPage.PLACE;
+    }
+
+    private boolean isViewBreak() {
+        return page.getValue() == SettingPage.BREAK;
+    }
+
+    private boolean isViewGeneral() {
+        return page.getValue() == SettingPage.GENERAL;
+    }
+
+    private boolean isViewRender() {
+        return page.getValue() == SettingPage.RENDER;
     }
 }
