@@ -9,10 +9,8 @@ import me.chloe.dactyl.event.impl.world.EntityRemovedEvent;
 import me.chloe.dactyl.module.Module;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -73,6 +71,10 @@ public class Notifications extends Module {
 
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityPlayer = (EntityPlayer)entity;
+
+            if (entityPlayer.getName().equals(mc.player.getName()))
+                return;
+
             sendChatNotif(String.format("&d%s's pearl loaded at &f[%d, %d, %d]", entityPlayer.getName(), (int)event.getTargetX(), (int)event.getTargetY(), (int)event.getTargetZ()), 0);
         }
     }
@@ -94,7 +96,7 @@ public class Notifications extends Module {
                 if (closestPlayer == null || event.getEntity().getDistance(p) < entity.getDistance(closestPlayer))
                     closestPlayer = p;
 
-            if (closestPlayer == null || closestPlayer.getDistance(entity) >= 2.0f || closestPlayer.getName() == mc.player.getName())
+            if (closestPlayer == null || closestPlayer.getDistance(entity) >= 2.0f || closestPlayer.getName().equals(mc.player.getName()))
                 return;
 
             this.uuidMap.put(entity.getUniqueID(), 200);
@@ -142,7 +144,7 @@ public class Notifications extends Module {
             return;
 
         String name = event.getEntity().getName();
-        if (visualRange.getValue() && event.getEntity() instanceof EntityPlayer && name != mc.player.getName())
+        if (visualRange.getValue() && event.getEntity() instanceof EntityPlayer && !name.equals(mc.player.getName()))
         {
             if(modeSetting.getValue() == NotifMode.POPUP)
                 sendNotification(String.format("%s entered your visual range.", name), true);
@@ -158,7 +160,7 @@ public class Notifications extends Module {
             return;
 
         String name = event.getEntity().getName();
-        if (visualRange.getValue() && event.getEntity() instanceof EntityPlayer && name != mc.player.getName()) {
+        if (visualRange.getValue() && event.getEntity() instanceof EntityPlayer && !name.equals(mc.player.getName())) {
 
             if(timeSent.containsKey(String.format("%s left your visual range.", name)) || timeSent.containsKey(String.format("&d%s left your visual range.", name)))
                 return;
