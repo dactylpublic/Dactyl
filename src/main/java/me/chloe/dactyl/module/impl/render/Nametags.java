@@ -31,19 +31,19 @@ import java.util.ArrayList;
  */
 
 public class Nametags extends Module {
-    Setting<Boolean> armor = new Setting<Boolean>("Armor", true);
-    Setting<Boolean> health = new Setting<Boolean>("Health", true);
-    Setting<Boolean> ping = new Setting<Boolean>("Ping", true);
-    Setting<Boolean> gamemode = new Setting<Boolean>("Gamemode", true);
-    Setting<Boolean> invisibles = new Setting<Boolean>("Invisibles", true);
-    Setting<Boolean> durability = new Setting<Boolean>("Durability", true);
-    Setting<Boolean> itemName = new Setting<Boolean>("ItemName", true);
-    Setting<Boolean> totemPops = new Setting<Boolean>("TotemPops", true);
-    Setting<Boolean> shortEnchants = new Setting<Boolean>("Enchants", true);
-    Setting<Integer> scaling = new Setting<Integer>("Scaling", 3, 1, 5);
-    static Setting<Boolean> background = new Setting<Boolean>("BG", true);
-    static Setting<Boolean> border = new Setting<Boolean>("Border", true);
-    Setting<Double> borderWidth = new Setting<Double>("BorderWidth", 1.0d, 0.1d, 3.0d, v->border.getValue());
+    Setting<Boolean> armor = new Setting<>("Armor", true);
+    Setting<Boolean> health = new Setting<>("Health", true);
+    Setting<Boolean> ping = new Setting<>("Ping", true);
+    Setting<Boolean> gamemode = new Setting<>("Gamemode", true);
+    Setting<Boolean> invisibles = new Setting<>("Invisibles", true);
+    Setting<Boolean> durability = new Setting<>("Durability", true);
+    Setting<Boolean> itemName = new Setting<>("ItemName", true);
+    Setting<Boolean> totemPops = new Setting<>("TotemPops", true);
+    Setting<Boolean> shortEnchants = new Setting<>("Enchants", true);
+    Setting<Double> scaling = new Setting<>("Scaling", 3.0d, 1.0d, 5.0d);
+    static Setting<Boolean> background = new Setting<>("BG", true);
+    static Setting<Boolean> border = new Setting<>("Border", true);
+    Setting<Double> borderWidth = new Setting<>("BorderWidth", 1.0d, 0.1d, 3.0d, v->border.getValue());
 
     public static Nametags INSTANCE;
     public Nametags() {
@@ -75,24 +75,25 @@ public class Nametags extends Module {
 
         bb = bb.expand(0.15f, 0.1f, 0.15f);
 
-        if (!camera.isBoundingBoxInFrustum(bb)) {
+        if (!camera.isBoundingBoxInFrustum(bb))
             return;
-        }
+
         double tempY = y;
         tempY += player.isSneaking() ? 0.5D : 0.7D;
         Entity camera = mc.getRenderViewEntity();
+
         double originalPositionX = camera.posX;
         double originalPositionY = camera.posY;
         double originalPositionZ = camera.posZ;
+
         camera.posX = interpolate(camera.prevPosX, camera.posX, delta);
         camera.posY = interpolate(camera.prevPosY, camera.posY, delta);
         camera.posZ = interpolate(camera.prevPosZ, camera.posZ, delta);
-        double distance = camera.getDistance(x + (mc.getRenderManager()).viewerPosX, y + (mc.getRenderManager()).viewerPosY, z +
-                (mc.getRenderManager()).viewerPosZ);
+
+        double distance = camera.getDistance(x + (mc.getRenderManager()).viewerPosX, y + (mc.getRenderManager()).viewerPosY, z +  (mc.getRenderManager()).viewerPosZ);
         int width = (int) (Dactyl.fontUtil.getStringWidth(getDisplayName(player)) / 2);
-        double scale = 0.0018D + ((scaling.getValue()*0.001)) * distance;
-        if (distance <= 8.0D)
-            scale = 0.0245D;
+        double scale = distance > 8.0d ? 0.0018d + (scaling.getValue() * 0.001d) * distance : 0.0018d + (scaling.getValue() * 0.001d) * 8.0d;
+
         GlStateManager.pushMatrix();
         RenderHelper.enableStandardItemLighting();
         GlStateManager.enablePolygonOffset();
