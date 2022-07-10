@@ -11,9 +11,11 @@ import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -63,7 +65,7 @@ public class Notifications extends Module {
     }
 
     @SubscribeEvent
-    public void onEntityTeleportEvent(EnderTeleportEvent event) {
+    public void onEnderTeleport(EnderTeleportEvent event) {
         if (mc.world == null || mc.player == null || !pearls.getValue())
             return;
 
@@ -75,7 +77,12 @@ public class Notifications extends Module {
             if (entityPlayer.getName().equals(mc.player.getName()))
                 return;
 
-            sendChatNotif(String.format("&d%s's pearl loaded at &f[%d, %d, %d]", entityPlayer.getName(), (int)event.getTargetX(), (int)event.getTargetY(), (int)event.getTargetZ()), 0);
+            // @note: chloe i think this is broken in multiplayer why
+            ChatUtil.printMsg(
+                    String.format("&d%s's pearl loaded at &f[%d, %d, %d]", entityPlayer.getName(), (int)event.getTargetX(), (int)event.getTargetY(), (int)event.getTargetZ()),
+                    watermark.getValue(),
+                    false
+            );
         }
     }
 
@@ -100,7 +107,7 @@ public class Notifications extends Module {
                 return;
 
             this.uuidMap.put(entity.getUniqueID(), 200);
-            sendChatNotif(String.format("&d%s threw a pearl %s", closestPlayer.getName(), replaceDir(entity.getHorizontalFacing().getName())));
+            sendChatNotif(String.format("&d%s threw a pearl &f%s", closestPlayer.getName(), replaceDir(entity.getHorizontalFacing().getName())));
         }
     }
 
@@ -210,20 +217,6 @@ public class Notifications extends Module {
         }
         timeSent.put(message, System.currentTimeMillis());
     }
-
-    private void sendChatNotif(String message, int line) {
-        ChatUtil.printMsg(message, watermark.getValue(), unclogged.getValue(), line);
-        if(sound.getValue())
-        {
-            if(mc.player == null)
-                return;
-
-            PositionedSoundRecord sound = new PositionedSoundRecord(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1, 1, mc.player.getPosition());
-            mc.getSoundHandler().playSound(sound);
-        }
-        timeSent.put(message, System.currentTimeMillis());
-    }
-
 
     private enum NotifMode {
         CHAT,
