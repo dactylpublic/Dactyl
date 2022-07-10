@@ -107,9 +107,9 @@ public class Nametags extends Module {
         GL11.glDisable(2929);
         GlStateManager.enableBlend();
         if(!Dactyl.fontUtil.isCustomFont()) {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 1), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect(-width - 2.0f, -(Dactyl.fontUtil.getFontHeight() + 1), width + 4.0f, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         } else {
-            drawBorderedRect((-width - 2), -(Dactyl.fontUtil.getFontHeight() + 2.3f), width + 2.0F, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
+            drawBorderedRect(-width - 2.0f, -(Dactyl.fontUtil.getFontHeight() + 2.3f), width + 4.0f, 1.5F, borderWidth.getValue().floatValue(), 1996488704, Colors.INSTANCE.getColor(1, false));
         }
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
@@ -289,10 +289,14 @@ public class Nametags extends Module {
     }
 
     public String getGMText(EntityPlayer p) {
-        if(p.isCreative()) return "C";
-        if(p.isSpectator()) return "I";
-        if(!p.isAllowEdit() && !p.isSpectator()) return "A";
-        if(!p.isCreative() && !p.isSpectator() && p.isAllowEdit()) return "S";
+        if(p.isCreative())
+            return "C";
+        if(p.isSpectator())
+            return "I";
+        if(!p.isAllowEdit() && !p.isSpectator())
+            return "A";
+        if(!p.isCreative() && !p.isSpectator() && p.isAllowEdit())
+            return "S";
         return "";
     }
 
@@ -390,50 +394,59 @@ public class Nametags extends Module {
     private String getDisplayName(EntityPlayer player) {
         TextFormatting color;
         String name = player.getDisplayName().getFormattedText();
-        if (!this.health.getValue())
-            return name;
-        float health = player.getHealth()+player.getAbsorptionAmount();
-        if(health <= 0) {
-            health = 1;
+
+        if(gamemode.getValue())
+            name += String.format(" [%s]", getGMText(player));
+
+        if(ping.getValue())
+            name += String.format(" %dms", EntityUtil.getPing(player));
+
+        if (this.health.getValue())
+        {
+            float health = player.getHealth()+player.getAbsorptionAmount();
+
+            if (health <= 0)
+                health = 1;
+
+            if (health > 18.0F)
+                color = TextFormatting.GREEN;
+            else if (health > 16.0F)
+                color = TextFormatting.DARK_GREEN;
+            else if (health > 12.0F)
+                color = TextFormatting.YELLOW;
+            else if (health > 8.0F)
+                color = TextFormatting.GOLD;
+            else if (health > 5.0F)
+                color = TextFormatting.RED;
+            else
+                color = TextFormatting.DARK_RED;
+
+            float totalHealth = player.getHealth() + player.getAbsorptionAmount();
+            int pHealth = (int)Math.ceil(totalHealth);
+
+            if(pHealth <= 0)
+                pHealth = 1;
+
+            name += String.format(" %s%d", color, pHealth);
         }
-        if (health > 18.0F) {
-            color = TextFormatting.GREEN;
-        } else if (health > 16.0F) {
-            color = TextFormatting.DARK_GREEN;
-        } else if (health > 12.0F) {
-            color = TextFormatting.YELLOW;
-        } else if (health > 8.0F) {
-            color = TextFormatting.GOLD;
-        } else if (health > 5.0F) {
-            color = TextFormatting.RED;
-        } else {
-            color = TextFormatting.DARK_RED;
-        }
-        String gm = "";
-        String p = "";
-        if(gamemode.getValue()) gm+= (" ["+getGMText(player)+"]");
-        if(ping.getValue()) p+= (" "+String.valueOf(EntityUtil.getPing(player))+"ms");
-        float totalHealth = player.getHealth() + player.getAbsorptionAmount();
-        int pHealth = (int)Math.ceil(totalHealth);
-        if(pHealth <= 0) {
-            pHealth = 1;
-        }
-        name = name + gm + p + color + " " + String.valueOf(pHealth);
-        if(totemPops.getValue() && player.getName() != null && getTotemPops(player.getName()) > 0) {
-            name+= TextFormatting.AQUA + " -" + String.valueOf(getTotemPops(player.getName()));
-        }
+
+        if (totemPops.getValue() && player.getName() != null && getTotemPops(player.getName()) > 0)
+            name += String.format(" %s-%d", TextFormatting.AQUA, getTotemPops(player.getName()));
+
         return name;
     }
 
     private int getDisplayColour(EntityPlayer player) {
-        int colour = 0xffffffff;
+        int colour = 0xffffffff; // why do you spell color like this r we british
+
         if (Dactyl.friendManager.isFriend(player.getName()))
             return 0xff55FFFF;
-        if (player.isInvisible()) {
+
+        if (player.isInvisible())
             colour = 0xff910022;
-        } else if (player.isSneaking()) {
+        else if (player.isSneaking())
             colour = -6481515;
-        }
+
         return colour;
     }
 
