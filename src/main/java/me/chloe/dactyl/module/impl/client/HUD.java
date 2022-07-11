@@ -13,6 +13,7 @@ import me.chloe.dactyl.util.render.RenderUtil;
 import me.chloe.dactyl.event.impl.render.PotionHUDEvent;
 import me.chloe.dactyl.module.Module;
 import me.chloe.dactyl.util.render.font.CFontRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -29,48 +30,48 @@ import java.util.*;
 
 public class HUD extends Module {
 
-    public Setting<Boolean> customFont = new Setting<Boolean>("CustomFont", true);
-    public Setting<Boolean> renderHud = new Setting<Boolean>("RenderHUD", true);
-    public Setting<Boolean> potionEffects = new Setting<Boolean>("Potions", true, v->renderHud.getValue());
-    public Setting<Boolean> potionColorSync = new Setting<Boolean>("PotionCSync", false, v->renderHud.getValue());
-    public Setting<Boolean> potionIcons = new Setting<Boolean>("PotionIcons", false);
-    public Setting<Boolean> arrayListSetting = new Setting<Boolean>("ArrayList", true, v->renderHud.getValue());
-    public Setting<Boolean> alphabetical = new Setting<Boolean>("ABC", false, v->renderHud.getValue()&&arrayListSetting.getValue());
-    public Setting<Integer> arrayListUpdates = new Setting<Integer>("ArrayUpdates", 200, 50, 1000, v->renderHud.getValue()&&arrayListSetting.getValue());
-    public Setting<Integer> arrayListFactor = new Setting<Integer>("AnimFactor", 2, 1, 10, v->renderHud.getValue()&&arrayListSetting.getValue());
-    public Setting<Boolean> fps = new Setting<Boolean>("FPS", true, v->renderHud.getValue());
-    public Setting<Boolean> tps = new Setting<Boolean>("TPS", true, v->renderHud.getValue());
-    public Setting<Boolean> speed = new Setting<Boolean>("Speed", true, v->renderHud.getValue());
-    public Setting<Boolean> ping = new Setting<Boolean>("Ping", true, v->renderHud.getValue());
-    public Setting<Boolean> clock = new Setting<Boolean>("Clock", true, v->renderHud.getValue());
-    public Setting<Boolean> playerCount = new Setting<Boolean>("PlayerCount", false, v->renderHud.getValue());
-    public Setting<Boolean> grayColor = new Setting<Boolean>("GrayColor", false, v->renderHud.getValue());
-    public Setting<Boolean> direction = new Setting<Boolean>("Direction", true, v->renderHud.getValue());
-    public Setting<Boolean> coords = new Setting<Boolean>("Coords", true, v->renderHud.getValue());
-    public Setting<Boolean> netherCoords = new Setting<Boolean>("NetherCoords", true, v->renderHud.getValue() && coords.getValue());
+    public Setting<Boolean> customFont = new Setting<>("CustomFont", true);
+    public Setting<Boolean> renderHud = new Setting<>("RenderHUD", true);
+    public Setting<Boolean> potionEffects = new Setting<>("Potions", true, v->renderHud.getValue());
+    public Setting<Boolean> potionColorSync = new Setting<>("PotionCSync", false, v->renderHud.getValue());
+    public Setting<Boolean> potionIcons = new Setting<>("PotionIcons", false);
+    public Setting<Boolean> arrayListSetting = new Setting<>("ArrayList", true, v->renderHud.getValue());
+    public Setting<Boolean> alphabetical = new Setting<>("ABC", false, v->renderHud.getValue()&&arrayListSetting.getValue());
+    public Setting<Integer> arrayListUpdates = new Setting<>("ArrayUpdates", 200, 50, 1000, v->renderHud.getValue()&&arrayListSetting.getValue());
+    public Setting<Integer> arrayListFactor = new Setting<>("AnimFactor", 2, 1, 10, v->renderHud.getValue()&&arrayListSetting.getValue());
+    public Setting<Boolean> fps = new Setting<>("FPS", true, v->renderHud.getValue());
+    public Setting<Boolean> tps = new Setting<>("TPS", true, v->renderHud.getValue());
+    public Setting<Boolean> speed = new Setting<>("Speed", true, v->renderHud.getValue());
+    public Setting<Boolean> ping = new Setting<>("Ping", true, v->renderHud.getValue());
+    public Setting<Boolean> clock = new Setting<>("Clock", true, v->renderHud.getValue());
+    public Setting<Boolean> playerCount = new Setting<>("PlayerCount", false, v->renderHud.getValue());
+    public Setting<Boolean> grayColor = new Setting<>("GrayColor", false, v->renderHud.getValue());
+    public Setting<Boolean> direction = new Setting<>("Direction", true, v->renderHud.getValue());
+    public Setting<Boolean> coords = new Setting<>("Coords", true, v->renderHud.getValue());
+    public Setting<Boolean> netherCoords = new Setting<>("NetherCoords", true, v->renderHud.getValue() && coords.getValue());
     //public Setting<CoordsSide> coordsSideSetting = new Setting<CoordsSide>("Side", CoordsSide.LEFT, v->renderHud.getValue() && coords.getValue());
-    public Setting<Boolean> lagNotifier = new Setting<Boolean>("LagNotifier", true, v->renderHud.getValue());
-    public Setting<Boolean> armorHud = new Setting<Boolean>("ArmorHUD", true, v->renderHud.getValue());
-    public Setting<Boolean> totemCount = new Setting<Boolean>("TotemCount", true, v->renderHud.getValue());
-    public Setting<Rendering> renderingSetting = new Setting<Rendering>("Rendering", Rendering.UP, v->renderHud.getValue());
+    public Setting<Boolean> lagNotifier = new Setting<>("LagNotifier", true, v->renderHud.getValue());
+    public Setting<Boolean> armorHud = new Setting<>("ArmorHUD", true, v->renderHud.getValue());
+    public Setting<Boolean> totemCount = new Setting<>("TotemCount", true, v->renderHud.getValue());
+    public Setting<Rendering> renderingSetting = new Setting<>("Rendering", Rendering.UP, v->renderHud.getValue());
 
-    public Setting<WatermarkType> watermarkTypeSetting = new Setting<WatermarkType>("Logo", WatermarkType.DACTYL_IE, v->renderHud.getValue());
-    public Setting<Boolean> skeetWatermark = new Setting<Boolean>("SkeetWatermark", true, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
-    public Setting<String> customWatermark = new Setting<String>("CustomWatermark", "Dactyl.ie", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
-    public Setting<Integer> waterMarkOffset = new Setting<Integer>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
-    public Setting<Boolean> gradientLogo = new Setting<Boolean>("LogoGradient", false, v->renderHud.getValue());
+    public Setting<WatermarkType> watermarkTypeSetting = new Setting<>("Logo", WatermarkType.DACTYL_IE, v->renderHud.getValue());
+    public Setting<Boolean> skeetWatermark = new Setting<>("SkeetWatermark", true, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
+    public Setting<String> customWatermark = new Setting<>("CustomWatermark", "Dactyl.ie", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
+    public Setting<Integer> waterMarkOffset = new Setting<>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
+    public Setting<Boolean> gradientLogo = new Setting<>("LogoGradient", false, v->renderHud.getValue());
 
-    public Setting<Boolean> welcomer = new Setting<Boolean>("Welcomer", true, v->renderHud.getValue());
-    public Setting<String> customWelcomer = new Setting<String>("CustomWelcomerr", "Hello <p>, welcome to jennifergoddess.us", v->renderHud.getValue()&&welcomer.getValue());
-    public Setting<Boolean> welcomerGradient = new Setting<Boolean>("WelcomeGradient", true, v->renderHud.getValue()&&welcomer.getValue());
+    public Setting<Boolean> welcomer = new Setting<>("Welcomer", true, v->renderHud.getValue());
+    public Setting<String> customWelcomer = new Setting<>("CustomWelcomerr", "Hello <p>, welcome to jennifergoddess.us", v->renderHud.getValue()&&welcomer.getValue());
+    public Setting<Boolean> welcomerGradient = new Setting<>("WelcomeGradient", true, v->renderHud.getValue()&&welcomer.getValue());
 
-    public Setting<Boolean> currentConfig = new Setting<Boolean>("CurrentConfig", false, v->renderHud.getValue());
-    public Setting<Integer> currentConfigOffset = new Setting<Integer>("ConfigOffset", 10, 0, 100, v->renderHud.getValue() && currentConfig.getValue());
-    public Setting<Boolean> currentConfigGradient = new Setting<Boolean>("ConfigGradient", false, v->renderHud.getValue()&&currentConfig.getValue());
+    public Setting<Boolean> currentConfig = new Setting<>("CurrentConfig", false, v->renderHud.getValue());
+    public Setting<Integer> currentConfigOffset = new Setting<>("ConfigOffset", 10, 0, 100, v->renderHud.getValue() && currentConfig.getValue());
+    public Setting<Boolean> currentConfigGradient = new Setting<>("ConfigGradient", false, v->renderHud.getValue()&&currentConfig.getValue());
 
-    public Setting<Boolean> shadow = new Setting<Boolean>("Shadow", true, v->renderHud.getValue());
+    public Setting<Boolean> shadow = new Setting<>("Shadow", true, v->renderHud.getValue());
 
-    public Setting<String> commandPrefix = new Setting<String>("CommandPrefix", "-");
+    public Setting<String> commandPrefix = new Setting<>("CommandPrefix", "-");
 
 
     public static HUD INSTANCE;
@@ -83,7 +84,7 @@ public class HUD extends Module {
     public static final TimeUtil arrayTimer = new TimeUtil();
 
     private long serverLastUpdated;
-    private static ItemStack totemStack = new ItemStack(Items.TOTEM_OF_UNDYING);
+    private static final ItemStack totemStack = new ItemStack(Items.TOTEM_OF_UNDYING);
 
     public float hue;
 
@@ -265,28 +266,30 @@ public class HUD extends Module {
 
         if(potionEffects.getValue()) {
             Collection<PotionEffect> effects = mc.player.getActivePotionEffects();
-            if (effects != null && !effects.isEmpty()) {
+            if (!effects.isEmpty()) {
                 for (PotionEffect effect : effects) {
                     if (effect != null) {
                         Potion potion = effect.getPotion();
-                        if (potion != null) {
-                            String name = I18n.format(potion.getName());
-                            if (effect.getAmplifier() == 1)
-                            {
-                                name+=" 2";
+                        String name = I18n.format(potion.getName());
+
+                        switch (effect.getAmplifier()) {
+                            case 1: {
+                                name += " 2";
+                                break;
                             }
-                            else if (effect.getAmplifier() == 2)
-                            {
-                                name+=" 3";
+                            case 2: {
+                                name += " 3";
+                                break;
                             }
-                            else if (effect.getAmplifier() == 3)
-                            {
-                                name+=" 4";
+                            case 3: {
+                                name += " 4";
+                                break;
                             }
-                            name += TextFormatting.WHITE + " "+Potion.getPotionDurationString(effect, 1.0F);
-                            pots.add(new TextElement(name, potion.getLiquidColor(), !potionColorSync.getValue()));
-                            pots.sort(sortByLength);
                         }
+
+                        name += TextFormatting.WHITE + " "+Potion.getPotionDurationString(effect, 1.0F);
+                        pots.add(new TextElement(name, potion.getLiquidColor(), !potionColorSync.getValue()));
+                        pots.sort(sortByLength);
                     }
                 }
             }
@@ -294,9 +297,9 @@ public class HUD extends Module {
 
         if(fps.getValue()) {
             if(!grayColor.getValue()) {
-                normal.add(new TextElement(TextFormatting.RESET + "FPS " + TextFormatting.WHITE + String.valueOf(mc.getDebugFPS()), 0xffffffff, false));
+                normal.add(new TextElement(TextFormatting.RESET + "FPS " + TextFormatting.WHITE + Minecraft.getDebugFPS(), 0xffffffff, false));
             } else {
-                normal.add(new TextElement(TextFormatting.GRAY + "FPS " + TextFormatting.WHITE + String.valueOf(mc.getDebugFPS()), 0xffffffff, false));
+                normal.add(new TextElement(TextFormatting.GRAY + "FPS " + TextFormatting.WHITE + Minecraft.getDebugFPS(), 0xffffffff, false));
             }
         }
 
@@ -304,19 +307,19 @@ public class HUD extends Module {
             float tick = Dactyl.INSTANCE.getTickRateManager().getTickRate();
             float rounded = (float) ((float)Math.round(tick * 100.0) / 100.0);
             if(!grayColor.getValue()) {
-                normal.add(new TextElement(TextFormatting.RESET + "TPS " + TextFormatting.WHITE + String.valueOf(rounded), 0xffffffff, false));
+                normal.add(new TextElement(TextFormatting.RESET + "TPS " + TextFormatting.WHITE + rounded, 0xffffffff, false));
             } else {
-                normal.add(new TextElement(TextFormatting.GRAY + "TPS " + TextFormatting.WHITE + String.valueOf(rounded), 0xffffffff, false));
+                normal.add(new TextElement(TextFormatting.GRAY + "TPS " + TextFormatting.WHITE + rounded, 0xffffffff, false));
             }
         }
 
         if(ping.getValue()) {
             int ms = EntityUtil.getPing(mc.player);
-            String msText = ChatFormatting.RESET + "Ping " + ChatFormatting.WHITE + String.valueOf(ms) + "ms";
+            String msText = ChatFormatting.RESET + "Ping " + ChatFormatting.WHITE + ms + "ms";
             if(!grayColor.getValue()) {
                 normal.add(new TextElement(msText, 0xffffffff, false));
             } else {
-                String msGrayText = ChatFormatting.GRAY + "Ping " + ChatFormatting.WHITE + String.valueOf(ms) + "ms";
+                String msGrayText = ChatFormatting.GRAY + "Ping " + ChatFormatting.WHITE + ms + "ms";
                 normal.add(new TextElement(msGrayText, 0xffffffff, false));
             }
         }
@@ -324,32 +327,32 @@ public class HUD extends Module {
         if(clock.getValue()) {
             int hour = rightNow.get(Calendar.HOUR_OF_DAY);
             int mins = rightNow.get(Calendar.MINUTE);
-            boolean isAfternoon = false;
-            if(hour >= 12) isAfternoon = true;
-            if(isAfternoon && (hour-12 == 0)) {
+
+            boolean isAfternoon = hour >= 12;
+            if(isAfternoon && (hour-12 == 0))
                 hour = 24;
-            }
+
             String hourString = isAfternoon ? String.valueOf(hour-12) : String.valueOf(hour);
-            String textTime = ChatFormatting.RESET + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "")+String.valueOf(mins) + (isAfternoon ? "pm" : "am");
+            String textTime = ChatFormatting.RESET + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "") + mins + (isAfternoon ? "pm" : "am");
             if(!grayColor.getValue()) {
                 normal.add(new TextElement(textTime, 0xffffffff, false));
             } else {
-                String textGrayTime = ChatFormatting.GRAY + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "")+String.valueOf(mins) + (isAfternoon ? "pm" : "am");
+                String textGrayTime = ChatFormatting.GRAY + "Time " + ChatFormatting.WHITE + hourString +":"+(mins < 10 ? "0" : "") + mins + (isAfternoon ? "pm" : "am");
                 normal.add(new TextElement(textGrayTime, 0xffffffff, false));
             }
         }
 
         if(playerCount.getValue()) {
-            int count = 0;
-            if(mc.player == null || mc.player.connection == null || mc.player.connection.getPlayerInfoMap() == null || mc.isSingleplayer()) {
+            int count;
+            if(mc.player == null || mc.player.connection == null || mc.isSingleplayer()) {
                 count = 1;
             } else {
                 count = mc.player.connection.getPlayerInfoMap().size();
             }
             if(!grayColor.getValue()) {
-                normal.add(new TextElement(TextFormatting.RESET + "Players " + TextFormatting.WHITE + String.valueOf(count), 0xffffffff, false));
+                normal.add(new TextElement(TextFormatting.RESET + "Players " + TextFormatting.WHITE + count, 0xffffffff, false));
             } else {
-                normal.add(new TextElement(TextFormatting.GRAY + "Players " + TextFormatting.WHITE + String.valueOf(count), 0xffffffff, false));
+                normal.add(new TextElement(TextFormatting.GRAY + "Players " + TextFormatting.WHITE + count, 0xffffffff, false));
             }
         }
 
@@ -363,7 +366,7 @@ public class HUD extends Module {
 
 
         if(lagNotifier.getValue()) {
-            String lag = TextFormatting.GRAY + "Server is not responding " + String.valueOf(timeDifference()) + "s";
+            String lag = TextFormatting.GRAY + "Server is not responding " + timeDifference() + "s";
             if ((1000L <= System.currentTimeMillis() - serverLastUpdated) && !(mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat))) {
                 int divider = getScale();
                 int lagX = (int) (mc.displayWidth / divider / 2 - Dactyl.fontUtil.getStringWidth(lag) / 2);
@@ -428,7 +431,7 @@ public class HUD extends Module {
     }
 
     private Color getCurrentColor() {
-        return Color.getHSBColor(this.hue, 255F / 255.0F, 1F);
+        return Color.getHSBColor(this.hue, 1.0f, 1F);
     }
 
     private int getColorDarker(int offset, boolean isX) {
@@ -470,12 +473,12 @@ public class HUD extends Module {
         hue = (System.currentTimeMillis() % (360f * zoomSpeed)) / (360f * zoomSpeed);
         float tempHue = hue;
         for (int i = 0; i <= res.getScaledHeight(); i++) {
-            colorY.put(i, Color.HSBtoRGB(tempHue, 255F / 255f, 1f));
+            colorY.put(i, Color.HSBtoRGB(tempHue, 1.0f, 1f));
             tempHue += ((float) 5) / res.getScaledHeight();
         }
         float tempHue1 = hue;
         for (int i = 0; i <= res.getScaledWidth(); i++) {
-            colorX.put(i, Color.HSBtoRGB(tempHue1, 255F / 255f, 1f));
+            colorX.put(i, Color.HSBtoRGB(tempHue1, 1.0f, 1f));
             tempHue1 += ((float) 5) / res.getScaledWidth();
         }
     }
@@ -498,35 +501,48 @@ public class HUD extends Module {
         return null;
     }
 
-    public void renderDirAndCoords() {
-        if(!direction.getValue()) {
+    public void renderDirAndCoords()
+    {
+        if (direction.getValue())
+        {
+            String directionText;
+            if (!grayColor.getValue())
+                directionText = String.format("%s%s [%s%s%s]", TextFormatting.RESET, EntityUtil.getFacingWithProperCapitals(), TextFormatting.WHITE, EntityUtil.getRelativeDirection(), TextFormatting.RESET);
+            else
+                directionText = String.format("%s%s [%s%s%s]", TextFormatting.GRAY, EntityUtil.getFacingWithProperCapitals(), TextFormatting.WHITE, EntityUtil.getRelativeDirection(), TextFormatting.GRAY);
+
+            int dirY = RenderUtil.getScreenHeight() - (coords.getValue() ? 10 : 0) - (mc.currentScreen instanceof GuiChat ? 15 : 0) - 10;
+
+            if (shadow.getValue())
+                Dactyl.fontUtil.drawStringWithShadow(directionText, 1, dirY, Colors.INSTANCE.getColor(dirY, false));
+            else
+                Dactyl.fontUtil.drawString(directionText, 1, dirY, Colors.INSTANCE.getColor(dirY, false));
+        }
+
+        if(!coords.getValue())
             return;
-        }
-        String directionText = TextFormatting.RESET + EntityUtil.getFacingWithProperCapitals() + " [" + TextFormatting.WHITE + EntityUtil.getRelativeDirection() + TextFormatting.RESET + "]";
-        int dirY = RenderUtil.getScreenHeight()-(coords.getValue() ? 10 : 0)-(mc.currentScreen instanceof GuiChat ? 15 : 0)-10;
-        if(shadow.getValue()) {
-            Dactyl.fontUtil.drawStringWithShadow(directionText, 1, dirY, Colors.INSTANCE.getColor(dirY, false));
-        } else {
-            Dactyl.fontUtil.drawString(directionText, 1, dirY, Colors.INSTANCE.getColor(dirY, false));
-        }
-        if(!coords.getValue()) {
-            return;
-        }
-        int coordY = RenderUtil.getScreenHeight()-(mc.currentScreen instanceof GuiChat ? 15 : 0)-10;
-        String xCoord = String.format("%.1f", mc.player.posX);
-        String yCoord = String.format("%.1f", mc.player.posY);
-        String zCoord = String.format("%.1f", mc.player.posZ);
-        String xyzText = "XYZ " + TextFormatting.WHITE + xCoord + TextFormatting.RESET + ", " + TextFormatting.WHITE + yCoord + TextFormatting.RESET + ", " + TextFormatting.WHITE + zCoord + TextFormatting.RESET;
+
+        String xyzText;
+        if (!grayColor.getValue())
+            xyzText = String.format("%sXYZ %s%.1f%s, %s%.1f%s, %s%.1f%s", TextFormatting.RESET, TextFormatting.WHITE, mc.player.posX, TextFormatting.RESET, TextFormatting.WHITE, mc.player.posY, TextFormatting.RESET, TextFormatting.WHITE, mc.player.posZ, TextFormatting.RESET);
+        else
+            xyzText = String.format("%sXYZ %s%.1f%s, %s%.1f%s, %s%.1f%s", TextFormatting.GRAY, TextFormatting.WHITE, mc.player.posX, TextFormatting.GRAY, TextFormatting.WHITE, mc.player.posY, TextFormatting.GRAY, TextFormatting.WHITE, mc.player.posZ, TextFormatting.GRAY);
+
         if(netherCoords.getValue()) {
             String netherX = mc.player.dimension != -1 ? String.format("%.1f", mc.player.posX / 8) : String.format("%.1f", mc.player.posX * 8);
             String netherZ = mc.player.dimension != -1 ? String.format("%.1f", mc.player.posZ / 8) : String.format("%.1f", mc.player.posZ * 8);
-            xyzText+= " [" + TextFormatting.WHITE + netherX + TextFormatting.RESET + ", " + TextFormatting.WHITE + netherZ + TextFormatting.RESET + "]";
+
+            if (!grayColor.getValue())
+                xyzText += String.format(" [%s%s%s, %s%s%s]", TextFormatting.WHITE, netherX, TextFormatting.RESET, TextFormatting.WHITE, netherZ, TextFormatting.RESET);
+            else
+                xyzText += String.format(" [%s%s%s, %s%s%s]", TextFormatting.WHITE, netherX, TextFormatting.GRAY, TextFormatting.WHITE, netherZ, TextFormatting.GRAY);
         }
-        if(shadow.getValue()) {
-            Dactyl.fontUtil.drawStringWithShadow(xyzText, 1, coordY, Colors.INSTANCE.getColor(coordY, false));
-        } else {
-            Dactyl.fontUtil.drawString(xyzText, 1, coordY, Colors.INSTANCE.getColor(coordY, false));
-        }
+
+        int height = RenderUtil.getScreenHeight() - (mc.currentScreen instanceof GuiChat ? 15 : 0) - 10;
+        if(shadow.getValue())
+            Dactyl.fontUtil.drawStringWithShadow(xyzText, 1, height, Colors.INSTANCE.getColor(height, false));
+        else
+            Dactyl.fontUtil.drawString(xyzText, 1, height, Colors.INSTANCE.getColor(height, false));
     }
 
     public void renderTotemHUD() {
@@ -554,7 +570,7 @@ public class HUD extends Module {
             GlStateManager.enableTexture2D();
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();
-            Dactyl.fontUtil.drawStringWithShadow(totems + "", (int)(x + 19 - 2 - Dactyl.fontUtil.getStringWidth(totems + "")), (int)(y + 9), 16777215);
+            Dactyl.fontUtil.drawStringWithShadow(totems + "", (int)(x + 19 - 2 - Dactyl.fontUtil.getStringWidth(totems + "")), y + 9, 16777215);
             GlStateManager.enableDepth();
             GlStateManager.disableLighting();
         }
@@ -586,19 +602,19 @@ public class HUD extends Module {
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();
             final String s = (is.getCount() > 1) ? (is.getCount() + "") : "";
-            Dactyl.fontUtil.drawStringWithShadow(s, (int)(x + 19 - 2 - Dactyl.fontUtil.getStringWidth(s)), (int)(y + 9), 16777215);
-            int dmg = 0;
+            Dactyl.fontUtil.drawStringWithShadow(s, (int)(x + 19 - 2 - Dactyl.fontUtil.getStringWidth(s)), y + 9, 16777215);
+            int dmg;
             final int itemDurability = is.getMaxDamage() - is.getItemDamage();
             final float green = (is.getMaxDamage() - (float)is.getItemDamage()) / is.getMaxDamage();
             final float red = 1.0f - green;
             dmg = 100 - (int)(red * 100.0f);
-            Dactyl.fontUtil.drawStringWithShadow(dmg + "", (int)(x + 8 - Dactyl.fontUtil.getStringWidth(dmg + "") / 2), (int)(y - 11), RenderUtil.toRGBA((int)(red * 255.0f), (int)(green * 255.0f), 0));
+            Dactyl.fontUtil.drawStringWithShadow(dmg + "", (int)(x + 8 - Dactyl.fontUtil.getStringWidth(dmg + "") / 2), y - 11, RenderUtil.toRGBA((int)(red * 255.0f), (int)(green * 255.0f), 0));
         }
         GlStateManager.enableDepth();
         GlStateManager.disableLighting();
     }
 
-    private CFontRenderer skeetFont = new CFontRenderer(new Font("Verdana", Font.PLAIN, 16), true, true);
+    private final CFontRenderer skeetFont = new CFontRenderer(new Font("Verdana", Font.PLAIN, 16), true, true);
 
     private void doWatermark() {
         if(watermarkTypeSetting.getValue() != WatermarkType.NONE) {
@@ -637,7 +653,7 @@ public class HUD extends Module {
                 return;
             }
             String drawingWatermark = "";
-            switch((WatermarkType)watermarkTypeSetting.getValue()) {
+            switch(watermarkTypeSetting.getValue()) {
                 case DACTYL_IE:
                     drawingWatermark = "Dactyl.ie " + Dactyl.VERSION;
                     break;
@@ -678,7 +694,7 @@ public class HUD extends Module {
         String renderText = customWelcomer.getValue().replace("<p>", mc.session.getUsername());
         if (welcomerGradient.getValue()) {
             char[] characters = renderText.toCharArray();
-            int currentX = (int)width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2;
+            int currentX = width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2;
             for (char ch : characters) {
                 if (shadow.getValue()) {
                     Dactyl.fontUtil.drawStringWithShadow(String.valueOf(ch), currentX, 2, Colors.INSTANCE.getColor(currentX, true));
@@ -689,9 +705,9 @@ public class HUD extends Module {
             }
         } else {
             if (shadow.getValue()) {
-                Dactyl.fontUtil.drawStringWithShadow(renderText, (int)width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2, 2, Colors.INSTANCE.getColor(1, false));
+                Dactyl.fontUtil.drawStringWithShadow(renderText, width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2, 2, Colors.INSTANCE.getColor(1, false));
             } else {
-                Dactyl.fontUtil.drawString(renderText, (int)width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2, 2, Colors.INSTANCE.getColor(1, false));
+                Dactyl.fontUtil.drawString(renderText, width / 2 - (int)Dactyl.fontUtil.getStringWidth(renderText) / 2 + 2, 2, Colors.INSTANCE.getColor(1, false));
             }
         }
     }
@@ -764,7 +780,7 @@ public class HUD extends Module {
         arrayTimer.reset();
     }
 
-    private class ArrayListElement {
+    private static class ArrayListElement {
         public Module module;
         public AnimationState state;
         public int ticks;
@@ -776,7 +792,7 @@ public class HUD extends Module {
         }
     }
 
-    private class TextElement {
+    private static class TextElement {
         private final boolean isPotion;
         private final String text;
         private final int color;
@@ -829,7 +845,7 @@ public class HUD extends Module {
 
         private final String name;
 
-        private WatermarkType(String name) {
+        WatermarkType(String name) {
             this.name = name;
         }
 
