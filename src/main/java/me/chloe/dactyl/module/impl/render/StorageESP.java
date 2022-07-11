@@ -12,12 +12,12 @@ import net.minecraft.tileentity.*;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public class StorageESP extends Module {
-    public Setting<Boolean> shulkerViewer = new Setting<Boolean>("ShulkerViewer", true);
-    public Setting<Boolean> chests = new Setting<Boolean>("Chests", true);
-    public Setting<Boolean> enderchests = new Setting<Boolean>("EChests", true);
-    public Setting<Boolean> shulkers = new Setting<Boolean>("Shulkers", true);
-    public Setting<Boolean> hoppers = new Setting<Boolean>("Hoppers", false);
-    public Setting<Double> lineWidth = new Setting<Double>("Width", 1.0d, 0.1d, 3.0d);
+    public Setting<Boolean> shulkerViewer = new Setting<>("ShulkerViewer", true);
+    public Setting<Boolean> chests = new Setting<>("Chests", true);
+    public Setting<Boolean> enderchests = new Setting<>("EChests", true);
+    public Setting<Boolean> shulkers = new Setting<>("Shulkers", true);
+    public Setting<Boolean> hoppers = new Setting<>("Hoppers", false);
+    public Setting<Double> lineWidth = new Setting<>("Width", 1.0d, 0.1d, 3.0d);
 
     public static StorageESP INSTANCE;
     public StorageESP() {
@@ -45,24 +45,16 @@ public class StorageESP extends Module {
 
                 if (tileEntity instanceof TileEntityChest)
                 {
-                    TileEntityChest chest = TileEntityChest.class.cast(tileEntity);
+                    TileEntityChest chest = (TileEntityChest)tileEntity;
 
                     if (chest.adjacentChestZPos != null)
-                    {
                         box = new AxisAlignedBB(x + 0.0625, y, z + 0.0625, x + 0.9375, y + 0.875, z + 1.9375);
-                    }
                     else if (chest.adjacentChestXPos != null)
-                    {
                         box = new AxisAlignedBB(x + 0.0625, y, z + 0.0625, x + 1.9375, y + 0.875, z + 0.9375);
-                    }
-                    else if (chest.adjacentChestZPos == null && chest.adjacentChestXPos == null && chest.adjacentChestZNeg == null && chest.adjacentChestXNeg == null)
-                    {
+                    else if (chest.adjacentChestZNeg == null && chest.adjacentChestXNeg == null)
                         box = new AxisAlignedBB(x + 0.0625, y, z + 0.0625, x + 0.9375, y + 0.875, z + 0.9375);
-                    }
                     else
-                    {
                         continue;
-                    }
                 }
                 else if (tileEntity instanceof TileEntityEnderChest)
                 {
@@ -125,18 +117,12 @@ public class StorageESP extends Module {
 
 
     private boolean canDraw(TileEntity entity) {
-        if(entity instanceof TileEntityChest && chests.getValue()) {
+        if(entity instanceof TileEntityChest && chests.getValue())
             return true;
-        }
-        if(entity instanceof TileEntityEnderChest && enderchests.getValue()) {
+        if(entity instanceof TileEntityEnderChest && enderchests.getValue())
             return true;
-        }
-        if(entity instanceof TileEntityShulkerBox && shulkers.getValue()) {
+        if(entity instanceof TileEntityShulkerBox && shulkers.getValue())
             return true;
-        }
-        if(entity instanceof TileEntityHopper && hoppers.getValue()) {
-            return true;
-        }
-        return false;
+        return entity instanceof TileEntityHopper && hoppers.getValue();
     }
 }
