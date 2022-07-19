@@ -1,7 +1,7 @@
 [
 {
-  "modid": "dactyl",
-  "name": "Dactyl",
+  "modid": "moonlight",
+  "name": "Moonlight",
   "description": "good anarchy utility",
   "version": "${version}",
   "mcversion": "${mcversion}",

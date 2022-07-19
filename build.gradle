@@ -27,8 +27,8 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 version = 'v1.7.1'
-group = 'me.chloe.dactyl' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'Dactyl'
+group = 'me.chloe.moonlight'
+archivesBaseName = 'Moonlight'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
@@ -36,7 +36,7 @@ minecraft {
     version = "1.12.2-14.23.0.2531"
     runDir = "run"
     mappings = "stable_39"
-    coreMod = "me.chloe.dactyl.injection.core.DactylInjectionCore"
+    coreMod = "me.chloe.moonlight.injection.core.MoonlightInjectionCore"
 }
 
 repositories {
@@ -115,9 +115,9 @@ jar {
                 'tweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
                 'TweakOrder': 0,
                 'FMLCorePluginContainsFMLMod': 'true',
-                'FMLCorePlugin': 'me.chloe.dactyl.injection.core.DactylInjectionCore',
+                'FMLCorePlugin': 'me.chloe.moonlight.injection.core.MoonlightInjectionCore',
                 'ForceLoadAsMod': 'true',
-                'FMLAT': 'dactyl_at.cfg'
+                'FMLAT': 'moonlight_at.cfg'
         )
     }
 }
