@@ -111,7 +111,7 @@ reobf {
 jar {
     manifest {
         attributes(
-                'MixinConfigs': 'mixins.dactyl.json',
+                'MixinConfigs': 'mixins.moonlight.json',
                 'tweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
                 'TweakOrder': 0,
                 'FMLCorePluginContainsFMLMod': 'true',
