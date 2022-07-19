@@ -13,7 +13,6 @@ import me.chloe.dactyl.injection.inj.access.ICPacketUseEntity;
 import me.chloe.dactyl.module.Module;
 import me.chloe.dactyl.module.impl.client.Colors;
 import me.chloe.dactyl.setting.Setting;
-import me.chloe.dactyl.util.*;
 import me.chloe.dactyl.util.render.RenderUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

@@ -97,4 +97,189 @@ public class PlaceUtil {
         double distance = MathHelper.sqrt(x * x + z * z);
         return new float[] { (float)(Math.atan2(z, x) * 180.0D / Math.PI) - 90.0F, (float)-(Math.atan2(y, distance) * 180.0D / Math.PI) };
     }
+
+    public static Scaffold.BlockData getBlockData2(BlockPos pos) {
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos.add(0, 0, -1), EnumFacing.SOUTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos.add(0, 1, 0), EnumFacing.DOWN);
+        BlockPos pos2 = pos.add(-1, 0, 0);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos3 = pos.add(1, 0, 0);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos4 = pos.add(0, 0, 1);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos5 = pos.add(0, 0, -1);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos6 = pos.add(-2, 0, 0);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos2.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos7 = pos.add(2, 0, 0);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos3.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos8 = pos.add(0, 0, 2);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos4.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos9 = pos.add(0, 0, -2);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos5.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos10 = pos.add(0, -1, 0);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos10.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos10.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos10.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos10.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos10.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos10.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos11 = pos10.add(1, 0, 0);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos11.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos11.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos11.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos11.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos11.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos11.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos12 = pos10.add(-1, 0, 0);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos12.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos12.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos12.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos12.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos12.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos12.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos13 = pos10.add(0, 0, 1);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos13.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos13.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos13.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos13.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos13.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos13.add(0, 0, -1), EnumFacing.SOUTH);
+        BlockPos pos14 = pos10.add(0, 0, -1);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, -1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos14.add(0, -1, 0), EnumFacing.UP);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, 1, 0)).getBlock()))
+            return new Scaffold.BlockData(pos14.add(0, 1, 0), EnumFacing.DOWN);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(-1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos14.add(-1, 0, 0), EnumFacing.EAST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(1, 0, 0)).getBlock()))
+            return new Scaffold.BlockData(pos14.add(1, 0, 0), EnumFacing.WEST);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, 0, 1)).getBlock()))
+            return new Scaffold.BlockData(pos14.add(0, 0, 1), EnumFacing.NORTH);
+        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, 0, -1)).getBlock()))
+            return new Scaffold.BlockData(pos14.add(0, 0, -1), EnumFacing.SOUTH);
+        return null;
+    }
 }

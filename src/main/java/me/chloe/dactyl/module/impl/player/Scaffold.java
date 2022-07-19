@@ -2,6 +2,9 @@ package me.chloe.dactyl.module.impl.player;
 
 import me.chloe.dactyl.event.ForgeEvent;
 import me.chloe.dactyl.event.impl.player.EventUpdateWalkingPlayer;
+import me.chloe.dactyl.event.impl.player.MoveEvent;
+import me.chloe.dactyl.module.impl.movement.ElytraFly;
+import me.chloe.dactyl.module.impl.movement.LongJump;
 import me.chloe.dactyl.util.PlaceUtil;
 import me.chloe.dactyl.util.TimeUtil;
 import me.chloe.dactyl.module.Module;
@@ -21,6 +24,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Scaffold extends Module {
     public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d);
     public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", false);
+    public Setting<SneakMode> sneakModeSetting = new Setting<SneakMode>("AntiFall", SneakMode.SNEAK);
+    public Setting<Integer> checkDelay = new Setting<Integer>("Check Delay", 100, 1, 1000, vis->sneakModeSetting.getValue()==SneakMode.STRICT);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
     public static Scaffold INSTANCE;
@@ -31,7 +36,7 @@ public class Scaffold extends Module {
 
     private TimeUtil timerMotion = new TimeUtil();
 
-    private TimeUtil itemTimer = new TimeUtil();
+    private TimeUtil blockCheckTimer = new TimeUtil();
 
     private BlockData blockData;
 
@@ -43,6 +48,8 @@ public class Scaffold extends Module {
 
     public boolean keepY = false;
 
+    public boolean doWait = false;
+
     public int lastY;
 
     public float lastYaw;
@@ -53,6 +60,28 @@ public class Scaffold extends Module {
 
     public boolean teleported;
 
+    @SubscribeEvent
+    public void onMove(MoveEvent event) {
+        if (event.getStage() != ForgeEvent.Stage.PRE) {
+            return;
+        }
+        if (Freecam.INSTANCE.isEnabled()) {
+            return;
+        }
+        if (LongJump.INSTANCE.isEnabled()) {
+            return;
+        }
+        if (mc.player.isElytraFlying() || mc.player.isInLava() || mc.player.isInWater() || ElytraFly.INSTANCE.isEnabled()) {
+            return;
+        }
+        if(sneakModeSetting.getValue() == SneakMode.STRICT && doWait) {
+            if(blockCheckTimer.hasPassed(checkDelay.getValue().longValue())) {
+                doWait = false;
+            } else {
+                event.setMotion(0.0d, 0.0d, 0.0d);
+            }
+        }
+    }
 
     @SubscribeEvent
     public void onUpdate(EventUpdateWalkingPlayer event) {
@@ -86,7 +115,7 @@ public class Scaffold extends Module {
             BlockPos blockBelow = new BlockPos(x, y - downDistance, z);
             this.pos = blockBelow;
             if (mc.world.getBlockState(blockBelow).getBlock() == Blocks.AIR || (mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.WATER) || mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.FLOWING_WATER) || mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.LAVA) || mc.world.getBlockState(blockBelow).getBlock().equals(Blocks.FLOWING_LAVA))) {
-                this.blockData = getBlockData2(blockBelow);
+                this.blockData = PlaceUtil.getBlockData2(blockBelow);
                 if (this.blockData != null) {
                     float yaw1 = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[0];
                     float pitch = PlaceUtil.aimAtLocation(this.blockData.position.getX(), this.blockData.position.getY(), this.blockData.position.getZ(), this.blockData.face)[1];
@@ -101,10 +130,10 @@ public class Scaffold extends Module {
                 return;
             }
             int heldItem = mc.player.inventory.currentItem;
-            if (this.Switch && !(mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock))
+            if (this.Switch && !(mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock)) {
                 for (int j = 0; j < 9; j++) {
-                    if (mc.player.inventory.getStackInSlot(j) != null && mc.player.inventory.getStackInSlot(j).getCount() != 0 && mc.player.inventory.getStackInSlot(j).getItem() instanceof ItemBlock && !PlaceUtil.invalid.contains(((ItemBlock)mc.player.inventory.getStackInSlot(j).getItem()).getBlock())) {
-                        if(packetSwitch.getValue()) {
+                    if (mc.player.inventory.getStackInSlot(j) != null && mc.player.inventory.getStackInSlot(j).getCount() != 0 && mc.player.inventory.getStackInSlot(j).getItem() instanceof ItemBlock && !PlaceUtil.invalid.contains(((ItemBlock) mc.player.inventory.getStackInSlot(j).getItem()).getBlock())) {
+                        if (packetSwitch.getValue()) {
                             mc.player.connection.sendPacket(new CPacketHeldItemChange(j));
                         } else {
                             mc.player.inventory.currentItem = j;
@@ -112,8 +141,11 @@ public class Scaffold extends Module {
                         break;
                     }
                 }
-            if (this.tower)
-                if (mc.gameSettings.keyBindJump.isKeyDown() && mc.player.moveForward == 0.0F && mc.player.moveStrafing == 0.0F && this.tower && !mc.player.isPotionActive(MobEffects.JUMP_BOOST)) {
+            }
+            boolean towering = false;
+            if (this.tower) {
+                towering = mc.gameSettings.keyBindJump.isKeyDown();
+                if (towering && mc.player.moveForward == 0.0F && mc.player.moveStrafing == 0.0F && this.tower && !mc.player.isPotionActive(MobEffects.JUMP_BOOST)) {
                     if (!this.teleported && this.center) {
                         this.teleported = true;
                         BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
@@ -131,11 +163,16 @@ public class Scaffold extends Module {
                     if (this.teleported && this.center)
                         this.teleported = false;
                 }
+            }
             Vec3d hitVec = new Vec3d(this.blockData.position).add(0.5, 0.5, 0.5)
                     .add(new Vec3d(this.blockData.face.getDirectionVec()).scale(0.5));
             //if (mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, new Vec3d(this.blockData.position.getX() + Math.random(), this.blockData.position.getY() + Math.random(), this.blockData.position.getZ() + Math.random()), EnumHand.MAIN_HAND) != EnumActionResult.FAIL) {
             mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, hitVec, EnumHand.MAIN_HAND);
             mc.player.connection.sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
+            if(!towering) {
+                doWait = true;
+                blockCheckTimer.reset();
+            }
             //}
             if(packetSwitch.getValue()) {
                 mc.player.connection.sendPacket(new CPacketHeldItemChange(heldItem));
@@ -145,193 +182,17 @@ public class Scaffold extends Module {
         }
     }
 
-    private BlockData getBlockData2(BlockPos pos) {
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos.add(0, 0, -1), EnumFacing.SOUTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos.add(0, 1, 0), EnumFacing.DOWN);
-        BlockPos pos2 = pos.add(-1, 0, 0);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos2.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos2.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos2.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos2.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos2.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos2.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos3 = pos.add(1, 0, 0);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos3.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos3.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos3.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos3.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos3.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos3.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos4 = pos.add(0, 0, 1);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos4.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos4.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos4.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos4.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos4.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos4.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos5 = pos.add(0, 0, -1);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos5.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos5.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos5.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos5.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos5.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos5.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos6 = pos.add(-2, 0, 0);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos2.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos2.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos2.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos2.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos2.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos2.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos2.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos7 = pos.add(2, 0, 0);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos3.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos3.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos3.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos3.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos3.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos3.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos3.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos8 = pos.add(0, 0, 2);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos4.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos4.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos4.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos4.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos4.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos4.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos4.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos9 = pos.add(0, 0, -2);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos5.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos5.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos5.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos5.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos5.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos5.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos5.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos10 = pos.add(0, -1, 0);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos10.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos10.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos10.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos10.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos10.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos10.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos10.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos11 = pos10.add(1, 0, 0);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos11.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos11.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos11.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos11.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos11.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos11.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos11.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos12 = pos10.add(-1, 0, 0);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos12.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos12.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos12.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos12.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos12.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos12.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos12.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos13 = pos10.add(0, 0, 1);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos13.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos13.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos13.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos13.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos13.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos13.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos13.add(0, 0, -1), EnumFacing.SOUTH);
-        BlockPos pos14 = pos10.add(0, 0, -1);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, -1, 0)).getBlock()))
-            return new BlockData(pos14.add(0, -1, 0), EnumFacing.UP);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, 1, 0)).getBlock()))
-            return new BlockData(pos14.add(0, 1, 0), EnumFacing.DOWN);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(-1, 0, 0)).getBlock()))
-            return new BlockData(pos14.add(-1, 0, 0), EnumFacing.EAST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(1, 0, 0)).getBlock()))
-            return new BlockData(pos14.add(1, 0, 0), EnumFacing.WEST);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, 0, 1)).getBlock()))
-            return new BlockData(pos14.add(0, 0, 1), EnumFacing.NORTH);
-        if (!PlaceUtil.invalid.contains(mc.world.getBlockState(pos14.add(0, 0, -1)).getBlock()))
-            return new BlockData(pos14.add(0, 0, -1), EnumFacing.SOUTH);
-        return null;
+    public boolean shouldSneak() {
+        return this.sneakModeSetting.getValue() == SneakMode.SNEAK;
+    }
+
+    public enum SneakMode {
+        SNEAK,
+        STRICT
     }
 
 
-    private class BlockData {
+    public static class BlockData {
         public BlockPos position;
 
         public EnumFacing face;

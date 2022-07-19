@@ -40,6 +40,6 @@ public abstract class InjEntity{
 
     @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSneaking()Z"))
     public boolean isSneaking(Entity entity) {
-        return Scaffold.INSTANCE.isEnabled() || entity.isSneaking();
+        return Scaffold.INSTANCE.shouldSneak() || entity.isSneaking();
     }
 }
