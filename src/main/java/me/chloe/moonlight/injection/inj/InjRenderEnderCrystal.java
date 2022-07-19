@@ -65,24 +65,24 @@ public abstract class InjRenderEnderCrystal {
                 f4 += f4 * f4;
                 GL11.glLineWidth(5.0f);
                 if (entity.shouldShowBottom()) {
-                    this.modelEnderCrystal.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    this.modelEnderCrystal.render(entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
                 }
                 else {
-                    this.modelEnderCrystalNoBase.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    this.modelEnderCrystalNoBase.render(entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
                 }
                 OutlineUtils.renderOne(Chams.INSTANCE.lineWidth.getValue().floatValue());
                 if (entity.shouldShowBottom()) {
-                    this.modelEnderCrystal.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    this.modelEnderCrystal.render(entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
                 }
                 else {
-                    this.modelEnderCrystalNoBase.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    this.modelEnderCrystalNoBase.render(entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
                 }
                 OutlineUtils.renderTwo();
                 if (entity.shouldShowBottom()) {
-                    this.modelEnderCrystal.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    this.modelEnderCrystal.render(entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
                 }
                 else {
-                    this.modelEnderCrystalNoBase.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    this.modelEnderCrystalNoBase.render(entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
                 }
                 OutlineUtils.renderThree();
                 OutlineUtils.renderFour(Chams.INSTANCE.crystalColorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(255, 71, 234, 255));
@@ -103,7 +103,6 @@ public abstract class InjRenderEnderCrystal {
                 float f4 = MathHelper.sin(f3 * 0.2f) / 2.0f + 0.5f;
                 f4 += f4 * f4;
                 GL11.glPushAttrib(1048575);
-                //GL11.glPolygonMode(1032, 6913);
                 if(Chams.INSTANCE.crystalChamFill.getValue()) {
                     GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
                 } else {
@@ -114,21 +113,36 @@ public abstract class InjRenderEnderCrystal {
                 GL11.glDisable(GL11.GL_DEPTH_TEST);
                 GL11.glEnable(GL11.GL_LINE_SMOOTH);
                 GL11.glEnable(GL11.GL_BLEND);
-                GL11.glBlendFunc(770, 771);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
                 Color c69 = Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false));
                 Color c1 = new Color(c69.getRed(), c69.getGreen(), c69.getBlue(), Chams.INSTANCE.crystalFillOpacity.getValue());
                 if(Chams.INSTANCE.crystalChamFill.getValue()) {
-                    OutlineUtils.setColor(Chams.INSTANCE.crystalColorSync.getValue() ? c1 : new Color(255, 71, 234, Chams.INSTANCE.crystalFillOpacity.getValue()));
+                    glColor4d(Chams.INSTANCE.crystalColorSync.getValue() ? c1 : new Color(255, 71, 234, Chams.INSTANCE.crystalFillOpacity.getValue()));
                 } else {
-                    OutlineUtils.setColor(Chams.INSTANCE.crystalColorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(255, 71, 234, 255));
+                    glColor4d(Chams.INSTANCE.crystalColorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(255, 71, 234, 255));
                 }
                 GL11.glLineWidth(Chams.INSTANCE.lineWidth.getValue().floatValue());
                 if (entity.shouldShowBottom()) {
                     this.modelEnderCrystal.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
-                }
-                else {
+                    if(Chams.INSTANCE.betterWireframe.getValue()) {
+                        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+                        glColor4d(Chams.INSTANCE.crystalColorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(255, 71, 234, 255));
+                        this.modelEnderCrystalNoBase.render((Entity) entity, 0.0f, f3 * 3.25f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    }
+                } else {
                     this.modelEnderCrystalNoBase.render((Entity)entity, 0.0f, f3 * 3.0f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    if(Chams.INSTANCE.betterWireframe.getValue()) {
+                        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+                        glColor4d(Chams.INSTANCE.crystalColorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(255, 71, 234, 255));
+                        this.modelEnderCrystalNoBase.render((Entity) entity, 0.0f, f3 * 3.25f, f4 * 0.2f, 0.0f, 0.0f, 0.0625f);
+                    }
                 }
+                /*if(Chams.INSTANCE.crystalChamFill.getValue()) {
+                    glColor4d(Chams.INSTANCE.crystalColorSync.getValue() ? c1 : new Color(255, 71, 234, Chams.INSTANCE.crystalFillOpacity.getValue()));
+                } else {
+                    glColor4d(Chams.INSTANCE.crystalColorSync.getValue() ? Colors.INSTANCE.convertHex(Colors.INSTANCE.getColor(1, false)) : new Color(255, 71, 234, 255));
+                }
+                GL11.glLineWidth(Chams.INSTANCE.lineWidth.getValue().floatValue());*/
                 GL11.glPopAttrib();
                 GL11.glPopMatrix();
             }
@@ -161,5 +175,9 @@ public abstract class InjRenderEnderCrystal {
                 GL11.glPopMatrix();
             }
         }
+    }
+
+    private void glColor4d(Color c) {
+        GL11.glColor4d(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f);
     }
 }

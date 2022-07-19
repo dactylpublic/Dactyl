@@ -60,7 +60,7 @@ public class Moonlight {
 
     @Mod.EventHandler
     public void postInitialization(FMLPostInitializationEvent event) {
-        Display.setTitle("Moonlight.ie " + VERSION);
+        Display.setTitle("Moonlight " + VERSION);
     }
 
     public void save() {
