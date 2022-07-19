@@ -95,7 +95,11 @@ public class AutoCrystal extends Module {
     public Setting<SwingLogic> swingSetting = new Setting<SwingLogic>("Swing", SwingLogic.BOTH, v->isViewGeneral());
     public Setting<Integer> loginWaitTicks = new Setting<Integer>("LoginTicks", 0, 1, 500, v->isViewGeneral());
     public Setting<Boolean> multiPoint = new Setting<Boolean>("MultiPoint", true, v->isViewGeneral());
-    public Setting<Boolean> multiPointRotations = new Setting<Boolean>("PointRotations", false, v->isViewGeneral());
+    public Setting<Boolean> customLookAtPoses = new Setting<Boolean>("Rotation Offsets", false, v->isViewGeneral());
+    public Setting<Double> customLookAtX = new Setting<Double>("X", 0.5d, 0.0d, 1.0d, v->isViewGeneral() && customLookAtPoses.getValue());
+    public Setting<Double> customLookAtY = new Setting<Double>("Y", 0.5d, 0.0d, 1.0d, v->isViewGeneral() && customLookAtPoses.getValue());
+    public Setting<Double> customLookAtZ = new Setting<Double>("Z", 0.5d, 0.0d, 1.0d, v->isViewGeneral() && customLookAtPoses.getValue());
+    public Setting<Boolean> customLookAtNegY = new Setting<Boolean>("Negate Y", true, v->isViewGeneral() && customLookAtPoses.getValue());
     public Setting<Boolean> debugRotate = new Setting<Boolean>("DebugRotate", false, v->isViewGeneral());
     public Setting<Boolean> toobeeRotate = new Setting<Boolean>("2bRotate", false, v->isViewGeneral() /*for some reason this works on 2b????*/);
     public Setting<Boolean> rotateHead = new Setting<Boolean>("RotateHead", true, v->isViewGeneral());
@@ -339,8 +343,11 @@ public class AutoCrystal extends Module {
             boolean finalizePlace = true;
             damage = CombatUtil.getDamageBestPosNew(multiPoint.getValue(), antiSuiPlace.getValue(), placeMaxSelf.getValue(), minDamage.getValue(), (faceplaceKeyOn ? 36.0d : facePlaceH.getValue()), placeTrace.getValue(), wallsPlace.getValue(), enemyRange.getValue(), oneBlockCA.getValue(), placeRange.getValue());
             double[] finalRots = CombatUtil.calculateLookAt(placePosition.getX() + 0.5, placePosition.getY() - 0.5, placePosition.getZ() + 0.5);
-            if(multiPointRotations.getValue()) {
-                finalRots = CombatUtil.calculateLookAtBlock(placePosition);
+            if(customLookAtPoses.getValue()) {
+                double x = customLookAtX.getValue();
+                double y = customLookAtNegY.getValue() ? -customLookAtY.getValue() : customLookAtY.getValue();
+                double z = customLookAtZ.getValue();
+                finalRots = CombatUtil.calculateLookAt(placePosition.getX() + x, placePosition.getY() + y, placePosition.getZ() + z);
             }
             if (placeRotate.getValue()) {
                 if(yawStepEnum.getValue() == YawStepEnum.PLACE || yawStepEnum.getValue() == YawStepEnum.BOTH) {

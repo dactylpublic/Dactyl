@@ -25,8 +25,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Scaffold extends Module {
     public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", false);
     public Setting<Boolean> strict = new Setting<Boolean>("Strict", false);
-    public Setting<Boolean> strictTower = new Setting<Boolean>("StrictTower", false);
-    public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d);
+    public Setting<Double> expand = new Setting<Double>("Offset", 0.5d, 0.1d, 6.0d);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
     public static Scaffold INSTANCE;
@@ -157,7 +156,7 @@ public class Scaffold extends Module {
                 }
             }
             Vec3d hitVec = new Vec3d(this.blockData.position).add(0.5, 0.5, 0.5).add(new Vec3d(this.blockData.face.getDirectionVec()).scale(0.5));
-            if(towering ? strictTower.getValue() : strict.getValue()) {
+            if(!towering && strict.getValue()) {
                 if (mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, new Vec3d(this.blockData.position.getX() + Math.random(), this.blockData.position.getY() + Math.random(), this.blockData.position.getZ() + Math.random()), EnumHand.MAIN_HAND) != EnumActionResult.FAIL) {
                     placeScaffoldBlock(hitVec);
                 }
