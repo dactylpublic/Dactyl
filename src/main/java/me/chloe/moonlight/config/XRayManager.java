@@ -12,12 +12,12 @@ import java.util.Map;
 public class XRayManager {
     private final List<Block> xrayList;
 
-    File dactylXRay;
+    File MoonlightXRay;
 
     public XRayManager() {
         xrayList = new ArrayList<>();
         try {
-            dactylXRay = ConfigUtil.createFileIfNotExists("xrayblocks", "yml");
+            MoonlightXRay = ConfigUtil.createFileIfNotExists("xrayblocks", "yml");
             intializeBlocks();
         } catch(IOException exception) {
             exception.printStackTrace();
@@ -33,7 +33,7 @@ public class XRayManager {
     }
 
     public void intializeBlocks() throws IOException {
-        InputStream friendStream = new FileInputStream(dactylXRay);
+        InputStream friendStream = new FileInputStream(MoonlightXRay);
         Map<String, Map<String, Object>> yamlObj = new Yaml().load(friendStream);
         if(yamlObj != null) {
             for (Map.Entry<String, Map<String, Object>> pathEntry : yamlObj.entrySet()) {
@@ -53,7 +53,7 @@ public class XRayManager {
     }
 
     public void save() throws IOException {
-        ConfigUtil.clearFile(dactylXRay);
+        ConfigUtil.clearFile(MoonlightXRay);
         Map<String, Object> yamlData = new HashMap<String, Object>();
         for (Block block : xrayList) {
             if(block.getLocalizedName() != null) {
@@ -62,7 +62,7 @@ public class XRayManager {
             }
         }
         Yaml yaml = new Yaml();
-        BufferedWriter bufferedWriter = ConfigUtil.makeWriter(dactylXRay, false);
+        BufferedWriter bufferedWriter = ConfigUtil.makeWriter(MoonlightXRay, false);
         yaml.dump(yamlData, bufferedWriter);
         ConfigUtil.closeWriter(bufferedWriter);
     }

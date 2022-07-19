@@ -83,7 +83,7 @@ public class HUD extends Module {
     public static final ArrayList<ArrayListElement> arrayListElements = new ArrayList<>();
     public static final TimeUtil arrayTimer = new TimeUtil();
 
-    private long serverLastUpdated;
+    private long serverLastUpdated = System.currentTimeMillis();
     private static final ItemStack totemStack = new ItemStack(Items.TOTEM_OF_UNDYING);
 
     public float hue;

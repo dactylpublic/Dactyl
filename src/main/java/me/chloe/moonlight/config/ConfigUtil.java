@@ -7,11 +7,11 @@ import java.util.Map;
 
 public class ConfigUtil {
     public static File createFileIfNotExists(String name, String exstension) throws IOException {
-        File dir = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator);
+        File dir = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator);
         if(!dir.exists()) {
             dir.mkdir();
         }
-        File namedFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+name+"."+exstension);
+        File namedFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+name+"."+exstension);
         if(!namedFile.exists()) {
             namedFile.createNewFile();
         }
@@ -26,7 +26,7 @@ public class ConfigUtil {
 
     public static void createDirsIfNotExists(String[] directories) throws IOException {
         for(String directory : directories) {
-            File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+directory);
+            File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+directory);
             if(!dirFile.exists()) {
                 dirFile.mkdir();
             }
@@ -34,14 +34,14 @@ public class ConfigUtil {
     }
 
     public static void createDirIfNotExists(String directory) throws IOException {
-        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+directory+File.separator);
+        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+directory+File.separator);
         if(!dirFile.exists()) {
             dirFile.mkdir();
         }
     }
 
     public static void createDirIfNotExistsRaw(String directory) throws IOException {
-        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+directory);
+        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+directory);
         if(!dirFile.exists()) {
             dirFile.mkdir();
         }
@@ -76,7 +76,7 @@ public class ConfigUtil {
     }
 
     public static File makeClientDirFile(String path) {
-        return new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+path+File.separator);
+        return new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+path+File.separator);
     }
 
 

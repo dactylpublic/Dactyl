@@ -12,12 +12,12 @@ import java.util.Map;
 public class NukerManager {
     private final List<Block> nukerList;
 
-    File dactylNuker;
+    File MoonlightNuker;
 
     public NukerManager() {
         nukerList = new ArrayList<>();
         try {
-            dactylNuker = ConfigUtil.createFileIfNotExists("nukerblocks", "yml");
+            MoonlightNuker = ConfigUtil.createFileIfNotExists("nukerblocks", "yml");
             intializeBlocks();
         } catch(IOException exception) {
             exception.printStackTrace();
@@ -33,7 +33,7 @@ public class NukerManager {
     }
 
     public void intializeBlocks() throws IOException {
-        InputStream friendStream = new FileInputStream(dactylNuker);
+        InputStream friendStream = new FileInputStream(MoonlightNuker);
         Map<String, Map<String, Object>> yamlObj = new Yaml().load(friendStream);
         if(yamlObj != null) {
             for (Map.Entry<String, Map<String, Object>> pathEntry : yamlObj.entrySet()) {
@@ -53,7 +53,7 @@ public class NukerManager {
     }
 
     public void save() throws IOException {
-        ConfigUtil.clearFile(dactylNuker);
+        ConfigUtil.clearFile(MoonlightNuker);
         Map<String, Object> yamlData = new HashMap<String, Object>();
         for (Block block : nukerList) {
             if(block.getLocalizedName() != null) {
@@ -62,7 +62,7 @@ public class NukerManager {
             }
         }
         Yaml yaml = new Yaml();
-        BufferedWriter bufferedWriter = ConfigUtil.makeWriter(dactylNuker, false);
+        BufferedWriter bufferedWriter = ConfigUtil.makeWriter(MoonlightNuker, false);
         yaml.dump(yamlData, bufferedWriter);
         ConfigUtil.closeWriter(bufferedWriter);
     }
