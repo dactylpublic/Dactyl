@@ -26,7 +26,7 @@ public class Scaffold extends Module {
     public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", false);
     public Setting<Boolean> strict = new Setting<Boolean>("Strict", false);
     public Setting<Boolean> strictTower = new Setting<Boolean>("StrictTower", false);
-    public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d, vis->!strict.getValue());
+    public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
     public static Scaffold INSTANCE;
