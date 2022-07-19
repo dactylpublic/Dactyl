@@ -25,7 +25,7 @@ public class Configuration {
     }
 
     public static boolean load(String configName, boolean isMainConfig) throws IOException, IllegalAccessException {
-        File configFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"config" + sep + configName +File.separator);
+        File configFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+"config" + sep + configName +File.separator);
         if(!configFile.exists() && !isMainConfig) {
             return false;
         }
@@ -88,7 +88,7 @@ public class Configuration {
     }
 
     public static void save(String configName, boolean isMainConfig) throws IOException {
-        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl");
+        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight");
         if(!dirFile.exists()) {
             dirFile.mkdir();
         }
@@ -96,11 +96,11 @@ public class Configuration {
         for(Module mod : Moonlight.moduleManager.getModules()) {
             ConfigUtil.createDirIfNotExistsRaw(File.separator+"config"+File.separator+(isMainConfig ? "Loaded Config" : configName)+File.separator+mod.getCategory().toString()+File.separator);
             if(isMainConfig) {
-                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"config"+File.separator+"Loaded Config"+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
+                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+"config"+File.separator+"Loaded Config"+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
                 ConfigUtil.createFileIfNotExistsRaw(moduleConfig);
                 saveModuleConfig(moduleConfig, mod);
             } else {
-                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"config"+File.separator+configName+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
+                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+"config"+File.separator+configName+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
                 ConfigUtil.createFileIfNotExistsRaw(moduleConfig);
                 saveModuleConfig(moduleConfig, mod);
             }
@@ -129,15 +129,15 @@ public class Configuration {
     }
 
     public static void createIfNotExists(String configName, boolean isMainConfig) throws IOException {
-        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl");
+        File dirFile = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight");
         if(!dirFile.exists()) {
             dirFile.mkdir();
         }
-        File spammerDir = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"spammer");
+        File spammerDir = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+"spammer");
         if(!spammerDir.exists()) {
             spammerDir.mkdir();
         }
-        File kitsDir = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"kits");
+        File kitsDir = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+"kits");
         if(!kitsDir.exists()) {
             kitsDir.mkdir();
         }
@@ -145,11 +145,11 @@ public class Configuration {
         for(Module mod : Moonlight.moduleManager.getModules()) {
             ConfigUtil.createDirIfNotExistsRaw(File.separator+"config"+File.separator+(isMainConfig ? "Loaded Config" : configName)+File.separator+mod.getCategory().toString()+File.separator);
             if(isMainConfig) {
-                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"config"+File.separator+"Loaded Config"+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
+                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+"config"+File.separator+"Loaded Config"+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
                 ConfigUtil.createFileIfNotExistsRaw(moduleConfig);
                 initModuleConfig(moduleConfig, mod);
             } else {
-                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Dactyl"+File.separator+"config"+File.separator+configName+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
+                File moduleConfig = new File(Minecraft.getMinecraft().gameDir.getAbsolutePath(), File.separator+"Moonlight"+File.separator+"config"+File.separator+configName+File.separator+File.separator+mod.getCategory().toString()+File.separator+mod.getName()+".yml"+File.separator);
                 ConfigUtil.createFileIfNotExistsRaw(moduleConfig);
                 initModuleConfig(moduleConfig, mod);
             }
