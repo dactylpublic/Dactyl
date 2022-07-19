@@ -10,8 +10,8 @@ import java.util.Map;
 
 @IFMLLoadingPlugin.Name(value = "Moonlight")
 @IFMLLoadingPlugin.MCVersion(value = "1.12.2")
-public class MoonlightIInjectionCore implements IFMLLoadingPlugin{
-    public MoonlightIInjectionCore() {
+public class MoonlightInjectionCore implements IFMLLoadingPlugin{
+    public MoonlightInjectionCore() {
         MixinBootstrap.init();
         Mixins.addConfiguration("mixins.moonlight.json");
         MixinEnvironment.getDefaultEnvironment().setSide(MixinEnvironment.Side.CLIENT);
