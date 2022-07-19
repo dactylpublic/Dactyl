@@ -14,6 +14,7 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -22,10 +23,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Scaffold extends Module {
-    public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d);
     public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", false);
-    public Setting<SneakMode> sneakModeSetting = new Setting<SneakMode>("AntiFall", SneakMode.SNEAK);
-    public Setting<Integer> checkDelay = new Setting<Integer>("Check Delay", 100, 1, 1000, vis->sneakModeSetting.getValue()==SneakMode.STRICT);
+    public Setting<Boolean> strict = new Setting<Boolean>("Strict", false);
+    public Setting<Boolean> strictTower = new Setting<Boolean>("StrictTower", false);
+    public Setting<Double> expand = new Setting<Double>("Offset", 1.0d, 0.1d, 6.0d, vis->!strict.getValue());
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
     public static Scaffold INSTANCE;
@@ -35,8 +36,6 @@ public class Scaffold extends Module {
     }
 
     private TimeUtil timerMotion = new TimeUtil();
-
-    private TimeUtil blockCheckTimer = new TimeUtil();
 
     private BlockData blockData;
 
@@ -73,13 +72,6 @@ public class Scaffold extends Module {
         }
         if (mc.player.isElytraFlying() || mc.player.isInLava() || mc.player.isInWater() || ElytraFly.INSTANCE.isEnabled()) {
             return;
-        }
-        if(sneakModeSetting.getValue() == SneakMode.STRICT && doWait) {
-            if(blockCheckTimer.hasPassed(checkDelay.getValue().longValue())) {
-                doWait = false;
-            } else {
-                event.setMotion(0.0d, 0.0d, 0.0d);
-            }
         }
     }
 
@@ -164,16 +156,14 @@ public class Scaffold extends Module {
                         this.teleported = false;
                 }
             }
-            Vec3d hitVec = new Vec3d(this.blockData.position).add(0.5, 0.5, 0.5)
-                    .add(new Vec3d(this.blockData.face.getDirectionVec()).scale(0.5));
-            //if (mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, new Vec3d(this.blockData.position.getX() + Math.random(), this.blockData.position.getY() + Math.random(), this.blockData.position.getZ() + Math.random()), EnumHand.MAIN_HAND) != EnumActionResult.FAIL) {
-            mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, hitVec, EnumHand.MAIN_HAND);
-            mc.player.connection.sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
-            if(!towering) {
-                doWait = true;
-                blockCheckTimer.reset();
+            Vec3d hitVec = new Vec3d(this.blockData.position).add(0.5, 0.5, 0.5).add(new Vec3d(this.blockData.face.getDirectionVec()).scale(0.5));
+            if(towering ? strictTower.getValue() : strict.getValue()) {
+                if (mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, new Vec3d(this.blockData.position.getX() + Math.random(), this.blockData.position.getY() + Math.random(), this.blockData.position.getZ() + Math.random()), EnumHand.MAIN_HAND) != EnumActionResult.FAIL) {
+                    placeScaffoldBlock(hitVec);
+                }
+            } else {
+                placeScaffoldBlock(hitVec);
             }
-            //}
             if(packetSwitch.getValue()) {
                 mc.player.connection.sendPacket(new CPacketHeldItemChange(heldItem));
             } else {
@@ -182,8 +172,9 @@ public class Scaffold extends Module {
         }
     }
 
-    public boolean shouldSneak() {
-        return this.sneakModeSetting.getValue() == SneakMode.SNEAK;
+    public void placeScaffoldBlock(Vec3d hitVec) {
+        mc.playerController.processRightClickBlock(mc.player, mc.world, this.blockData.position, this.blockData.face, hitVec, EnumHand.MAIN_HAND);
+        mc.player.connection.sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
     }
 
     public enum SneakMode {

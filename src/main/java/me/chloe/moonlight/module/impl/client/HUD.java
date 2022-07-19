@@ -55,14 +55,14 @@ public class HUD extends Module {
     public Setting<Boolean> totemCount = new Setting<>("TotemCount", true, v->renderHud.getValue());
     public Setting<Rendering> renderingSetting = new Setting<>("Rendering", Rendering.UP, v->renderHud.getValue());
 
-    public Setting<WatermarkType> watermarkTypeSetting = new Setting<>("Logo", WatermarkType.DACTYL_IE, v->renderHud.getValue());
+    public Setting<WatermarkType> watermarkTypeSetting = new Setting<>("Logo", WatermarkType.MOONLIGHT_IE, v->renderHud.getValue());
     public Setting<Boolean> skeetWatermark = new Setting<>("SkeetWatermark", true, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
-    public Setting<String> customWatermark = new Setting<>("CustomWatermark", "Dactyl.ie", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
+    public Setting<String> customWatermark = new Setting<>("CustomWatermark", "Moonlight.ie", vis->renderHud.getValue() && watermarkTypeSetting.getValue() == WatermarkType.CUSTOM);
     public Setting<Integer> waterMarkOffset = new Setting<>("LogoOffset", 0, 0, 100, v->renderHud.getValue() && watermarkTypeSetting.getValue() != WatermarkType.NONE);
     public Setting<Boolean> gradientLogo = new Setting<>("LogoGradient", false, v->renderHud.getValue());
 
     public Setting<Boolean> welcomer = new Setting<>("Welcomer", true, v->renderHud.getValue());
-    public Setting<String> customWelcomer = new Setting<>("CustomWelcomerr", "Hello <p>, welcome to jennifergoddess.us", v->renderHud.getValue()&&welcomer.getValue());
+    public Setting<String> customWelcomer = new Setting<>("CustomWelcomerr", "Hello <p>, welcome to Moonlight.ie", v->renderHud.getValue()&&welcomer.getValue());
     public Setting<Boolean> welcomerGradient = new Setting<>("WelcomeGradient", true, v->renderHud.getValue()&&welcomer.getValue());
 
     public Setting<Boolean> currentConfig = new Setting<>("CurrentConfig", false, v->renderHud.getValue());
@@ -619,7 +619,7 @@ public class HUD extends Module {
     private void doWatermark() {
         if(watermarkTypeSetting.getValue() != WatermarkType.NONE) {
             if(skeetWatermark.getValue()) {
-                String skeetWatermarkText = watermarkTypeSetting.getValue() == WatermarkType.DACTYL ? "Dactyl" : "Dactyl.ie";
+                String skeetWatermarkText = watermarkTypeSetting.getValue() == WatermarkType.MOONLIGHT ? "Moonlight" : "Moonlight.ie";
                 if(watermarkTypeSetting.getValue() == WatermarkType.CUSTOM) {
                     skeetWatermarkText = customWatermark.getValue();
                 }
@@ -628,7 +628,6 @@ public class HUD extends Module {
 
                 // top pixels 0xFF383838
                 RenderUtil.drawOutlinedRectangle(7, waterMarkOffset.getValue()+8.0f, Moonlight.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+25f, 0xFF383936);
-                //RenderUtil.drawRect(7, waterMarkOffset.getValue()+7.0f, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+8.0f, 0xFF383936);
 
                 // middle pixels 0xFF222524
                 RenderUtil.drawRect(8, waterMarkOffset.getValue()+9.0f, Moonlight.fontUtil.getStringWidth(skeetWatermarkText) + 2, waterMarkOffset.getValue()+10.5f, 0xFF222524);
@@ -649,16 +648,15 @@ public class HUD extends Module {
 
                 skeetFont.drawString(skeetWatermarkText, 10, waterMarkOffset.getValue()+16, 0xFFFFFFFF);
 
-                //RenderUtil.drawRect(7, waterMarkOffset.getValue()+6, Dactyl.fontUtil.getStringWidth(skeetWatermarkText) + 25, waterMarkOffset.getValue()+15, 0xFF211F20);
                 return;
             }
             String drawingWatermark = "";
             switch(watermarkTypeSetting.getValue()) {
-                case DACTYL_IE:
-                    drawingWatermark = "Dactyl.ie " + Moonlight.VERSION;
+                case MOONLIGHT_IE:
+                    drawingWatermark = "Moonlight.ie " + Moonlight.VERSION;
                     break;
-                case DACTYL:
-                    drawingWatermark = "Dactyl " + Moonlight.VERSION;
+                case MOONLIGHT:
+                    drawingWatermark = "Moonlight " + Moonlight.VERSION;
                     break;
                 case CUSTOM:
                     drawingWatermark = customWatermark.getValue().replace("<v>", Moonlight.VERSION);
@@ -838,8 +836,8 @@ public class HUD extends Module {
     }
 
     private enum WatermarkType {
-        DACTYL("Dactyl"),
-        DACTYL_IE("Dactyl.ie"),
+        MOONLIGHT("Moonlight"),
+        MOONLIGHT_IE("Moonlight.ie"),
         CUSTOM("Custom"),
         NONE("None");
 
