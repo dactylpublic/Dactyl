@@ -19,7 +19,7 @@ import org.lwjgl.opengl.Display;
 public class Moonlight {
     public static final String MODID = "moonlight";
     public static final String NAME = "Moonlight";
-    public static final String VERSION = "v1.7.2";
+    public static final String VERSION = "v1.7.3";
 
     public static Logger logger;
 

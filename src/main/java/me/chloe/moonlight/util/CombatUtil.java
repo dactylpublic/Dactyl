@@ -2295,6 +2295,19 @@ public class CombatUtil {
         }
     }
 
+    public static double[] getMultiPointLookAt(BlockPos pos, double yOffset) {
+        double[] rots = CombatUtil.calculateLookAt(pos.getX() + 0.5, pos.getY() - 0.5, pos.getZ() + 0.5);
+        for(Vec3d corner : cornerVecs) {
+            Vec3d blockVec = new Vec3d(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f);
+            Vec3d multiPointCorner = blockVec.add(corner);
+            RayTraceResult result = mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), multiPointCorner, false, true, false);
+            if(result == null) {
+                rots = CombatUtil.calculateLookAt(pos.getX() + 0.5f + corner.x, pos.getY() - 1f + corner.y + yOffset, pos.getZ() + 0.5f + corner.z);
+            }
+        }
+        return rots;
+    }
+
     public static boolean canSeeBlock(BlockPos pos, boolean multiPoint) {
         if(!multiPoint) {
             return (mc.world.rayTraceBlocks(mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d(pos.getX(), pos.getY() + 1.0f, pos.getZ()), false, true, false) == null);
