@@ -1,5 +1,6 @@
 package me.chloe.moonlight.module.impl.combat;
 
+import me.chloe.moonlight.event.impl.player.EventUpdateWalkingPlayer;
 import me.chloe.moonlight.util.HoleUtil;
 import me.chloe.moonlight.util.TimeUtil;
 import me.chloe.moonlight.module.Module;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class Surround extends Module {
     public Setting<SurroundPage> pageSetting = new Setting<SurroundPage>("Page", SurroundPage.GENERAL);
     // general settings
+    public Setting<UpdateMode> updateModeSetting = new Setting<UpdateMode>("Update", UpdateMode.CLIENT, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Integer> blocksPerTick = new Setting<Integer>("Share", 4, 1, 12, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> doDelay = new Setting<Boolean>("EnableDelay", false, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Integer> milliDelay = new Setting<Integer>("Delay", 0, 0, 200, v->pageSetting.getValue()==SurroundPage.GENERAL && doDelay.getValue());
@@ -37,9 +40,8 @@ public class Surround extends Module {
     public Setting<Boolean> nonLethalAttack = new Setting<Boolean>("NoLethal", true, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> antiCrystalRotate = new Setting<Boolean>("AntiCRotate", false, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> disableIfSafe = new Setting<Boolean>("DisableIfSafe", false, v->pageSetting.getValue()==SurroundPage.GENERAL);
-    public Setting<Boolean> multiThreaded = new Setting<Boolean>("MultiThreaded", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
+    //public Setting<Boolean> multiThreaded = new Setting<Boolean>("MultiThreaded", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> echestHoldPrio = new Setting<Boolean>("EChestHoldPrio", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
-    public Setting<Boolean> changeRightClickDelay = new Setting<Boolean>("UpdateRCD", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> multiPointRotate = new Setting<Boolean>("MultiPoint", true, v->pageSetting.getValue()==SurroundPage.GENERAL && rotate.getValue());
 
@@ -61,9 +63,18 @@ public class Surround extends Module {
     private int playerHotbarSlot = -1;
     private int lastHotbarSlot = -1;
     private final TimeUtil timer = new TimeUtil();
-    private ProtectionOffsetsThread protectionOffsetsThread;
 
     ArrayList<Vec3d> protectionOffsets = new ArrayList<>();
+
+    @SubscribeEvent
+    public void onUpdateWalking(EventUpdateWalkingPlayer event) {
+        if(mc.world == null || mc.player == null || Freecam.INSTANCE.isEnabled()) {
+            return;
+        }
+        if(updateModeSetting.getValue() == UpdateMode.CLIENT) {
+            protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
+        }
+    }
 
     @Override
     public void onClientUpdate() {
@@ -80,7 +91,7 @@ public class Surround extends Module {
         if(!timer.hasPassed(milliDelay.getValue()) && doDelay.getValue()) {
             return;
         }
-        if(!multiThreaded.getValue()) {
+        if(updateModeSetting.getValue() == UpdateMode.MOD) {
             protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
         }
         for (int i = 0; i < blocksPerTick.getValue(); i++) {
@@ -105,23 +116,11 @@ public class Surround extends Module {
                 BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
                 doAntiCrystal(placePosition);
                 this.lastHotbarSlot = obi;
-                CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), changeRightClickDelay.getValue(), multiPointRotate.getValue());
+                CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), true, multiPointRotate.getValue());
                 this.offsetStep++;
             } catch(Exception exception) {}
         }
         timer.reset();
-    }
-
-    public class ProtectionOffsetsThread extends Thread {
-        public void run() {
-            while (Surround.INSTANCE.isEnabled()) {
-                try {
-                    protectionOffsets.clear();
-                    protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
-                    TimeUnit.MILLISECONDS.sleep(5L);
-                } catch (Exception exception) {}
-            }
-        }
     }
 
     private void doAntiCrystal(BlockPos pos) {
@@ -178,10 +177,6 @@ public class Surround extends Module {
         if(mc.player == null || mc.player.inventory == null || mc.world == null) {
             return;
         }
-        if(multiThreaded.getValue()) {
-            protectionOffsetsThread = new ProtectionOffsetsThread();
-            protectionOffsetsThread.start();
-        }
         if(autoCenter.getValue()) {
             CombatUtil.centerToNearestblock();
         }
@@ -217,6 +212,11 @@ public class Surround extends Module {
 
     private void doModInfo() {
         this.setModuleInfo(HoleUtil.isInHole() ? TextFormatting.GREEN + "Safe" : TextFormatting.RED + "Unsafe");
+    }
+
+    public enum UpdateMode {
+        CLIENT,
+        MOD
     }
 
     public enum SurroundPage {
