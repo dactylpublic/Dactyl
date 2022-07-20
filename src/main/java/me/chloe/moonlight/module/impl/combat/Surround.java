@@ -67,6 +67,9 @@ public class Surround extends Module {
     private final TimeUtil timer = new TimeUtil();
     private final TimeUtil antiCrystalTimer = new TimeUtil();
 
+    boolean isRotating = false;
+    float yaw, pitch = 0.0f;
+
     ArrayList<Vec3d> protectionOffsets = new ArrayList<>();
 
     @SubscribeEvent
@@ -133,6 +136,17 @@ public class Surround extends Module {
         timer.reset();
     }
 
+    @SubscribeEvent
+    public void onRotate(EventUpdateWalkingPlayer event) {
+        if(mc.world == null || mc.player == null) {
+            return;
+        }
+        if(isRotating) {
+            event.setYaw(yaw);
+            event.setPitch(pitch);
+        }
+    }
+
     private void doAntiCrystal(BlockPos pos) {
         if(!antiCrystal.getValue()) {
             return;
@@ -158,13 +172,19 @@ public class Surround extends Module {
                 }
                 if (antiCrystalRotate.getValue()) {
                     double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
-                    mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float)rots[0], (float)rots[1], mc.player.onGround));
+                    yaw = (float)rots[0];
+                    pitch = (float)rots[1];
+                    isRotating = true;
+                    //mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float)rots[0], (float)rots[1], mc.player.onGround));
+                } else {
+                    isRotating = false;
                 }
                 mc.getConnection().sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
                 mc.getConnection().sendPacket(new CPacketUseEntity(crystal));
             }
         } else {
             antiCrystalTimer.reset();
+            isRotating = false;
         }
     }
 
@@ -200,7 +220,10 @@ public class Surround extends Module {
         protectionOffsets.clear();
         playerHotbarSlot = mc.player.inventory.currentItem;
         lastHotbarSlot = -1;
+        isRotating = false;
+        yaw = pitch = 0.0f;
         timer.reset();
+        antiCrystalTimer.reset();
     }
 
     @Override
@@ -210,6 +233,8 @@ public class Surround extends Module {
         }
         lastHotbarSlot = -1;
         playerHotbarSlot = -1;
+        isRotating = false;
+        yaw = pitch = 0.0f;
         timer.reset();
         antiCrystalTimer.reset();
     }
