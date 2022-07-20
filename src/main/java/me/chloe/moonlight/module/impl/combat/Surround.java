@@ -148,6 +148,8 @@ public class Surround extends Module {
             if(crystal != null) {
                 if(!antiCrystalTimer.hasPassed(antiCrystalDelay.getValue().longValue())) {
                     return;
+                } else {
+                    antiCrystalTimer.reset();
                 }
                 if(nonLethalAttack.getValue()) {
                     if(((double)CombatUtil.calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= (mc.player.getHealth()+mc.player.getAbsorptionAmount()))) {
