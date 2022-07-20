@@ -88,6 +88,7 @@ public class Surround extends Module {
     }
 
     private void doSurround() {
+        protectionOffsets.clear();
         protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
         doModInfo();
         doDisablers();
@@ -124,6 +125,7 @@ public class Surround extends Module {
                 CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), true, multiPointRotate.getValue());
                 this.offsetStep++;
             } catch (Exception exception) {
+                exception.printStackTrace();
             }
         }
         timer.reset();
@@ -186,6 +188,7 @@ public class Surround extends Module {
         if(autoCenter.getValue()) {
             CombatUtil.centerToNearestblock();
         }
+        protectionOffsets.clear();
         playerHotbarSlot = mc.player.inventory.currentItem;
         lastHotbarSlot = -1;
         timer.reset();
