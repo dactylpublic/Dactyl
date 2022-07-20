@@ -38,6 +38,7 @@ public class Surround extends Module {
     public Setting<Boolean> autoCenter = new Setting<Boolean>("AutoCenter", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> packetPlace = new Setting<Boolean>("PacketPlace", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> antiCrystal = new Setting<Boolean>("AntiCrystal", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
+    public Setting<Integer> antiCrystalDelay = new Setting<Integer>("AntiCDelay", 50, 0, 500, v->pageSetting.getValue()==SurroundPage.GENERAL&&antiCrystal.getValue());
     public Setting<Boolean> nonLethalAttack = new Setting<Boolean>("NoLethal", true, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> antiCrystalRotate = new Setting<Boolean>("AntiCRotate", false, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> disableIfSafe = new Setting<Boolean>("DisableIfSafe", false, v->pageSetting.getValue()==SurroundPage.GENERAL);
@@ -64,6 +65,7 @@ public class Surround extends Module {
     private int playerHotbarSlot = -1;
     private int lastHotbarSlot = -1;
     private final TimeUtil timer = new TimeUtil();
+    private final TimeUtil antiCrystalTimer = new TimeUtil();
 
     ArrayList<Vec3d> protectionOffsets = new ArrayList<>();
 
@@ -144,6 +146,9 @@ public class Surround extends Module {
                 crystal = (EntityEnderCrystal)entity;
             }
             if(crystal != null) {
+                if(!antiCrystalTimer.hasPassed(antiCrystalDelay.getValue().longValue())) {
+                    return;
+                }
                 if(nonLethalAttack.getValue()) {
                     if(((double)CombatUtil.calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= (mc.player.getHealth()+mc.player.getAbsorptionAmount()))) {
                         return;
@@ -156,6 +161,8 @@ public class Surround extends Module {
                 mc.getConnection().sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
                 mc.getConnection().sendPacket(new CPacketUseEntity(crystal));
             }
+        } else {
+            antiCrystalTimer.reset();
         }
     }
 
@@ -202,6 +209,7 @@ public class Surround extends Module {
         lastHotbarSlot = -1;
         playerHotbarSlot = -1;
         timer.reset();
+        antiCrystalTimer.reset();
     }
 
     private void doDisablers() {
