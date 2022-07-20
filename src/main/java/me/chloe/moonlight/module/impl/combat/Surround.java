@@ -40,6 +40,7 @@ public class Surround extends Module {
     public Setting<Integer> milliDelay = new Setting<Integer>("Delay", 0, 0, 200, v->pageSetting.getValue()==SurroundPage.GENERAL && doDelay.getValue());
     public Setting<Boolean> autoCenter = new Setting<Boolean>("AutoCenter", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> packetPlace = new Setting<Boolean>("PacketPlace", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
+    public Setting<Boolean> extend = new Setting<Boolean>("Extend", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> antiCrystal = new Setting<Boolean>("AntiCrystal", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Integer> antiCrystalDelay = new Setting<Integer>("AntiCDelay", 50, 0, 500, v->pageSetting.getValue()==SurroundPage.GENERAL&&antiCrystal.getValue());
     //public Setting<Boolean> nonLethalAttack = new Setting<Boolean>("NoLethal", true, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
@@ -113,6 +114,13 @@ public class Surround extends Module {
                     endLoop();
                     return;
                 }
+
+                Vec3d offset = protectionOffsets.get(offsetStep);
+                BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
+                if(doAntiCrystal(placePosition)) {
+                    return;
+                }
+
                 boolean isHoldingEchest = (echestHoldPrio.getValue() && (mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock && ((ItemBlock) mc.player.getHeldItemMainhand().getItem()).getBlock() == Blocks.ENDER_CHEST));
                 int obi = CombatUtil.findSurroundBlock(isHoldingEchest);
                 if (obi == -1) {
@@ -125,9 +133,6 @@ public class Surround extends Module {
                     mc.player.inventory.currentItem = obi;
                     mc.playerController.updateController();
                 }
-                Vec3d offset = protectionOffsets.get(offsetStep);
-                BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
-                doAntiCrystal(placePosition);
                 this.lastHotbarSlot = obi;
                 CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), true, false);
                 this.offsetStep++;
@@ -149,23 +154,9 @@ public class Surround extends Module {
         }
     }
 
-    @SubscribeEvent
-    public void onPacket(PacketEvent event) {
-        if(mc.world == null || mc.player == null) {
-            return;
-        }
-        if(event.getType() == PacketEvent.PacketType.OUTGOING) {
-            if(isRotating && antiCrystal.getValue()) {
-                if(event.getPacket() instanceof CPacketHeldItemChange) {
-                    event.setCanceled(true);
-                }
-            }
-        }
-    }
-
-    private void doAntiCrystal(BlockPos pos) {
+    private boolean doAntiCrystal(BlockPos pos) {
         if(!antiCrystal.getValue()) {
-            return;
+            return false;
         }
         if(isInterceptedByCrystal(pos)) {
             EntityEnderCrystal crystal = null;
@@ -177,15 +168,10 @@ public class Surround extends Module {
             }
             if(crystal != null) {
                 if(!antiCrystalTimer.hasPassed(antiCrystalDelay.getValue().longValue())) {
-                    return;
+                    return false;
                 } else {
                     antiCrystalTimer.reset();
                 }
-                /*if(nonLethalAttack.getValue()) {
-                    if(((double)CombatUtil.calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= (mc.player.getHealth()+mc.player.getAbsorptionAmount()))) {
-                        return;
-                    }
-                }*/
                 if (antiCrystalRotate.getValue()) {
                     double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY - 0.5d, crystal.posZ);
                     yaw = (float)rots[0];
@@ -197,11 +183,14 @@ public class Surround extends Module {
                 }
                 mc.playerController.attackEntity(mc.player, crystal);
                 mc.player.swingArm(EnumHand.MAIN_HAND);
+                return true;
             }
         } else {
             antiCrystalTimer.reset();
             isRotating = false;
+            return false;
         }
+        return false;
     }
 
     private boolean isInterceptedByCrystal(BlockPos pos) {
