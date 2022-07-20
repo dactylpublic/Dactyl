@@ -89,7 +89,7 @@ public class Surround extends Module {
 
     private void doSurround(ForgeEvent.Stage stage) {
         protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
-        if(stage == ForgeEvent.Stage.PRE) {
+        if(stage != null && stage == ForgeEvent.Stage.PRE) {
             return;
         }
         doModInfo();
