@@ -46,7 +46,7 @@ public class PlaceUtil {
         Block underBlock = mc.world.getBlockState(underPos).getBlock();
         double xCalc = -999.0D, zCalc = -999.0D;
         double dist = 0.0D;
-        double expandDist = Scaffold.INSTANCE.expand.getValue() * 2.0D;
+        double expandDist = Scaffold.INSTANCE.extraBlocks.getValue() ? Scaffold.INSTANCE.expand.getValue() * 2.0D : 1.0D;
         while (!canPlace(underBlock)) {
             xCalc = x;
             zCalc = z;

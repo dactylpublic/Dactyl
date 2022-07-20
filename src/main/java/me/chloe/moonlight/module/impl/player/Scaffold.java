@@ -23,9 +23,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Scaffold extends Module {
-    public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", false);
     public Setting<Boolean> strict = new Setting<Boolean>("Strict", false);
-    public Setting<Double> expand = new Setting<Double>("Offset", 0.5d, 0.1d, 6.0d);
+    public Setting<Boolean> extraBlocks = new Setting<Boolean>("Extra", false);
+    public Setting<Double> expand = new Setting<Double>("Offset", 0.5d, 0.1d, 6.0d, vis->extraBlocks.getValue());
+    public Setting<Boolean> packetSwitch = new Setting<Boolean>("SilentSwitch", true);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true);
 
     public static Scaffold INSTANCE;
@@ -57,6 +58,7 @@ public class Scaffold extends Module {
     public BlockPos pos;
 
     public boolean teleported;
+
 
     @SubscribeEvent
     public void onMove(MoveEvent event) {
