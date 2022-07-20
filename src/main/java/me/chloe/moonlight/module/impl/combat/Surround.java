@@ -1,5 +1,6 @@
 package me.chloe.moonlight.module.impl.combat;
 
+import me.chloe.moonlight.event.ForgeEvent;
 import me.chloe.moonlight.event.impl.player.EventUpdateWalkingPlayer;
 import me.chloe.moonlight.util.HoleUtil;
 import me.chloe.moonlight.util.TimeUtil;
@@ -72,7 +73,7 @@ public class Surround extends Module {
             return;
         }
         if(updateModeSetting.getValue() == UpdateMode.CLIENT) {
-            protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
+            doSurround(event.getStage());
         }
     }
 
@@ -81,18 +82,25 @@ public class Surround extends Module {
         if(mc.world == null || mc.player == null || Freecam.INSTANCE.isEnabled()) {
             return;
         }
+        if(updateModeSetting.getValue() == UpdateMode.MOD) {
+            doSurround(null);
+        }
+    }
+
+    private void doSurround(ForgeEvent.Stage stage) {
+        protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
+        if(stage == ForgeEvent.Stage.PRE) {
+            return;
+        }
         doModInfo();
         doDisablers();
 
-        if(offsetStep == 0) {
+        if (offsetStep == 0) {
             basePos = (new BlockPos(mc.player.getPositionVector())).down();
             playerHotbarSlot = mc.player.inventory.currentItem;
         }
-        if(!timer.hasPassed(milliDelay.getValue()) && doDelay.getValue()) {
+        if (!timer.hasPassed(milliDelay.getValue()) && doDelay.getValue()) {
             return;
-        }
-        if(updateModeSetting.getValue() == UpdateMode.MOD) {
-            protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
         }
         for (int i = 0; i < blocksPerTick.getValue(); i++) {
             try {
@@ -118,7 +126,8 @@ public class Surround extends Module {
                 this.lastHotbarSlot = obi;
                 CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), true, multiPointRotate.getValue());
                 this.offsetStep++;
-            } catch(Exception exception) {}
+            } catch (Exception exception) {
+            }
         }
         timer.reset();
     }
