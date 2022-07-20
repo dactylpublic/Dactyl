@@ -1,6 +1,9 @@
 package me.chloe.moonlight.module.impl.combat;
 
 import me.chloe.moonlight.Moonlight;
+import me.chloe.moonlight.event.ForgeEvent;
+import me.chloe.moonlight.event.impl.player.EventUpdateWalkingPlayer;
+import me.chloe.moonlight.module.impl.player.Freecam;
 import me.chloe.moonlight.util.CombatUtil;
 import me.chloe.moonlight.util.TimeUtil;
 import me.chloe.moonlight.module.Module;
@@ -14,11 +17,13 @@ import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AutoTrap extends Module {
+    public Setting<UpdateMode> updateModeSetting = new Setting<UpdateMode>("Update", UpdateMode.CLIENT);
     public Setting<Integer> quota = new Setting<Integer>("Quota", 3, 1, 10);
     public Setting<Integer> delay = new Setting<Integer>("Delay", 25, 1, 150);
     public Setting<TraceMode> raytrace = new Setting<TraceMode>("RayTrace", TraceMode.OFF);
@@ -57,8 +62,22 @@ public class AutoTrap extends Module {
         }
     }
 
+    @SubscribeEvent
+    public void onUpdateWalking(EventUpdateWalkingPlayer event) {
+        if(mc.world == null || mc.player == null || Freecam.INSTANCE.isEnabled()) {
+            return;
+        }
+        if(updateModeSetting.getValue() == UpdateMode.CLIENT) {
+            doUpdateAutoTrap(event.getStage());
+        }
+    }
+
     @Override
     public void onClientUpdate() {
+        doUpdateAutoTrap(null);
+    }
+
+    public void doUpdateAutoTrap(ForgeEvent.Stage stage) {
         if(mc.player == null || mc.world == null) {
             resetAutoTrap();
             timer.reset();
@@ -82,6 +101,9 @@ public class AutoTrap extends Module {
             }
         }
         this.setModuleInfo(bestTarget.getName());
+        if(stage != null && stage == ForgeEvent.Stage.PRE) {
+            return;
+        }
         doAutoTrap(bestTarget);
     }
 
@@ -289,6 +311,11 @@ public class AutoTrap extends Module {
         bestTarget = null;
         this.setModuleInfo("");
         step = 0;
+    }
+
+    public enum UpdateMode {
+        CLIENT,
+        MOD
     }
 
 
