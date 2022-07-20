@@ -68,16 +68,16 @@ public class AutoTrap extends Module {
             return;
         }
         if(updateModeSetting.getValue() == UpdateMode.CLIENT) {
-            doUpdateAutoTrap(event.getStage());
+            doUpdateAutoTrap();
         }
     }
 
     @Override
     public void onClientUpdate() {
-        doUpdateAutoTrap(null);
+        doUpdateAutoTrap();
     }
 
-    public void doUpdateAutoTrap(ForgeEvent.Stage stage) {
+    public void doUpdateAutoTrap() {
         if(mc.player == null || mc.world == null) {
             resetAutoTrap();
             timer.reset();
@@ -101,9 +101,9 @@ public class AutoTrap extends Module {
             }
         }
         this.setModuleInfo(bestTarget.getName());
-        if(stage != null && stage == ForgeEvent.Stage.PRE) {
+        /*if(stage != null && stage == ForgeEvent.Stage.PRE) {
             return;
-        }
+        }*/
         doAutoTrap(bestTarget);
     }
 

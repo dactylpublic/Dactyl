@@ -73,7 +73,7 @@ public class Surround extends Module {
             return;
         }
         if(updateModeSetting.getValue() == UpdateMode.CLIENT) {
-            doSurround(event.getStage());
+            doSurround();
         }
     }
 
@@ -83,15 +83,12 @@ public class Surround extends Module {
             return;
         }
         if(updateModeSetting.getValue() == UpdateMode.MOD) {
-            doSurround(null);
+            doSurround();
         }
     }
 
-    private void doSurround(ForgeEvent.Stage stage) {
+    private void doSurround() {
         protectionOffsets.addAll(CombatUtil.getProtectionOffsetsNew(antiCrystal.getValue()));
-        if(stage != null && stage == ForgeEvent.Stage.PRE) {
-            return;
-        }
         doModInfo();
         doDisablers();
 
