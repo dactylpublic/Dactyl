@@ -1,6 +1,7 @@
 package me.chloe.moonlight.module.impl.combat;
 
 import me.chloe.moonlight.event.ForgeEvent;
+import me.chloe.moonlight.event.impl.network.PacketEvent;
 import me.chloe.moonlight.event.impl.player.EventUpdateWalkingPlayer;
 import me.chloe.moonlight.util.HoleUtil;
 import me.chloe.moonlight.util.TimeUtil;
@@ -17,6 +18,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.network.play.client.CPacketAnimation;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.util.EnumHand;
@@ -40,7 +42,7 @@ public class Surround extends Module {
     public Setting<Boolean> packetPlace = new Setting<Boolean>("PacketPlace", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> antiCrystal = new Setting<Boolean>("AntiCrystal", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Integer> antiCrystalDelay = new Setting<Integer>("AntiCDelay", 50, 0, 500, v->pageSetting.getValue()==SurroundPage.GENERAL&&antiCrystal.getValue());
-    public Setting<Boolean> nonLethalAttack = new Setting<Boolean>("NoLethal", true, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
+    //public Setting<Boolean> nonLethalAttack = new Setting<Boolean>("NoLethal", true, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> antiCrystalRotate = new Setting<Boolean>("AntiCRotate", false, v->pageSetting.getValue()==SurroundPage.GENERAL && antiCrystal.getValue());
     public Setting<Boolean> disableIfSafe = new Setting<Boolean>("DisableIfSafe", false, v->pageSetting.getValue()==SurroundPage.GENERAL);
     //public Setting<Boolean> multiThreaded = new Setting<Boolean>("MultiThreaded", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
@@ -147,6 +149,20 @@ public class Surround extends Module {
         }
     }
 
+    @SubscribeEvent
+    public void onPacket(PacketEvent event) {
+        if(mc.world == null || mc.player == null) {
+            return;
+        }
+        if(event.getType() == PacketEvent.PacketType.OUTGOING) {
+            if(isRotating && antiCrystal.getValue()) {
+                if(event.getPacket() instanceof CPacketHeldItemChange) {
+                    event.setCanceled(true);
+                }
+            }
+        }
+    }
+
     private void doAntiCrystal(BlockPos pos) {
         if(!antiCrystal.getValue()) {
             return;
@@ -165,13 +181,13 @@ public class Surround extends Module {
                 } else {
                     antiCrystalTimer.reset();
                 }
-                if(nonLethalAttack.getValue()) {
+                /*if(nonLethalAttack.getValue()) {
                     if(((double)CombatUtil.calculateDamage(crystal.posX, crystal.posY, crystal.posZ, mc.player) >= (mc.player.getHealth()+mc.player.getAbsorptionAmount()))) {
                         return;
                     }
-                }
+                }*/
                 if (antiCrystalRotate.getValue()) {
-                    double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY, crystal.posZ);
+                    double[] rots = CombatUtil.calculateLookAt(crystal.posX, crystal.posY - 0.5d, crystal.posZ);
                     yaw = (float)rots[0];
                     pitch = (float)rots[1];
                     isRotating = true;
