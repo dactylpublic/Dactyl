@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -45,7 +46,6 @@ public class Surround extends Module {
     //public Setting<Boolean> multiThreaded = new Setting<Boolean>("MultiThreaded", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> echestHoldPrio = new Setting<Boolean>("EChestHoldPrio", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
     public Setting<Boolean> rotate = new Setting<Boolean>("Rotate", true, v->pageSetting.getValue()==SurroundPage.GENERAL);
-    public Setting<Boolean> multiPointRotate = new Setting<Boolean>("MultiPoint", true, v->pageSetting.getValue()==SurroundPage.GENERAL && rotate.getValue());
 
     // disablers
     public Setting<Boolean> jumpDisable = new Setting<Boolean>("JumpDisable", true, v->pageSetting.getValue()==SurroundPage.DISABLERS);
@@ -127,7 +127,7 @@ public class Surround extends Module {
                 BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
                 doAntiCrystal(placePosition);
                 this.lastHotbarSlot = obi;
-                CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), true, multiPointRotate.getValue());
+                CombatUtil.placeBlockSurroundNew(placePosition, false, rotate.getValue(), true, false, false, obi, packetPlace.getValue(), true, false);
                 this.offsetStep++;
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -179,8 +179,8 @@ public class Surround extends Module {
                 } else {
                     isRotating = false;
                 }
-                mc.getConnection().sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
-                mc.getConnection().sendPacket(new CPacketUseEntity(crystal));
+                mc.playerController.attackEntity(mc.player, crystal);
+                mc.player.swingArm(EnumHand.MAIN_HAND);
             }
         } else {
             antiCrystalTimer.reset();
