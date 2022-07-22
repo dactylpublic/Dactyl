@@ -117,8 +117,9 @@ public class Surround extends Module {
 
                 Vec3d offset = protectionOffsets.get(offsetStep);
                 BlockPos placePosition = new BlockPos(this.basePos.add(offset.x, offset.y, offset.z));
-                if(doAntiCrystal(placePosition)) {
-                    return;
+                if(antiCrystal.getValue() && isInterceptedByCrystal(placePosition)) {
+                   doAntiCrystal(placePosition);
+                   return;
                 }
 
                 boolean isHoldingEchest = (echestHoldPrio.getValue() && (mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock && ((ItemBlock) mc.player.getHeldItemMainhand().getItem()).getBlock() == Blocks.ENDER_CHEST));
@@ -154,9 +155,9 @@ public class Surround extends Module {
         }
     }
 
-    private boolean doAntiCrystal(BlockPos pos) {
+    private void doAntiCrystal(BlockPos pos) {
         if(!antiCrystal.getValue()) {
-            return false;
+            return;
         }
         if(isInterceptedByCrystal(pos)) {
             EntityEnderCrystal crystal = null;
@@ -168,7 +169,7 @@ public class Surround extends Module {
             }
             if(crystal != null) {
                 if(!antiCrystalTimer.hasPassed(antiCrystalDelay.getValue().longValue())) {
-                    return false;
+                    return;
                 } else {
                     antiCrystalTimer.reset();
                 }
@@ -183,14 +184,14 @@ public class Surround extends Module {
                 }
                 mc.playerController.attackEntity(mc.player, crystal);
                 mc.player.swingArm(EnumHand.MAIN_HAND);
-                return true;
+                return;
             }
         } else {
             antiCrystalTimer.reset();
             isRotating = false;
-            return false;
+            return;
         }
-        return false;
+        return;
     }
 
     private boolean isInterceptedByCrystal(BlockPos pos) {

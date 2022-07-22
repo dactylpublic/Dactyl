@@ -24,14 +24,14 @@ public class Chat extends Module {
     public Setting<Boolean> creepyDecrypt = new Setting<Boolean>("Decryptor", true);
     public Setting<Boolean> gradientWatermark = new Setting<Boolean>("CoolWatermark", true);
     public Setting<Boolean> fancySuffix = new Setting<Boolean>("FancySuffix", true, v->chatSuffix.getValue());
-    public Setting<String> customChatSuffix = new Setting<String>("CustomSuffix", "Dactyl", v->!fancySuffix.getValue());
+    public Setting<String> customChatSuffix = new Setting<String>("CustomSuffix", "Moonlight", v->!fancySuffix.getValue());
     public Setting<Boolean> commands = new Setting<Boolean>("Commands", false, v->chatSuffix.getValue());
     public Setting<Boolean> connectionMessages = new Setting<Boolean>("ConnMsgs", false);
     public Setting<Boolean> connectionWatermark = new Setting<Boolean>("ConnLogo", true, v->connectionMessages.getValue());
     public Setting<Boolean> connectionClogged = new Setting<Boolean>("ConnFilled", false, v->connectionMessages.getValue());
     public Setting<Boolean> afkReply = new Setting<Boolean>("AFKReply", false);
     public Setting<Integer> afkDelay = new Setting<Integer>("AFKDelay", 15, 1, 40, v->afkReply.getValue(), "Delay (in seconds)");
-    public Setting<String> afkMessage = new Setting<String>("AFKMessage", "[Dactyl] I am currently AFK.", v->afkReply.getValue());
+    public Setting<String> afkMessage = new Setting<String>("AFKMessage", "[Moonlight] I am currently AFK.", v->afkReply.getValue());
     public Setting<Boolean> encryptor = new Setting<Boolean>("Encrypt", false);
     public Setting<String> encryptPrefix = new Setting<String>("EncryptPrefix", "**", v->encryptor.getValue());
     public static Chat INSTANCE;
