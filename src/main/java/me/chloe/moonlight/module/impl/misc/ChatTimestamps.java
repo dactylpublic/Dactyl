@@ -12,8 +12,8 @@ import java.util.Calendar;
 
 public class ChatTimestamps extends Module {
     //public Setting<StampFormat> format = new Setting<StampFormat>("Cover", StampFormat.BRACKETS);
-    public Setting<Style> styleSetting = new Setting<Style>("Style", Style.BRITISHTWO);
-    public Setting<Boolean> space = new Setting<Boolean>("ExtraSpace", true);
+    public Setting<Style> styleSetting = new Setting<>("Style", Style.BRITISHTWO);
+    public Setting<Boolean> space = new Setting<>("ExtraSpace", true);
     public static ChatTimestamps INSTANCE;
     public ChatTimestamps() {
         super("ChatTimestamps", Category.MISC);
@@ -23,26 +23,31 @@ public class ChatTimestamps extends Module {
     @SubscribeEvent
     public void onChatRecieved(ClientChatReceivedEvent event) {
         Calendar rightNow = Calendar.getInstance();
+
         String decoLeft = "<";
         String decoRight = ">";
+
         int hour = rightNow.get(Calendar.HOUR_OF_DAY);
         int mins = rightNow.get(Calendar.MINUTE);
         int seconds = rightNow.get(Calendar.SECOND);
-        boolean isAfternoon = false;
-        if(hour >= 12) isAfternoon = true;
-        if(isAfternoon && (hour-12 == 0)) {
-            hour = 24;
-        }
-        String americaOnTop = isAfternoon ? String.valueOf(hour-12) : String.valueOf(hour);
+
+        boolean isAfternoon = hour >= 12;
+
+        String americaOnTop = isAfternoon && hour != 12 ? String.valueOf(hour-12) : String.valueOf(hour);
         String british = String.valueOf(hour);
 
         String timestamp = styleSetting.getValue().toString();
         timestamp = timestamp.replace("H24", british);
         timestamp = timestamp.replace("H12", americaOnTop);
-        timestamp = timestamp.replace("mm", (mins < 10 ? "0" : "")+String.valueOf(mins));
-        timestamp = timestamp.replace("ss", (seconds < 10 ? "0" : "")+String.valueOf(seconds));
+        timestamp = timestamp.replace("mm", (mins < 10 ? "0" : "") + mins);
+        timestamp = timestamp.replace("ss", (seconds < 10 ? "0" : "") + seconds);
 
-        if (space.getValue()) decoRight += " ";
+        if (styleSetting.getValue() == Style.AMERICAONE || styleSetting.getValue() == Style.AMERICATWO)
+            timestamp += isAfternoon ? "pm" : "am";
+
+        if (space.getValue())
+            decoRight += " ";
+
         String hacker = TextFormatting.BLUE + "" + TextFormatting.RED + "" + TextFormatting.GREEN;
         TextComponentString time = new TextComponentString( hacker + decoLeft + timestamp + decoRight + ChatFormatting.RESET);
         event.setMessage(time.appendSibling(event.getMessage()));
@@ -55,7 +60,7 @@ public class ChatTimestamps extends Module {
         AMERICATWO("H12:mm:ss");
 
         private final String name;
-        private Style(String name) {
+        Style(String name) {
             this.name = name;
         }
 
