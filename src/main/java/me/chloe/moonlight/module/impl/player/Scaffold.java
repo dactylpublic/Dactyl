@@ -74,6 +74,11 @@ public class Scaffold extends Module {
         if (mc.player.isElytraFlying() || mc.player.isInLava() || mc.player.isInWater() || ElytraFly.INSTANCE.isEnabled()) {
             return;
         }
+        if(mc.gameSettings.keyBindJump.isKeyDown() && strict.getValue()) {
+            if(!(mc.player.moveForward == 0.0F && mc.player.moveStrafing == 0.0F && !mc.player.isPotionActive(MobEffects.JUMP_BOOST))) {
+                event.setY(0.0d);
+            }
+        }
     }
 
     @SubscribeEvent
